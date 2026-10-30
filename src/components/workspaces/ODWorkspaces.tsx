@@ -1,15 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Compass, Share2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Compass } from 'lucide-react';
 import { getBasePath } from '@/lib/constants';
 
 export const ODMapWorkspace: React.FC = () => {
   const [activeEngine, setActiveEngine] = useState<'echarts' | 'canvas'>('echarts');
+  const [iframeHeight, setIframeHeight] = useState<number>(1050);
   const basePath = getBasePath();
+
+  useEffect(() => {
+    const handleMsg = (e: MessageEvent) => {
+      if (e.data && e.data.type === 'map_resize' && typeof e.data.height === 'number') {
+        setIframeHeight(Math.max(1000, e.data.height + 20));
+      }
+    };
+    window.addEventListener('message', handleMsg);
+    return () => window.removeEventListener('message', handleMsg);
+  }, []);
 
   return (
     <div className="space-y-4">
+      {/* HEADER CONTROLS */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -50,11 +62,14 @@ export const ODMapWorkspace: React.FC = () => {
         </div>
       </div>
 
+      {/* MAP IFRAME CONTAINER */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs bg-slate-950">
         <iframe
           src={activeEngine === 'echarts' ? `${basePath}/peta_rute_od_echarts.html` : `${basePath}/peta_rute_od_interaktif.html`}
-          className="w-full h-[850px] border-none"
+          style={{ height: `${iframeHeight}px` }}
+          className="w-full border-none transition-all duration-150"
           title="Peta Rute OD Udara"
+          scrolling="no"
         />
       </div>
     </div>
@@ -62,31 +77,29 @@ export const ODMapWorkspace: React.FC = () => {
 };
 
 export const ODSankeyWorkspace: React.FC = () => {
+  const [iframeHeight, setIframeHeight] = useState<number>(1450);
   const basePath = getBasePath();
+
+  useEffect(() => {
+    const handleMsg = (e: MessageEvent) => {
+      if (e.data && e.data.type === 'sankey_resize' && typeof e.data.height === 'number') {
+        setIframeHeight(Math.max(1350, e.data.height + 25));
+      }
+    };
+    window.addEventListener('message', handleMsg);
+    return () => window.removeEventListener('message', handleMsg);
+  }, []);
 
   return (
     <div className="space-y-4">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <Share2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                Diagram Sankey Multimoda & Aliran Arus Penumpang Antarpulau
-              </h3>
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Visualisasi proporsi perpindahan penumpang antarmoda dan koridor utama pergerakan nasional.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
+      {/* SANKEY IFRAME CONTAINER (Seamless, full-height downwards without inner scroll) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
         <iframe
           src={`${basePath}/sankey_diagram_od.html`}
-          className="w-full h-[850px] border-none"
+          style={{ height: `${iframeHeight}px` }}
+          className="w-full border-none transition-all duration-150"
           title="Diagram Sankey OD Multimoda"
+          scrolling="no"
         />
       </div>
     </div>

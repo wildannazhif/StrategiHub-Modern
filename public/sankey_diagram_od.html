@@ -149,8 +149,8 @@
       </div>
 
       <!-- SANKEY SVG CONTAINER -->
-      <div class="relative w-full overflow-x-auto rounded-xl bg-[var(--background)] border border-[var(--border)] p-2">
-        <svg id="sankey-svg" viewBox="0 0 1000 640" class="w-full h-auto min-w-[760px] select-none"></svg>
+      <div class="relative w-full rounded-xl bg-[var(--background)] border border-[var(--border)] p-2">
+        <svg id="sankey-svg" viewBox="0 0 1000 820" class="w-full h-auto select-none"></svg>
 
         <!-- FLOATING TOOLTIP -->
         <div id="tooltip" class="absolute hidden pointer-events-none z-50 bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-xl p-3 shadow-xl text-xs max-w-xs transition-opacity duration-150"></div>
@@ -307,14 +307,14 @@
       const sources = Object.keys(sourceMap).sort((a,b) => sourceMap[b] - sourceMap[a]);
       const targets = Object.keys(targetMap).sort((a,b) => targetMap[b] - targetMap[a]);
 
-      const minNodeH = isIsland ? 22 : 14;
+      const minNodeH = isIsland ? 24 : 16;
       const nodeWidth = 22;
-      const gap = isIsland ? 16 : 10;
+      const gap = isIsland ? 18 : 12;
       const padY = 40;
-      const padX = isIsland ? 160 : 190;
+      const padX = isIsland ? 140 : 165;
       const width = 1000;
 
-      const flowHeight = isIsland ? 500 : 550;
+      const flowHeight = isIsland ? 650 : 750;
       const baseScale = flowHeight / totalValue;
 
       // Calculate exact column heights
@@ -330,7 +330,7 @@
       });
       totalHeightT += (targets.length - 1) * gap;
       const maxColH = Math.max(totalHeightS, totalHeightT);
-      const height = Math.max(640, Math.ceil(maxColH + (2 * padY) + 40));
+      const height = Math.max(820, Math.ceil(maxColH + (2 * padY) + 60));
 
       // Dynamically resize SVG viewBox so no element overflows
       svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
@@ -499,7 +499,7 @@
         // Node Label
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         text.setAttribute('y', node.y + (node.height / 2) + 4);
-        text.setAttribute('font-size', '11.5');
+        text.setAttribute('font-size', '13');
         text.setAttribute('font-weight', '600');
         text.setAttribute('fill', 'var(--foreground)');
 
@@ -516,8 +516,8 @@
 
         // Value subtext
         const sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        sub.setAttribute('y', node.y + (node.height / 2) + 16);
-        sub.setAttribute('font-size', '10');
+        sub.setAttribute('y', node.y + (node.height / 2) + 18);
+        sub.setAttribute('font-size', '11');
         sub.setAttribute('fill', 'var(--muted-foreground)');
 
         if (node.isSource) {
@@ -561,6 +561,21 @@
           resetHighlight();
         }
       };
+
+      // Notify parent of new height
+      notifyHeight();
+    }
+
+    function notifyHeight() {
+      setTimeout(() => {
+        const h = Math.max(
+          document.documentElement.scrollHeight,
+          document.body.scrollHeight,
+          document.documentElement.offsetHeight,
+          document.body.offsetHeight
+        );
+        window.parent.postMessage({ type: 'sankey_resize', height: h }, '*');
+      }, 50);
     }
 
     // Helper functions for highlighting and tooltips
@@ -629,7 +644,10 @@
     // Initial render
     window.addEventListener('DOMContentLoaded', () => {
       switchView('hub');
+      notifyHeight();
     });
+    window.addEventListener('resize', notifyHeight);
+    window.addEventListener('load', notifyHeight);
   </script>
 </body>
 </html>

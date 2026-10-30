@@ -389,10 +389,26 @@
       renderEChartsMap();
     }
 
-    window.addEventListener('resize', () => myChart.resize());
+    window.addEventListener('resize', () => {
+      myChart.resize();
+      notifyHeight();
+    });
+
+    function notifyHeight() {
+      setTimeout(() => {
+        const h = Math.max(
+          document.documentElement.scrollHeight,
+          document.body.scrollHeight,
+          document.documentElement.offsetHeight,
+          document.body.offsetHeight
+        );
+        window.parent.postMessage({ type: 'map_resize', height: h }, '*');
+      }, 50);
+    }
 
     // Initial render
     renderEChartsMap();
+    window.addEventListener('load', notifyHeight);
   </script>
 </body>
 </html>
