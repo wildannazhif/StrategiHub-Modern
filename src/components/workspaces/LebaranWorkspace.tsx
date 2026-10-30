@@ -18,38 +18,49 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
   isDarkMode,
 }) => {
   const [selectedDayIdx, setSelectedDayIdx] = useState<number>(11); // H+3 default (Peak Day: 24 Mar 2026)
+  const [chartMode, setChartMode] = useState<'modes' | 'total'>('modes');
 
   const selectedDay = lebaranDaily[selectedDayIdx] || lebaranDaily[0];
 
-  // 17-day multi-line chart
+  // 17-day line chart
   const lebaranLineChartOption = useMemo(() => {
     const dates = lebaranDaily.map((d: any) => `${d.tag || d.h_tag} (${d.date.slice(5)})`);
     const textColor = isDarkMode ? '#cbd5e1' : '#475569';
     const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
 
     const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT'> = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'];
-    const series: any[] = modes.map((m) => ({
-      name: MODA_DISPLAY_NAME[m],
-      type: 'line',
-      smooth: 0.3,
-      symbol: 'circle',
-      symbolSize: 6,
-      data: lebaranDaily.map((d: any) => Number(d[m]) || 0),
-      lineStyle: { width: 2.5, color: COLOR[m] },
-      itemStyle: { color: COLOR[m] },
-    }));
+    let series: any[] = [];
 
-    // Add Total Line
-    series.push({
-      name: 'Semua Moda',
-      type: 'line',
-      smooth: 0.3,
-      symbol: 'diamond',
-      symbolSize: 8,
-      data: lebaranDaily.map((d: any) => Number(d.TOTAL) || 0),
-      lineStyle: { width: 3.5, color: isDarkMode ? '#f8fafc' : '#0f172a', type: 'dashed' },
-      itemStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a' },
-    });
+    if (chartMode === 'modes') {
+      // 5 MODA ONLY (scaled to 0 - 700k, visible details)
+      series = modes.map((m) => ({
+        name: MODA_DISPLAY_NAME[m],
+        type: 'line',
+        smooth: 0.3,
+        symbol: 'circle',
+        symbolSize: 6,
+        data: lebaranDaily.map((d: any) => Number(d[m]) || 0),
+        lineStyle: { width: 2.5, color: COLOR[m] },
+        itemStyle: { color: COLOR[m] },
+      }));
+    } else {
+      // SEMUA MODA ONLY (National macro peak 0 - 2.5M)
+      series = [
+        {
+          name: 'Semua Moda (Total Nasional)',
+          type: 'line',
+          smooth: 0.3,
+          symbol: 'diamond',
+          symbolSize: 8,
+          data: lebaranDaily.map((d: any) => Number(d.TOTAL) || 0),
+          lineStyle: { width: 3.5, color: isDarkMode ? '#f43f5e' : '#e11d48' },
+          itemStyle: { color: isDarkMode ? '#f43f5e' : '#e11d48' },
+          areaStyle: {
+            color: isDarkMode ? 'rgba(244, 63, 94, 0.12)' : 'rgba(225, 29, 72, 0.1)',
+          },
+        },
+      ];
+    }
 
     return {
       tooltip: {
@@ -88,7 +99,7 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
       },
       series,
     };
-  }, [lebaranDaily, isDarkMode]);
+  }, [lebaranDaily, isDarkMode, chartMode]);
 
   // Modal share stacked area chart
   const modalShareAreaOption = useMemo(() => {
@@ -250,13 +261,38 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
 
       {/* CHARTS ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEBARAN MULTI-LINE */}
+        {/* LEBARAN LINE CHART */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-              Grafik Fluktuasi H-8 s/d H+8 Lebaran 2026
-            </h4>
-            <span className="text-[11px] font-mono text-slate-400">Satuan: Orang</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div>
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                Grafik Fluktuasi H-8 s/d H+8 Lebaran 2026 {chartMode === 'modes' ? '(5 Moda Terpisah)' : '(Total Nasional)'}
+              </h4>
+              <span className="text-[11px] font-mono text-slate-400">Satuan: Orang</span>
+            </div>
+
+            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+              <button
+                onClick={() => setChartMode('modes')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  chartMode === 'modes'
+                    ? 'bg-rose-600 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                5 Moda
+              </button>
+              <button
+                onClick={() => setChartMode('total')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  chartMode === 'total'
+                    ? 'bg-rose-600 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                Total Nasional
+              </button>
+            </div>
           </div>
           <EChartWrapper options={lebaranLineChartOption} style={{ height: '340px', width: '100%' }} />
         </div>

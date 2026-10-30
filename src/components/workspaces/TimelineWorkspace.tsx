@@ -22,6 +22,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
   // State
   const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>('pnp');
   const [selectedDirection, setSelectedDirection] = useState<'tot' | 'dat' | 'brg'>('tot');
+  const [chartViewMode, setChartViewMode] = useState<'modes' | 'total'>('modes');
   const [timeRange, setTimeRange] = useState<'all' | 't1' | 't2' | 't3' | 'lebaran' | 'custom'>('all');
   const [customStart, setCustomStart] = useState('2026-03-01');
   const [customEnd, setCustomEnd] = useState('2026-03-31');
@@ -51,32 +52,42 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
 
     const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT'> = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'];
 
-    const series: any[] = modes.map((m) => {
-      const data = filteredTimeline.map((d) => getMetricValue(d, m, selectedMetric, selectedDirection));
-      return {
-        name: MODA_DISPLAY_NAME[m],
-        type: 'line',
-        smooth: 0.25,
-        showSymbol: filteredTimeline.length <= 35,
-        symbolSize: 6,
-        data,
-        lineStyle: { width: 2.5, color: COLOR[m] },
-        itemStyle: { color: COLOR[m] },
-      };
-    });
+    let series: any[] = [];
 
-    // Add Total Multimoda line
-    const totalData = filteredTimeline.map((d) => getMetricValue(d, 'TOTAL', selectedMetric, selectedDirection));
-    series.push({
-      name: 'Total Multimoda',
-      type: 'line',
-      smooth: 0.25,
-      showSymbol: filteredTimeline.length <= 35,
-      symbolSize: 6,
-      data: totalData,
-      lineStyle: { width: 3, color: isDarkMode ? '#e2e8f0' : '#0f172a', type: 'dashed' },
-      itemStyle: { color: isDarkMode ? '#e2e8f0' : '#0f172a' },
-    });
+    if (chartViewMode === 'modes') {
+      // Show ONLY the 5 distinct transport modes (No Total to avoid scale squashing)
+      series = modes.map((m) => {
+        const data = filteredTimeline.map((d) => getMetricValue(d, m, selectedMetric, selectedDirection));
+        return {
+          name: MODA_DISPLAY_NAME[m],
+          type: 'line',
+          smooth: 0.25,
+          showSymbol: filteredTimeline.length <= 35,
+          symbolSize: 6,
+          data,
+          lineStyle: { width: 2.5, color: COLOR[m] },
+          itemStyle: { color: COLOR[m] },
+        };
+      });
+    } else {
+      // Show ONLY Total Multimoda (scaled to national volume with subtle gradient)
+      const totalData = filteredTimeline.map((d) => getMetricValue(d, 'TOTAL', selectedMetric, selectedDirection));
+      series = [
+        {
+          name: 'Total Multimoda Nasional',
+          type: 'line',
+          smooth: 0.25,
+          showSymbol: filteredTimeline.length <= 35,
+          symbolSize: 6,
+          data: totalData,
+          lineStyle: { width: 3.5, color: isDarkMode ? '#38bdf8' : '#0284c7' },
+          itemStyle: { color: isDarkMode ? '#38bdf8' : '#0284c7' },
+          areaStyle: {
+            color: isDarkMode ? 'rgba(56, 189, 248, 0.12)' : 'rgba(2, 132, 199, 0.1)',
+          },
+        },
+      ];
+    }
 
     return {
       tooltip: {
@@ -120,7 +131,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
       },
       series,
     };
-  }, [filteredTimeline, isDarkMode, selectedMetric, selectedDirection]);
+  }, [filteredTimeline, isDarkMode, selectedMetric, selectedDirection, chartViewMode]);
 
   // EChart Options for DOW
   const dowChartOption = useMemo(() => {
@@ -189,7 +200,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
                 onClick={() => setSelectedMetric('pnp')}
                 className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
                   selectedMetric === 'pnp'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
@@ -199,7 +210,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
                 onClick={() => setSelectedMetric('arm')}
                 className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
                   selectedMetric === 'arm'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
@@ -212,7 +223,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
                 onClick={() => setSelectedDirection('tot')}
                 className={`px-2.5 py-1.5 rounded-md font-medium ${
                   selectedDirection === 'tot'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
                     : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
@@ -222,7 +233,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
                 onClick={() => setSelectedDirection('dat')}
                 className={`px-2.5 py-1.5 rounded-md font-medium ${
                   selectedDirection === 'dat'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
                     : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
@@ -232,11 +243,35 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
                 onClick={() => setSelectedDirection('brg')}
                 className={`px-2.5 py-1.5 rounded-md font-medium ${
                   selectedDirection === 'brg'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
                     : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
                 Berangkat
+              </button>
+            </div>
+
+            {/* View Mode: 5 Moda vs Total Multimoda */}
+            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+              <button
+                onClick={() => setChartViewMode('modes')}
+                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+                  chartViewMode === 'modes'
+                    ? 'bg-sky-900 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                📊 5 Moda (Detail)
+              </button>
+              <button
+                onClick={() => setChartViewMode('total')}
+                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+                  chartViewMode === 'total'
+                    ? 'bg-sky-900 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                📈 Total Multimoda
               </button>
             </div>
           </div>
@@ -257,7 +292,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
                 onClick={() => setTimeRange(r.id as any)}
                 className={`px-2.5 py-1 rounded-md font-medium transition-colors border ${
                   timeRange === r.id
-                    ? 'bg-sky-50 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-800'
+                    ? 'bg-sky-50 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-800 font-semibold'
                     : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
                 }`}
               >
@@ -292,11 +327,12 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
             <h3 className="font-bold text-slate-900 dark:text-white text-base">
-              Tren Harian Deret Waktu Multimoda 2026
+              Tren Harian Deret Waktu Multimoda 2026 {chartViewMode === 'modes' ? '(5 Moda Terpisah)' : '(Agregat Total)'}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Menampilkan {filteredTimeline.length} observasi harian ({selectedMetric === 'pnp' ? 'Penumpang' : 'Armada'} •{' '}
               {selectedDirection === 'tot' ? 'Total Dua Arah' : selectedDirection === 'dat' ? 'Kedatangan' : 'Keberangkatan'})
+              {chartViewMode === 'modes' && ' — Skala Y-axis optimal untuk melihat dinamika masing-masing moda tanpa tertutup angka total.'}
             </p>
           </div>
           <div className="text-xs font-mono text-slate-500 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
