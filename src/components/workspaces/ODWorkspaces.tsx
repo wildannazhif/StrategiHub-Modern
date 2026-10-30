@@ -53,7 +53,7 @@ export const ODMapWorkspace: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs bg-slate-950">
         <iframe
           src={activeEngine === 'echarts' ? `${basePath}/peta_rute_od_echarts.html` : `${basePath}/peta_rute_od_interaktif.html`}
-          className="w-full h-[680px] border-none"
+          className="w-full h-[850px] border-none"
           title="Peta Rute OD Udara"
         />
       </div>
@@ -85,7 +85,7 @@ export const ODSankeyWorkspace: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
         <iframe
           src={`${basePath}/sankey_diagram_od.html`}
-          className="w-full h-[680px] border-none"
+          className="w-full h-[850px] border-none"
           title="Diagram Sankey OD Multimoda"
         />
       </div>
