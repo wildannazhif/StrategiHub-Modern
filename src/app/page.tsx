@@ -15,6 +15,7 @@ import { SimulatorWorkspace } from '@/components/workspaces/SimulatorWorkspace';
 import { ODMapWorkspace, ODSankeyWorkspace } from '@/components/workspaces/ODWorkspaces';
 import { GlossaryWorkspace } from '@/components/workspaces/GlossaryWorkspace';
 import { MobilityDataBundle } from '@/types/mobility';
+import { getBasePath } from '@/lib/constants';
 
 export default function Home() {
   const [data, setData] = useState<MobilityDataBundle | null>(null);
@@ -28,10 +29,10 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const basePath = '/StrategiHub-Modern';
+        const base = getBasePath();
         const [bundleRes, benchRes] = await Promise.all([
-          fetch(`${basePath}/data/mobility_data_bundle.json`),
-          fetch(`${basePath}/data/benchmark_forecast_results.json`),
+          fetch(`${base}/data/mobility_data_bundle.json`),
+          fetch(`${base}/data/benchmark_forecast_results.json`),
         ]);
 
         if (bundleRes.ok) {

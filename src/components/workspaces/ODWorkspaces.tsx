@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { Compass, Share2 } from 'lucide-react';
+import { getBasePath } from '@/lib/constants';
 
 export const ODMapWorkspace: React.FC = () => {
   const [activeEngine, setActiveEngine] = useState<'echarts' | 'canvas'>('echarts');
-  const basePath = '/StrategiHub-Modern';
+  const basePath = getBasePath();
 
   return (
     <div className="space-y-4">
@@ -61,7 +62,7 @@ export const ODMapWorkspace: React.FC = () => {
 };
 
 export const ODSankeyWorkspace: React.FC = () => {
-  const basePath = '/StrategiHub-Modern';
+  const basePath = getBasePath();
 
   return (
     <div className="space-y-4">

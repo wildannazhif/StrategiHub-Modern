@@ -26,6 +26,14 @@ export const MODA_BADGE_CLASS: Record<string, string> = {
   TOTAL: 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
 };
 
+export function getBasePath(): string {
+  if (typeof window === 'undefined') return '';
+  if (window.location.pathname.startsWith('/StrategiHub-Modern')) {
+    return '/StrategiHub-Modern';
+  }
+  return '';
+}
+
 export function getMetricValue(
   item: any,
   moda: 'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT' | 'TOTAL',

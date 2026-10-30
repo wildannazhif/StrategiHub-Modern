@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal } from '@/lib/constants';
+import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal, getBasePath } from '@/lib/constants';
 import { MapPin, Search, Layers, Info } from 'lucide-react';
 
 interface SpatialMapWorkspaceProps {
@@ -84,7 +84,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
 
         // Load and add Choropleth GeoJSON
         try {
-          const basePath = '/StrategiHub-Modern';
+          const basePath = getBasePath();
           const geoRes = await fetch(`${basePath}/data/indonesia_38_provinces.geojson`);
           if (geoRes.ok) {
             const geoData = await geoRes.json();
