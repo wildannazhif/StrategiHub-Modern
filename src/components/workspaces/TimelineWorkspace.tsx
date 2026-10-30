@@ -3,7 +3,8 @@
 import React, { useState, useMemo } from 'react';
 import { EChartWrapper } from '@/components/charts/EChartWrapper';
 import { DailyTimelineEntry, MonthlySummaryEntry, DOWSummaryEntry } from '@/types/mobility';
-import { COLOR, MODA_DISPLAY_NAME, getMetricValue, formatNumber } from '@/lib/constants';
+import { COLOR, MODA_DISPLAY_NAME, getMetricValue, formatNumber, formatPercent } from '@/lib/constants';
+import { MapPin, TrendingUp, Calendar, AlertCircle } from 'lucide-react';
 
 interface TimelineWorkspaceProps {
   timeline: DailyTimelineEntry[];
@@ -17,6 +18,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
   timeline,
   monthly,
   dow,
+  provinceGrowthData = {},
   isDarkMode,
 }) => {
   // State
@@ -26,6 +28,20 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
   const [timeRange, setTimeRange] = useState<'all' | 't1' | 't2' | 't3' | 'lebaran' | 'custom'>('all');
   const [customStart, setCustomStart] = useState('2026-03-01');
   const [customEnd, setCustomEnd] = useState('2026-03-31');
+
+  // Province Trend State
+  const [selectedProv, setSelectedProv] = useState<string>('Jawa Timur');
+  const [selectedProvModa, setSelectedProvModa] = useState<string>('ALL');
+
+  const provincesList = useMemo(() => {
+    const list = Object.keys(provinceGrowthData.by_province || {}).sort();
+    return list.length > 0 ? list : ['Jawa Timur', 'Jawa Barat', 'Jawa Tengah', 'DKI Jakarta', 'Banten', 'Sumatera Utara', 'Bali'];
+  }, [provinceGrowthData]);
+
+  // Current Province Data
+  const currentProvData = useMemo(() => {
+    return (provinceGrowthData.by_province || {})[selectedProv] || null;
+  }, [provinceGrowthData, selectedProv]);
 
   // Filtered timeline data
   const filteredTimeline = useMemo(() => {
@@ -55,7 +71,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
     let series: any[] = [];
 
     if (chartViewMode === 'modes') {
-      // Show ONLY the 5 distinct transport modes (No Total to avoid scale squashing)
+      // 5 MODA ONLY (scaled to 0 - 700k without total squashing)
       series = modes.map((m) => {
         const data = filteredTimeline.map((d) => getMetricValue(d, m, selectedMetric, selectedDirection));
         return {
@@ -70,7 +86,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
         };
       });
     } else {
-      // Show ONLY Total Multimoda (scaled to national volume with subtle gradient)
+      // Total Multimoda (National macro peak 0 - 2.5M)
       const totalData = filteredTimeline.map((d) => getMetricValue(d, 'TOTAL', selectedMetric, selectedDirection));
       series = [
         {
@@ -132,6 +148,75 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
       series,
     };
   }, [filteredTimeline, isDarkMode, selectedMetric, selectedDirection, chartViewMode]);
+
+  // EChart Options for Province Monthly Trend (V1 1:1 Parity)
+  const provGrowthChartOption = useMemo(() => {
+    const monthlyArr = currentProvData?.monthly || [];
+    const labels = monthlyArr.map((m: any) => m.short || m.name);
+    const textColor = isDarkMode ? '#cbd5e1' : '#475569';
+    const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
+
+    const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT'> = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'];
+
+    let series: any[] = [];
+    if (selectedProvModa === 'ALL') {
+      series = modes.map((m) => ({
+        name: MODA_DISPLAY_NAME[m],
+        type: 'bar',
+        stack: 'provStack',
+        data: monthlyArr.map((item: any) => (item.modas && item.modas[m]) || 0),
+        itemStyle: { color: COLOR[m] },
+      }));
+    } else {
+      series = [
+        {
+          name: MODA_DISPLAY_NAME[selectedProvModa] || selectedProvModa,
+          type: 'bar',
+          data: monthlyArr.map((item: any) => (item.modas && item.modas[selectedProvModa]) || item.val || 0),
+          itemStyle: { color: (COLOR as any)[selectedProvModa] || '#1e3a8a' },
+        },
+      ];
+    }
+
+    return {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+        borderColor: isDarkMode ? '#334155' : '#e2e8f0',
+        textStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a', fontSize: 12 },
+        valueFormatter: (value: any) => `${formatNumber(value)} orang`,
+      },
+      legend: {
+        bottom: 0,
+        textStyle: { color: textColor, fontSize: 11 },
+        itemGap: 12,
+      },
+      grid: {
+        top: 20,
+        left: '2%',
+        right: '2%',
+        bottom: 35,
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        axisLabel: { color: textColor, fontSize: 11 },
+        axisLine: { lineStyle: { color: isDarkMode ? '#334155' : '#cbd5e1' } },
+      },
+      yAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { color: splitLineColor } },
+        axisLabel: {
+          color: textColor,
+          fontSize: 10,
+          formatter: (v: number) => (v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : `${Math.round(v / 1000)}k`),
+        },
+      },
+      series,
+    };
+  }, [currentProvData, selectedProvModa, isDarkMode]);
 
   // EChart Options for DOW
   const dowChartOption = useMemo(() => {
@@ -343,7 +428,86 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
         <EChartWrapper options={timelineChartOption} style={{ height: '400px', width: '100%' }} />
       </div>
 
-      {/* 2. TABEL RINGKASAN BULANAN (10 BULAN) & POLA HARI MINGGUAN */}
+      {/* 2. TREN & PERTUMBUHAN PROVINSI WORKSPACE (V1 1:1 Parity) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-sky-600" />
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                Tren & Lonjakan Bulanan per Wilayah Provinsi (10 Bulan)
+              </h4>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Distribusi mobilitas bulanan per provinsi dengan perbandingan lonjakan terhadap baseline normal.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <select
+              value={selectedProv}
+              onChange={(e) => setSelectedProv(e.target.value)}
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold"
+            >
+              {provincesList.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedProvModa}
+              onChange={(e) => setSelectedProvModa(e.target.value)}
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+            >
+              <option value="ALL">Semua Moda (Stacked)</option>
+              <option value="UDARA">✈ Udara</option>
+              <option value="KA">🚆 Kereta Api</option>
+              <option value="BUS">🚌 Bus</option>
+              <option value="ASDP">⛴ ASDP</option>
+              <option value="LAUT">🚢 Laut</option>
+            </select>
+          </div>
+        </div>
+
+        {/* PROVINCE SUMMARY BADGES */}
+        {currentProvData && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+            <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+              <span className="text-slate-400 font-sans text-[11px]">Total YTD Provinsi:</span>
+              <div className="font-bold text-slate-900 dark:text-white text-sm mt-0.5">
+                {formatNumber(currentProvData.total || currentProvData.total_brg || 0)} orang
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+              <span className="text-slate-400 font-sans text-[11px]">Bulan Puncak:</span>
+              <div className="font-bold text-rose-700 dark:text-rose-400 text-sm mt-0.5">
+                {currentProvData.peak_month} • {formatNumber(currentProvData.peak_vol)} orang
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+              <span className="text-slate-400 font-sans text-[11px]">Lonjakan vs Median:</span>
+              <div className="font-bold text-rose-600 dark:text-rose-400 text-sm mt-0.5">
+                {formatPercent(currentProvData.max_jump_vs_median_pct || currentProvData.max_jump_pct || 0)}
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+              <span className="text-slate-400 font-sans text-[11px]">Baseline Median Pra-Lebaran:</span>
+              <div className="font-bold text-slate-700 dark:text-slate-300 text-sm mt-0.5">
+                {formatNumber(currentProvData.median_vol || currentProvData.baseline_vol || 0)} /bln
+              </div>
+            </div>
+          </div>
+        )}
+
+        <EChartWrapper options={provGrowthChartOption} style={{ height: '320px', width: '100%' }} />
+      </div>
+
+      {/* 3. TABEL RINGKASAN BULANAN (10 BULAN) & POLA HARI MINGGUAN */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* TABEL BULANAN */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between">

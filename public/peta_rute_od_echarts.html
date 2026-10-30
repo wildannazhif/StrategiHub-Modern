@@ -190,7 +190,7 @@
         }
 
         return {
-          coords: [[r.lon1, r.lat1], [r.lon2, r.lat2]],
+          coords: [[r.olon ?? r.lon1, r.olat ?? r.lat1], [r.dlon ?? r.lon2, r.dlat ?? r.lat2]],
           lineStyle: { color: color, width: width, opacity: opacity, curveness: 0.2 },
           routeInfo: r
         };
