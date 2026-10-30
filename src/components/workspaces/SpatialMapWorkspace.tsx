@@ -1,53 +1,53 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { SpatialNode } from '@/types/mobility';
 import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal } from '@/lib/constants';
-import { MapPin, Search, Layers, Info, CheckCircle2 } from 'lucide-react';
+import { MapPin, Search, Layers, Info } from 'lucide-react';
 
 interface SpatialMapWorkspaceProps {
-  nodes: SpatialNode[];
+  nodes: any[];
   provinceGeojson?: any;
   isDarkMode: boolean;
 }
 
 export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
   nodes,
-  provinceGeojson,
   isDarkMode,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const layerGroupRef = useRef<any>(null);
-  const geojsonLayerRef = useRef<any>(null);
+  const markerGroupRef = useRef<any>(null);
+  const choroplethGroupRef = useRef<any>(null);
 
   const [selectedModa, setSelectedModa] = useState<string>('ALL');
   const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>('pnp');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedNode, setSelectedNode] = useState<SpatialNode | null>(null);
+  const [selectedNode, setSelectedNode] = useState<any | null>(null);
   const [showChoropleth, setShowChoropleth] = useState<boolean>(true);
 
-  // Filtered nodes
+  // Filtered nodes (handling field names: m, nama, p, lat, lon, pnp, arm)
   const filteredNodes = useMemo(() => {
-    let list = nodes.filter((n) => n.lat !== null && n.lon !== null);
+    let list = nodes.filter((n) => n.lat !== null && n.lon !== null && n.lat !== undefined && n.lon !== undefined);
 
     if (selectedModa !== 'ALL') {
-      list = list.filter((n) => n.moda === selectedModa);
+      list = list.filter((n) => (n.m || n.moda) === selectedModa);
     }
 
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       list = list.filter(
-        (n) => n.name.toLowerCase().includes(term) || n.prov.toLowerCase().includes(term)
+        (n) =>
+          (n.nama || n.name || '').toLowerCase().includes(term) ||
+          (n.p || n.prov || '').toLowerCase().includes(term)
       );
     }
 
     return list;
   }, [nodes, selectedModa, searchTerm]);
 
-  // Missing coordinate nodes (for audit tab)
-  const emptyCoordNodes = useMemo(() => {
-    return nodes.filter((n) => n.lat === null || n.lon === null);
+  // Missing coordinate nodes count
+  const emptyCoordCount = useMemo(() => {
+    return nodes.filter((n) => n.lat === null || n.lon === null || n.lat === undefined || n.lon === undefined).length;
   }, [nodes]);
 
   // Leaflet initialization
@@ -55,66 +55,88 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     if (typeof window === 'undefined' || !mapContainerRef.current) return;
 
     let L: any;
+    let isCancelled = false;
+
     const init = async () => {
       L = (await import('leaflet')).default;
-
-      // Fix default marker icons
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      });
+      if (isCancelled || !mapContainerRef.current) return;
 
       if (!mapInstanceRef.current) {
         const map = L.map(mapContainerRef.current, {
-          center: [-2.5, 118.0],
+          center: [-2.2, 117.5],
           zoom: 5,
           minZoom: 4,
-          maxZoom: 13,
+          maxZoom: 14,
+          zoomControl: false,
         });
 
-        const tileUrl = isDarkMode
-          ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-          : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        L.tileLayer(tileUrl, {
-          attribution: '&copy; OpenStreetMap &copy; CARTO',
-          maxZoom: 19,
+        // OpenStreetMap free standard tile layer (Same as V1, 100% reliable)
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+          maxZoom: 18,
         }).addTo(map);
 
         mapInstanceRef.current = map;
-        layerGroupRef.current = L.layerGroup().addTo(map);
+        choroplethGroupRef.current = L.layerGroup().addTo(map);
+        markerGroupRef.current = L.layerGroup().addTo(map);
+
+        // Load and add Choropleth GeoJSON
+        try {
+          const basePath = '/StrategiHub-Modern';
+          const geoRes = await fetch(`${basePath}/data/indonesia_38_provinces.geojson`);
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            if (!isCancelled && choroplethGroupRef.current) {
+              const geoLayer = L.geoJSON(geoData, {
+                style: () => ({
+                  color: isDarkMode ? '#38bdf8' : '#0284c7',
+                  weight: 1,
+                  opacity: 0.6,
+                  fillColor: isDarkMode ? '#0369a1' : '#bae6fd',
+                  fillOpacity: isDarkMode ? 0.15 : 0.12,
+                }),
+              });
+              choroplethGroupRef.current.addLayer(geoLayer);
+            }
+          }
+        } catch (e) {
+          console.warn('GeoJSON choropleth load skipped:', e);
+        }
       }
 
-      // Render markers
       const map = mapInstanceRef.current;
-      const group = layerGroupRef.current;
-      if (!map || !group) return;
+      const markerGroup = markerGroupRef.current;
+      if (!map || !markerGroup) return;
 
-      group.clearLayers();
+      markerGroup.clearLayers();
 
       filteredNodes.forEach((node) => {
-        if (node.lat === null || node.lon === null) return;
+        const lat = Number(node.lat);
+        const lon = Number(node.lon);
+        if (isNaN(lat) || isNaN(lon)) return;
 
-        const rawVal = Number(selectedMetric === 'pnp' ? node.pnp_tot : node.arm_tot) || 0;
-        const safeVal = Math.max(0, rawVal);
-        const color = (COLOR as any)[node.moda] || '#475569';
+        const modaKey = node.m || node.moda || 'UDARA';
+        const nodeName = node.nama || node.name || 'Simpul';
+        const nodeProv = node.p || node.prov || '';
+        const nodeVal = Number(selectedMetric === 'pnp' ? node.pnp ?? node.pnp_tot : node.arm ?? node.arm_tot) || 0;
+        const color = (COLOR as any)[modaKey] || '#1a5287';
 
-        // Radius by volume
-        const radius = Math.min(18, Math.max(5, Math.sqrt(safeVal) / 45));
+        // Size radius by volume (min 5, max 16)
+        const radius = Math.min(16, Math.max(5, Math.sqrt(nodeVal) / 45));
 
-        const circle = L.circleMarker([node.lat, node.lon], {
+        const circle = L.circleMarker([lat, lon], {
           radius,
           fillColor: color,
           color: '#ffffff',
           weight: 1.5,
-          opacity: 0.9,
-          fillOpacity: 0.8,
+          opacity: 0.95,
+          fillOpacity: 0.85,
         });
 
         circle.bindTooltip(
-          `<strong>${node.name}</strong><br/>${MODA_DISPLAY_NAME[node.moda] || node.moda} • ${node.prov}<br/>Volume: ${formatNumber(safeVal)}`,
+          `<strong>${nodeName}</strong><br/>${MODA_DISPLAY_NAME[modaKey] || modaKey} • ${nodeProv}<br/>${selectedMetric === 'pnp' ? 'Penumpang' : 'Armada'}: ${formatNumber(nodeVal)}`,
           { direction: 'top', className: 'leaflet-custom-tooltip' }
         );
 
@@ -122,12 +144,26 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           setSelectedNode(node);
         });
 
-        group.addLayer(circle);
+        markerGroup.addLayer(circle);
       });
     };
 
     init();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [filteredNodes, selectedMetric, isDarkMode]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -142,7 +178,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Menampilkan <strong>{filteredNodes.length} simpul berkoordinat valid</strong> dari total 1.214 simpul terdaftar di 38 provinsi.
+              Menampilkan <strong>{filteredNodes.length} simpul berkoordinat valid</strong> dari total {nodes.length} simpul terdaftar di 38 provinsi.
             </p>
           </div>
 
@@ -151,7 +187,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
               ✓ {filteredNodes.length} Plot Valid
             </span>
             <span className="px-2 py-1 bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 rounded border border-slate-200 dark:border-slate-700">
-              ⚠ {emptyCoordNodes.length} Koordinat Kosong
+              ⚠ {emptyCoordCount} Koordinat Kosong (Audit)
             </span>
           </div>
         </div>
@@ -212,11 +248,11 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* LEAFLET MAP CANVAS */}
         <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs relative">
-          <div ref={mapContainerRef} style={{ height: '520px', width: '100%' }} />
+          <div ref={mapContainerRef} style={{ height: '540px', width: '100%' }} />
 
           {/* MAP LEGEND */}
-          <div className="absolute bottom-3 left-3 z-10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-sm space-y-1">
-            <div className="font-semibold text-slate-700 dark:text-slate-300">Legenda Moda:</div>
+          <div className="absolute bottom-3 left-3 z-[1000] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-md space-y-1">
+            <div className="font-semibold text-slate-700 dark:text-slate-300">Warna Moda Transportasi:</div>
             <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
               {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => (
                 <div key={m} className="flex items-center gap-1.5">
@@ -241,15 +277,17 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Nama Simpul</span>
                   <div className="font-bold text-slate-900 dark:text-white text-base leading-tight mt-0.5">
-                    {selectedNode.name}
+                    {selectedNode.nama || selectedNode.name}
                   </div>
-                  <div className="text-xs text-slate-500">{selectedNode.prov}</div>
+                  <div className="text-xs text-slate-500">{selectedNode.p || selectedNode.prov}</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 font-mono text-xs">
                   <div>
                     <span className="text-[10px] text-slate-400 font-sans">Moda:</span>
-                    <div className="font-bold text-slate-800 dark:text-slate-200">{MODA_DISPLAY_NAME[selectedNode.moda]}</div>
+                    <div className="font-bold text-slate-800 dark:text-slate-200">
+                      {MODA_DISPLAY_NAME[selectedNode.m || selectedNode.moda] || selectedNode.m}
+                    </div>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 font-sans">Tipe:</span>
@@ -260,22 +298,32 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
                 <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 space-y-1.5 font-mono text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-500 font-sans">Total Penumpang:</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{formatNumber(selectedNode.pnp_tot)}</span>
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      {formatNumber(selectedNode.pnp ?? selectedNode.pnp_tot)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500 font-sans">Total Armada:</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{formatNumber(selectedNode.arm_tot)}</span>
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      {formatNumber(selectedNode.arm ?? selectedNode.arm_tot)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500 font-sans">Rasio Beban (LF):</span>
                     <span className="font-bold text-sky-700 dark:text-sky-300">
-                      {formatDecimal(selectedNode.load_factor || (selectedNode.arm_tot ? selectedNode.pnp_tot / selectedNode.arm_tot : 0))} pnp/trip
+                      {formatDecimal(
+                        (selectedNode.pnp ?? selectedNode.pnp_tot) / ((selectedNode.arm ?? selectedNode.arm_tot) || 1)
+                      )} pnp/trip
                     </span>
+                  </div>
+                  <div className="pt-1.5 border-t border-slate-200/40 dark:border-slate-700/40 text-[11px] flex justify-between text-slate-500">
+                    <span>Datang: {formatNumber(selectedNode.p_dat || 0)}</span>
+                    <span>Berangkat: {formatNumber(selectedNode.p_brg || 0)}</span>
                   </div>
                 </div>
 
                 <div className="text-[10px] font-mono text-slate-400">
-                  Koordinat: {selectedNode.lat?.toFixed(4)}, {selectedNode.lon?.toFixed(4)}
+                  Koordinat: {Number(selectedNode.lat)?.toFixed(4)}, {Number(selectedNode.lon)?.toFixed(4)}
                 </div>
               </div>
             ) : (

@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { TopHub, TransportModa } from '@/types/mobility';
+import { TransportModa } from '@/types/mobility';
 import { MODA_DISPLAY_NAME, MODA_BADGE_CLASS, formatNumber, formatDecimal } from '@/lib/constants';
-import { Anchor, Search, ArrowUpDown, Filter } from 'lucide-react';
+import { Anchor, Search } from 'lucide-react';
 
 interface TopHubsWorkspaceProps {
-  topHubsPeak: Record<string, TopHub[]>;
-  topHubsYtd: Record<string, TopHub[]>;
+  topHubsPeak: Record<string, any[]>;
+  topHubsYtd: Record<string, any[]>;
 }
 
 export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
@@ -21,24 +21,29 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
   const currentDataset = period === 'peak' ? topHubsPeak : topHubsYtd;
 
   const hubsList = useMemo(() => {
-    let list: TopHub[] = [];
+    let list: any[] = [];
     if (selectedModa === 'ALL') {
-      const allLists = Object.values(currentDataset).flat();
+      const allLists: any[] = [];
+      Object.entries(currentDataset).forEach(([mKey, arr]) => {
+        (arr || []).forEach((item) => {
+          allLists.push({ ...item, moda: mKey });
+        });
+      });
       // Sort by total penumpang descending
-      allLists.sort((a, b) => b.pnp_tot - a.pnp_tot);
+      allLists.sort((a, b) => (Number(b.pnp ?? b.pnp_tot) || 0) - (Number(a.pnp ?? a.pnp_tot) || 0));
       list = allLists.slice(0, 30).map((item, idx) => ({ ...item, rank: idx + 1 }));
     } else {
-      list = currentDataset[selectedModa] || [];
+      const arr = currentDataset[selectedModa] || [];
+      list = arr.map((item, idx) => ({ ...item, moda: selectedModa, rank: idx + 1 }));
     }
 
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
-      list = list.filter(
-        (h) =>
-          h.name.toLowerCase().includes(term) ||
-          h.prov.toLowerCase().includes(term) ||
-          h.tipe?.toLowerCase().includes(term)
-      );
+      list = list.filter((h) => {
+        const name = (h.nama_prasarana || h.name || '').toLowerCase();
+        const prov = (h.provinsi || h.prov || '').toLowerCase();
+        return name.includes(term) || prov.includes(term);
+      });
     }
     return list;
   }, [currentDataset, selectedModa, searchTerm]);
@@ -92,7 +97,7 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
               <button
                 key={m}
                 onClick={() => setSelectedModa(m)}
-                className={`px-2.5 py-1 rounded-md font-medium transition-colors border ${
+                className={`px-2.5 py-1 rounded-md font-medium border ${
                   selectedModa === m
                     ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white shadow-2xs font-semibold'
                     : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
@@ -135,7 +140,12 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
               {hubsList.length > 0 ? (
                 hubsList.map((h, idx) => {
-                  const lf = h.load_factor || (h.arm_tot ? h.pnp_tot / h.arm_tot : 0);
+                  const pnpVal = Number(h.pnp ?? h.pnp_tot) || 0;
+                  const armVal = Number(h.arm ?? h.arm_tot) || 0;
+                  const lf = armVal ? pnpVal / armVal : 0;
+                  const hubName = h.nama_prasarana || h.name || 'Simpul';
+                  const hubProv = h.provinsi || h.prov || '-';
+
                   const statusBadge =
                     lf > 250
                       ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
@@ -155,14 +165,14 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
                       : 'Stabil Normal';
 
                   return (
-                    <tr key={`${h.name}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <tr key={`${hubName}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                       <td className="py-2.5 text-center font-bold text-slate-400">
                         #{h.rank || idx + 1}
                       </td>
                       <td className="py-2.5 font-sans font-bold text-slate-900 dark:text-white">
-                        {h.name}
+                        {hubName}
                       </td>
-                      <td className="py-2.5 font-sans text-slate-500">{h.prov}</td>
+                      <td className="py-2.5 font-sans text-slate-500">{hubProv}</td>
                       <td className="py-2.5">
                         <span
                           className={`px-1.5 py-0.5 rounded text-[10px] font-sans font-semibold border ${
@@ -173,10 +183,10 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
                         </span>
                       </td>
                       <td className="py-2.5 text-right font-bold text-slate-800 dark:text-slate-200">
-                        {formatNumber(h.pnp_tot)}
+                        {formatNumber(pnpVal)}
                       </td>
                       <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
-                        {formatNumber(h.arm_tot)}
+                        {formatNumber(armVal)}
                       </td>
                       <td className="py-2.5 text-right font-bold text-sky-800 dark:text-sky-300">
                         {formatDecimal(lf)} pnp/trip

@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { Compass, Share2 } from 'lucide-react';
 
 export const ODMapWorkspace: React.FC = () => {
-  const [activeEngine, setActiveEngine] = useState<'canvas' | 'echarts'>('echarts');
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const [activeEngine, setActiveEngine] = useState<'echarts' | 'canvas'>('echarts');
+  const basePath = '/StrategiHub-Modern';
 
   return (
     <div className="space-y-4">
@@ -49,10 +49,10 @@ export const ODMapWorkspace: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs bg-slate-950">
         <iframe
           src={activeEngine === 'echarts' ? `${basePath}/peta_rute_od_echarts.html` : `${basePath}/peta_rute_od_interaktif.html`}
-          className="w-full h-[650px] border-none"
+          className="w-full h-[680px] border-none"
           title="Peta Rute OD Udara"
         />
       </div>
@@ -61,7 +61,7 @@ export const ODMapWorkspace: React.FC = () => {
 };
 
 export const ODSankeyWorkspace: React.FC = () => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const basePath = '/StrategiHub-Modern';
 
   return (
     <div className="space-y-4">
@@ -84,7 +84,7 @@ export const ODSankeyWorkspace: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
         <iframe
           src={`${basePath}/sankey_diagram_od.html`}
-          className="w-full h-[650px] border-none"
+          className="w-full h-[680px] border-none"
           title="Diagram Sankey OD Multimoda"
         />
       </div>
