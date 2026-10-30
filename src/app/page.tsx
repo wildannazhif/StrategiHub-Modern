@@ -181,6 +181,7 @@ export default function Home() {
                 forecastData={data.forecast_nataru}
                 benchmarkResults={benchmarkResults}
                 timeline2025={data.timeline_2025}
+                timeline={data.daily_timeline}
                 isDarkMode={isDarkMode}
               />
             )}
