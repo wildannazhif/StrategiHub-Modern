@@ -28,7 +28,7 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const basePath = '/StrategiHub-Modern';
         const [bundleRes, benchRes] = await Promise.all([
           fetch(`${basePath}/data/mobility_data_bundle.json`),
           fetch(`${basePath}/data/benchmark_forecast_results.json`),
