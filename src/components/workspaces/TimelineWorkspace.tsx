@@ -202,20 +202,20 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
       },
       legend: {
         bottom: 0,
-        textStyle: { color: textColor, fontSize: 11 },
-        itemGap: 12,
+        textStyle: { color: textColor, fontSize: 10 },
+        itemGap: 8,
       },
       grid: {
         top: 20,
         left: '2%',
         right: '2%',
-        bottom: 35,
+        bottom: 50,
         containLabel: true,
       },
       xAxis: {
         type: 'category',
         data: labels,
-        axisLabel: { color: textColor, fontSize: 11 },
+        axisLabel: { color: textColor, fontSize: 10, rotate: 20 },
         axisLine: { lineStyle: { color: isDarkMode ? '#334155' : '#cbd5e1' } },
       },
       yAxis: {
@@ -230,61 +230,6 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
       series,
     };
   }, [currentProvData, selectedProvModa, isDarkMode]);
-
-  // EChart Options for DOW
-  const dowChartOption = useMemo(() => {
-    const days = dow.map((d: any) => d.dow || d.day_name);
-    const textColor = isDarkMode ? '#cbd5e1' : '#475569';
-    const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
-
-    const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT'> = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'];
-    const series = modes.map((m) => ({
-      name: MODA_DISPLAY_NAME[m],
-      type: 'bar',
-      stack: 'total',
-      data: dow.map((d) => getMetricValue(d, m, selectedMetric, selectedDirection)),
-      itemStyle: { color: COLOR[m] },
-    }));
-
-    return {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow' },
-        backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
-        borderColor: isDarkMode ? '#334155' : '#e2e8f0',
-        textStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a', fontSize: 12 },
-        valueFormatter: (value: any) => `${formatNumber(value)} ${selectedMetric === 'pnp' ? 'orang' : 'trip'}`,
-      },
-      legend: {
-        bottom: 0,
-        textStyle: { color: textColor, fontSize: 11 },
-        itemGap: 12,
-      },
-      grid: {
-        top: 20,
-        left: '2%',
-        right: '2%',
-        bottom: 35,
-        containLabel: true,
-      },
-      xAxis: {
-        type: 'category',
-        data: days,
-        axisLabel: { color: textColor, fontSize: 11 },
-        axisLine: { lineStyle: { color: isDarkMode ? '#334155' : '#cbd5e1' } },
-      },
-      yAxis: {
-        type: 'value',
-        splitLine: { lineStyle: { color: splitLineColor } },
-        axisLabel: {
-          color: textColor,
-          fontSize: 10,
-          formatter: (v: number) => (v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : `${Math.round(v / 1000)}k`),
-        },
-      },
-      series,
-    };
-  }, [dow, isDarkMode, selectedMetric, selectedDirection]);
 
   return (
     <div className="space-y-6">
@@ -520,77 +465,70 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
         <EChartWrapper options={provGrowthChartOption} style={{ height: '320px', width: '100%' }} />
       </div>
 
-      {/* 3. TABEL RINGKASAN BULANAN (10 BULAN) & POLA HARI MINGGUAN */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* TABEL BULANAN */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between">
+      {/* 3. TABEL RINGKASAN AKUMULASI BULANAN PER MODA (Jan – Okt 2026 • 1:1 Paritas V1) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                Ringkasan Agregasi Bulanan (Jan – Okt 2026)
-              </h4>
-              <span className="text-[11px] font-mono text-slate-400">Satuan: {selectedMetric === 'pnp' ? 'Org' : 'Trip'}</span>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
-                    <th className="py-2 font-semibold">Bulan</th>
-                    <th className="py-2 text-right font-semibold">Udara</th>
-                    <th className="py-2 text-right font-semibold">KA</th>
-                    <th className="py-2 text-right font-semibold">Bus</th>
-                    <th className="py-2 text-right font-semibold">ASDP</th>
-                    <th className="py-2 text-right font-semibold">Laut</th>
-                    <th className="py-2 text-right font-semibold text-slate-900 dark:text-white">Total</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono">
-                  {monthly.map((m: any) => (
-                    <tr key={m.bulan || m.label} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                      <td className="py-2 font-sans font-medium text-slate-700 dark:text-slate-300">
-                        {m.label || m.bulan}
-                      </td>
-                      <td className="py-2 text-right text-slate-600 dark:text-slate-400">
-                        {formatNumber(getMetricValue(m, 'UDARA', selectedMetric, selectedDirection))}
-                      </td>
-                      <td className="py-2 text-right text-slate-600 dark:text-slate-400">
-                        {formatNumber(getMetricValue(m, 'KA', selectedMetric, selectedDirection))}
-                      </td>
-                      <td className="py-2 text-right text-slate-600 dark:text-slate-400">
-                        {formatNumber(getMetricValue(m, 'BUS', selectedMetric, selectedDirection))}
-                      </td>
-                      <td className="py-2 text-right text-slate-600 dark:text-slate-400">
-                        {formatNumber(getMetricValue(m, 'ASDP', selectedMetric, selectedDirection))}
-                      </td>
-                      <td className="py-2 text-right text-slate-600 dark:text-slate-400">
-                        {formatNumber(getMetricValue(m, 'LAUT', selectedMetric, selectedDirection))}
-                      </td>
-                      <td className="py-2 text-right font-bold text-slate-900 dark:text-white">
-                        {formatNumber(getMetricValue(m, 'TOTAL', selectedMetric, selectedDirection))}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+              Tabel Akumulasi Bulanan per Moda Transportasi
+            </h4>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Volume pergerakan dari Januari sampai dengan Oktober 2026 ({selectedMetric === 'pnp' ? 'Penumpang' : 'Armada'} •{' '}
+              {selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Total Dua Arah'})
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700">
+              10 Bulan (Jan - Okt)
+            </span>
+            <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 sm:hidden">
+              <span>Geser ke samping</span>
+              <span>→</span>
             </div>
           </div>
         </div>
 
-        {/* POLA HARI MINGGUAN (DOW) */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                Distribusi Pola Hari Mingguan (Day-of-Week Effect)
-              </h4>
-              <span className="text-[11px] font-mono text-slate-400">Komposisi 5 Moda</span>
-            </div>
-            <EChartWrapper options={dowChartOption} style={{ height: '310px', width: '100%' }} />
-          </div>
-          <div className="text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2 mt-2">
-            💡 <em>Jumat dan Minggu mencatat lonjakan mobilitas tertinggi pada moda Udara dan Kereta Api.</em>
-          </div>
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[720px] text-left text-xs">
+            <thead>
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold bg-slate-50 dark:bg-slate-800/60">
+                <th className="py-2.5 px-3">Bulan</th>
+                <th className="py-2.5 px-3 text-right text-blue-900 dark:text-blue-300 font-bold">✈ Udara</th>
+                <th className="py-2.5 px-3 text-right text-amber-700 dark:text-amber-400 font-bold">🚆 Perkeretaapian</th>
+                <th className="py-2.5 px-3 text-right text-emerald-700 dark:text-emerald-400 font-bold">🚌 Jalan</th>
+                <th className="py-2.5 px-3 text-right text-purple-700 dark:text-purple-400 font-bold">⛴ Penyebrangan</th>
+                <th className="py-2.5 px-3 text-right text-cyan-700 dark:text-cyan-400 font-bold">🚢 Laut</th>
+                <th className="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-white bg-slate-100/80 dark:bg-slate-800">Total</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono">
+              {monthly.map((m: any) => (
+                <tr key={m.bulan || m.label} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50">
+                  <td className="py-2.5 px-3 font-sans font-medium text-slate-800 dark:text-slate-200">
+                    {m.label || m.bulan}
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-slate-700 dark:text-slate-300">
+                    {formatNumber(getMetricValue(m, 'UDARA', selectedMetric, selectedDirection))}
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-slate-700 dark:text-slate-300">
+                    {formatNumber(getMetricValue(m, 'KA', selectedMetric, selectedDirection))}
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-slate-700 dark:text-slate-300">
+                    {formatNumber(getMetricValue(m, 'BUS', selectedMetric, selectedDirection))}
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-slate-700 dark:text-slate-300">
+                    {formatNumber(getMetricValue(m, 'ASDP', selectedMetric, selectedDirection))}
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-slate-700 dark:text-slate-300">
+                    {formatNumber(getMetricValue(m, 'LAUT', selectedMetric, selectedDirection))}
+                  </td>
+                  <td className="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-white bg-slate-50/50 dark:bg-slate-800/50">
+                    {formatNumber(getMetricValue(m, 'TOTAL', selectedMetric, selectedDirection))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

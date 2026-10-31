@@ -141,63 +141,6 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
     };
   }, [lebaranDaily, isDarkMode, chartMode, selectedDirection]);
 
-  // Modal share stacked area chart
-  const modalShareAreaOption = useMemo(() => {
-    const dates = lebaranDaily.map((d: any) => d.tag || d.h_tag);
-    const textColor = isDarkMode ? '#cbd5e1' : '#475569';
-    const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
-
-    const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT'> = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'];
-    const series = modes.map((m) => ({
-      name: MODA_DISPLAY_NAME[m],
-      type: 'line',
-      stack: 'Total',
-      areaStyle: { opacity: 0.65 },
-      emphasis: { focus: 'series' },
-      data: lebaranDaily.map((d: any) => {
-        const tot = getLebaranTotal(d) || 1;
-        const val = getLebaranValue(d, m);
-        return Number(((val / tot) * 100).toFixed(1));
-      }),
-      itemStyle: { color: COLOR[m] },
-    }));
-
-    return {
-      tooltip: {
-        trigger: 'axis',
-        backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
-        borderColor: isDarkMode ? '#334155' : '#e2e8f0',
-        textStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a', fontSize: 12 },
-        valueFormatter: (value: any) => `${value}%`,
-      },
-      legend: {
-        bottom: 0,
-        textStyle: { color: textColor, fontSize: 11 },
-        itemGap: 12,
-      },
-      grid: {
-        top: 20,
-        left: '2%',
-        right: '2%',
-        bottom: 35,
-        containLabel: true,
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: dates,
-        axisLabel: { color: textColor, fontSize: 11 },
-      },
-      yAxis: {
-        type: 'value',
-        max: 100,
-        splitLine: { lineStyle: { color: splitLineColor } },
-        axisLabel: { color: textColor, fontSize: 10, formatter: '{value}%' },
-      },
-      series,
-    };
-  }, [lebaranDaily, isDarkMode]);
-
   return (
     <div className="space-y-6">
       {/* HEADER BANNER */}
@@ -299,9 +242,8 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
         </div>
       )}
 
-      {/* CHARTS ROW */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEBARAN LINE CHART */}
+      {/* LEBARAN LINE CHART (1:1 Paritas V1) */}
+      <div className="w-full">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div>
@@ -371,18 +313,7 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
               </div>
             </div>
           </div>
-          <EChartWrapper options={lebaranLineChartOption} style={{ height: '340px', width: '100%' }} />
-        </div>
-
-        {/* MODAL SHARE AREA */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-              Dinamika Pangsa Pasar (Modal Share) 17 Hari
-            </h4>
-            <span className="text-[11px] font-mono text-slate-400">100% Stacked</span>
-          </div>
-          <EChartWrapper options={modalShareAreaOption} style={{ height: '340px', width: '100%' }} />
+          <EChartWrapper options={lebaranLineChartOption} style={{ height: '360px', width: '100%' }} />
         </div>
       </div>
 
