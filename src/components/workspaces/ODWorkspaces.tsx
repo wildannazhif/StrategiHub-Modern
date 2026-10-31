@@ -62,8 +62,8 @@ export const ODMapWorkspace: React.FC = () => {
         </div>
       </div>
 
-      {/* MAP IFRAME CONTAINER */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs bg-slate-950">
+      {/* MAP IFRAME CONTAINER (Isolated stacking context) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs bg-slate-950 relative isolate z-0">
         <iframe
           src={activeEngine === 'echarts' ? `${basePath}/peta_rute_od_echarts.html` : `${basePath}/peta_rute_od_interaktif.html`}
           style={{ height: `${iframeHeight}px` }}
@@ -93,7 +93,7 @@ export const ODSankeyWorkspace: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* SANKEY IFRAME CONTAINER (Seamless, full-height downwards without inner scroll) */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs relative isolate z-0">
         <iframe
           src={`${basePath}/sankey_diagram_od.html`}
           style={{ height: `${iframeHeight}px` }}

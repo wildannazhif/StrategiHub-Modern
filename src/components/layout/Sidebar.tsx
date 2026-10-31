@@ -32,6 +32,7 @@ interface SidebarProps {
   activeTab: TabId;
   onSelectTab: (tab: TabId) => void;
   isOpen: boolean;
+  onClose?: () => void;
 }
 
 interface NavItem {
@@ -46,7 +47,7 @@ interface NavGroup {
   items: NavItem[];
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen, onClose }) => {
   const navGroups: NavGroup[] = [
     {
       groupName: 'KRONOLOGI & OPERASIONAL',
@@ -82,59 +83,71 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen
   ];
 
   return (
-    <aside
-      className={`fixed lg:static top-[57px] bottom-0 left-0 z-20 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-200 ease-in-out flex flex-col justify-between overflow-y-auto ${
-        isOpen ? 'translate-x-0' : '-translate-x-full lg:hidden'
-      }`}
-    >
-      <div className="py-4 px-3 space-y-6">
-        {navGroups.map((group, gIdx) => (
-          <div key={gIdx} className="space-y-1">
-            <h3 className="px-3 text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
-              {group.groupName}
-            </h3>
-            <div className="mt-1 space-y-0.5">
-              {group.items.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => onSelectTab(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                      isActive
-                        ? 'bg-sky-50 text-sky-900 dark:bg-sky-950/70 dark:text-sky-200 font-semibold shadow-xs border border-sky-100 dark:border-sky-900'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <span className={isActive ? 'text-sky-700 dark:text-sky-300' : 'text-slate-500'}>
-                        {item.icon}
-                      </span>
-                      <span className="truncate">{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span
-                        className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-semibold ${
-                          isActive
-                            ? 'bg-sky-200/80 text-sky-900 dark:bg-sky-900 dark:text-sky-200'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
+    <>
+      {/* MOBILE BACKDROP OVERLAY (Closes sidebar on click, sits above any map) */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 top-[57px] bg-slate-950/70 backdrop-blur-xs z-[1150] lg:hidden transition-opacity"
+          aria-hidden="true"
+        />
+      )}
 
-      <div className="p-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/50">
-        <p className="font-semibold text-slate-600 dark:text-slate-400">PUSDATIN Kemenhub 2026</p>
-        <p className="text-[10px]">Verified 221.999 Baris Bersih</p>
-      </div>
-    </aside>
+      {/* SIDEBAR DRAWER (z-[1200] so it ALWAYS sits on top of Leaflet maps and canvas) */}
+      <aside
+        className={`fixed lg:static top-[57px] bottom-0 left-0 z-[1200] w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-transform duration-200 ease-in-out flex flex-col justify-between overflow-y-auto shadow-2xl lg:shadow-none ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        <div className="py-4 px-3 space-y-6">
+          {navGroups.map((group, gIdx) => (
+            <div key={gIdx} className="space-y-1">
+              <h3 className="px-3 text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
+                {group.groupName}
+              </h3>
+              <div className="mt-1 space-y-0.5">
+                {group.items.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => onSelectTab(item.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                        isActive
+                          ? 'bg-sky-50 text-sky-900 dark:bg-sky-950/70 dark:text-sky-200 font-semibold shadow-xs border border-sky-100 dark:border-sky-900'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <span className={isActive ? 'text-sky-700 dark:text-sky-300' : 'text-slate-500'}>
+                          {item.icon}
+                        </span>
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span
+                          className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-semibold ${
+                            isActive
+                              ? 'bg-sky-200/80 text-sky-900 dark:bg-sky-900 dark:text-sky-200'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/50">
+          <p className="font-semibold text-slate-600 dark:text-slate-400">PUSDATIN Kemenhub 2026</p>
+          <p className="text-[10px]">Verified 221.999 Baris Bersih</p>
+        </div>
+      </aside>
+    </>
   );
 };

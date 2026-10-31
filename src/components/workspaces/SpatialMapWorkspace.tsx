@@ -523,12 +523,12 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
 
       {/* 2. MAP & NODE INSPECTOR */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        {/* LEAFLET CANVAS */}
-        <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs relative">
+        {/* LEAFLET CANVAS (Isolated stacking context so Leaflet controls never bleed through sidebar) */}
+        <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs relative isolate z-0">
           <div ref={mapContainerRef} style={{ height: '580px', width: '100%' }} />
 
           {/* V1 EXACT INTERACTIVE MAP LEGEND (HEATMAP BAR + SIMPUL DOTS) */}
-          <div className="absolute bottom-3 left-3 z-[1000] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-lg space-y-2.5 max-w-[230px]">
+          <div className="absolute bottom-3 left-3 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-lg space-y-2.5 max-w-[230px]">
             {/* Heatmap Gradient Bar */}
             {showHeatmap && (
               <div>

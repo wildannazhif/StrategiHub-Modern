@@ -120,6 +120,7 @@ export default function Home() {
             }
           }}
           isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
 
         {/* MAIN WORKSPACE CONTENT */}
