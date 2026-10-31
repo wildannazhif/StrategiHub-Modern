@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef } from 'react';
-import { Share2, Plane, Users, Flame, Activity, RotateCcw, Filter, Compass } from 'lucide-react';
+import { Plane, Flame, Activity, RotateCcw, Filter } from 'lucide-react';
 import { HUB_FLOWS, ISLAND_FLOWS, SANKEY_COLOR_MAP, SankeyFlow } from '@/data/sankeyData';
 import { formatNumber, formatDecimal } from '@/lib/constants';
 
@@ -29,6 +29,58 @@ interface TooltipData {
   flights?: number;
   density?: string;
   share: number;
+}
+
+function cleanAirportName(name: string): string {
+  if (['Jawa', 'Sumatera', 'Bali & Nusra', 'Kalimantan', 'Sulawesi', 'Maluku & Papua', 'Lainnya'].includes(name)) {
+    return name;
+  }
+
+  const map: Record<string, string> = {
+    CGK: 'CGK (Jakarta)',
+    SUB: 'SUB (Surabaya)',
+    DPS: 'DPS (Bali)',
+    UPG: 'UPG (Makassar)',
+    KNO: 'KNO (Medan)',
+    BPN: 'BPN (Balikpapan)',
+    BTH: 'BTH (Batam)',
+    YIA: 'YIA (Yogyakarta)',
+    BDJ: 'BDJ (Banjarmasin)',
+    LOP: 'LOP (Lombok)',
+    PLM: 'PLM (Palembang)',
+    SRG: 'SRG (Semarang)',
+    PKU: 'PKU (Pekanbaru)',
+    PDG: 'PDG (Padang)',
+    DJJ: 'DJJ (Jayapura)',
+    PNK: 'PNK (Pontianak)',
+    MDC: 'MDC (Manado)',
+    KOE: 'KOE (Kupang)',
+    TRK: 'TRK (Tarakan)',
+    TJQ: 'TJQ (Belitung)',
+    AAP: 'AAP (Samarinda)',
+    BTJ: 'BTJ (Banda Aceh)',
+    DTB: 'DTB (Silangit)',
+    PGK: 'PGK (Pangkalpinang)',
+    BKS: 'BKS (Bengkulu)',
+    TTE: 'TTE (Ternate)',
+    AMQ: 'AMQ (Ambon)',
+    PLW: 'PLW (Palu)',
+    SOC: 'SOC (Solo)',
+    DJB: 'DJB (Jambi)',
+    HLP: 'HLP (Halim)',
+    KDI: 'KDI (Kendari)',
+    LBJ: 'LBJ (Labuan Bajo)',
+  };
+
+  const code = name.split(' ')[0].trim();
+  if (map[code]) return map[code];
+
+  const match = name.match(/^([A-Z]{3})\s*\((.*?)\)/);
+  if (match) {
+    const cleanCity = match[2].split('-')[0].split(',')[0].trim();
+    return `${match[1]} (${cleanCity})`;
+  }
+  return name;
 }
 
 export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = false }) => {
@@ -88,10 +140,10 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
     };
   }, [currentDataset, isIsland]);
 
-  // Bipartite Sankey Layout Calculations (Generous vertical spacing to prevent crowding on mobile)
+  // Bipartite Sankey Layout Calculations (Self-contained, 100% visible on Mobile & Desktop, Zero Cut-off)
   const layout = useMemo(() => {
     if (!currentDataset || currentDataset.length === 0) {
-      return { nodes: [], links: [], width: 1000, height: 600, totalValue: 0, padX: 190 };
+      return { nodes: [], links: [], width: 520, height: 600, totalValue: 0, padX: 105 };
     }
 
     const sourceMap: Record<string, number> = {};
@@ -107,46 +159,38 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
     const sources = Object.keys(sourceMap).sort((a, b) => sourceMap[b] - sourceMap[a]);
     const targets = Object.keys(targetMap).sort((a, b) => targetMap[b] - targetMap[a]);
 
-    const minNodeH = isIsland ? 30 : 22;
-    const nodeWidth = 24;
-    const gap = isIsland ? 22 : 15;
-    const padY = 55;
-    const padX = isIsland ? 170 : 190;
-    const width = 1000;
+    const minNodeH = isIsland ? 28 : 18;
+    const nodeWidth = 14;
+    const gap = isIsland ? 18 : 11;
+    const padY = 40;
+    const padX = isIsland ? 120 : 135;
+    const width = 620;
 
-    // Minimum required height based on target nodes count to guarantee zero text overlap
-    const minRequiredH = Math.max(
-      sources.length * (minNodeH + gap) + padY * 2,
-      targets.length * (minNodeH + gap) + padY * 2
-    );
-
-    const baseFlowHeight = Math.max(isIsland ? 720 : 860, minRequiredH - padY * 2);
-    const height = Math.max(900, Math.ceil(baseFlowHeight + padY * 2 + 50));
-
-    // Usable height
-    const usableHeightS = height - 2 * padY - (sources.length - 1) * gap;
-    const usableHeightT = height - 2 * padY - (targets.length - 1) * gap;
-
-    const scaleS = Math.max(0.00001, usableHeightS / (totalValue || 1));
-    const scaleT = Math.max(0.00001, usableHeightT / (totalValue || 1));
+    // Flow scaling factor
+    const targetFlowSpan = Math.max(isIsland ? 500 : 700, targets.length * 22);
+    const scaleS = targetFlowSpan / (totalValue || 1);
+    const scaleT = targetFlowSpan / (totalValue || 1);
 
     const sourceNodes: Record<string, NodeItem> = {};
-    let currY = padY;
+    let currYS = padY;
     sources.forEach((s) => {
       const h = Math.max(sourceMap[s] * scaleS, minNodeH);
       const color = SANKEY_COLOR_MAP[s] || '#2563eb';
-      sourceNodes[s] = { name: s, x: padX, y: currY, height: h, value: sourceMap[s], isSource: true, color };
-      currY += h + gap;
+      sourceNodes[s] = { name: s, x: padX, y: currYS, height: h, value: sourceMap[s], isSource: true, color };
+      currYS += h + gap;
     });
 
     const targetNodes: Record<string, NodeItem> = {};
-    currY = padY;
+    let currYT = padY;
     targets.forEach((t) => {
       const h = Math.max(targetMap[t] * scaleT, minNodeH);
       const color = SANKEY_COLOR_MAP[t] || '#10b981';
-      targetNodes[t] = { name: t, x: width - padX - nodeWidth, y: currY, height: h, value: targetMap[t], isSource: false, color };
-      currY += h + gap;
+      targetNodes[t] = { name: t, x: width - padX - nodeWidth, y: currYT, height: h, value: targetMap[t], isSource: false, color };
+      currYT += h + gap;
     });
+
+    // GUARANTEED SAFE HEIGHT: Sized to the exact lowest node + padY (Zero vertical cut-off)
+    const height = Math.max(currYS, currYT) + padY;
 
     const sOffsets: Record<string, number> = {};
     const tOffsets: Record<string, number> = {};
@@ -211,14 +255,14 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    let left = e.clientX - rect.left + 15;
-    let top = e.clientY - rect.top + 15;
+    let left = e.clientX - rect.left + 12;
+    let top = e.clientY - rect.top + 12;
 
-    if (left + 260 > rect.width) {
-      left = e.clientX - rect.left - 270;
+    if (left + 240 > rect.width) {
+      left = e.clientX - rect.left - 250;
     }
-    if (top + 160 > rect.height) {
-      top = e.clientY - rect.top - 150;
+    if (top + 150 > rect.height) {
+      top = e.clientY - rect.top - 140;
     }
 
     setTooltip((prev) => ({ ...prev, x: Math.max(10, left), y: Math.max(10, top) }));
@@ -231,7 +275,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
       visible: true,
       x: 0,
       y: 0,
-      title: `${item.flow.source} ➔ ${item.flow.target}`,
+      title: `${cleanAirportName(item.flow.source)} ➔ ${cleanAirportName(item.flow.target)}`,
       badge: 'Rute Langsung',
       pax: item.flow.value,
       flights: item.flow.flights,
@@ -243,14 +287,15 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
   const handleNodeMouseEnter = (e: React.MouseEvent, node: NodeItem) => {
     setHoveredNode(node.name);
     handleMouseMove(e);
+    const pct = ((node.value / (layout.totalValue || 1)) * 100).toFixed(1);
     setTooltip({
       visible: true,
       x: 0,
       y: 0,
-      title: `${node.isSource ? '🛫 Titik Asal' : '🛬 Titik Tujuan'}: ${node.name}`,
-      badge: node.isSource ? 'Origin Hub' : 'Destination',
+      title: cleanAirportName(node.name),
+      badge: node.isSource ? 'Hub Asal (Origin)' : 'Tujuan (Destination)',
       pax: node.value,
-      share: Number(((node.value / (layout.totalValue || 1)) * 100).toFixed(1)),
+      share: Number(pct),
     });
   };
 
@@ -269,44 +314,45 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
   };
 
   const resetAll = () => {
-    setSelectedNode(null);
     setSelectedOrigin('ALL');
     setMinPaxThreshold(10000);
+    setSelectedNode(null);
+    setHoveredLink(null);
+    setHoveredNode(null);
   };
 
   return (
     <div className="space-y-6">
-      {/* 1. TOP HEADER & VIEW MODE SELECTOR */}
+      {/* 1. HEADER & VIEW SELECTOR */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-                <Share2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800 flex items-center gap-1">
                 SIASATI OD Udara Kemenhub
               </span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                 Verified Domestic 100%
               </span>
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+            <h3 className="font-bold text-slate-900 dark:text-white text-base mt-2">
               Diagram Alir Sankey: Arus Koridor Mobilitas Udara Nasional
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-1">
               Visualisasi proporsional volume penumpang antarmoda dan konektivitas koridor udara antarpulau nusantara.
             </p>
           </div>
 
-          {/* VIEW SWITCHER: AIRPORT HUBS VS INTER-ISLAND */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 self-start sm:self-auto shrink-0">
+          {/* Hub vs Island Toggle */}
+          <div className="flex items-center rounded-xl p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs self-start sm:self-auto shrink-0">
             <button
               onClick={() => {
                 setViewMode('hub');
-                setSelectedNode(null);
+                resetAll();
               }}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 viewMode === 'hub'
-                  ? 'bg-sky-600 text-white shadow-2xs'
+                  ? 'bg-sky-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -316,32 +362,31 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
             <button
               onClick={() => {
                 setViewMode('island');
-                setSelectedNode(null);
+                resetAll();
               }}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all ${
                 viewMode === 'island'
-                  ? 'bg-sky-600 text-white shadow-2xs'
+                  ? 'bg-sky-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Arus Antar-Pulau</span>
+              <span>🧭 Arus Antar-Pulau</span>
             </button>
           </div>
         </div>
 
-        {/* 2. EXECUTIVE METRIC STRIP (4 CARDS) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+        {/* 2. EXECUTIVE KPI CARDS */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
           <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 border border-slate-200 dark:border-slate-700/70">
             <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
               <span>Total Penumpang</span>
-              <Users className="w-3.5 h-3.5 text-sky-500" />
+              <Plane className="w-3.5 h-3.5 text-sky-500" />
             </div>
             <div className="text-xl sm:text-2xl font-black font-mono text-slate-900 dark:text-white">
               {formatNumber(kpiStats.totalPax)}
             </div>
-            <div className="text-[11px] text-sky-700 dark:text-sky-300 font-medium mt-0.5">
-              {isIsland ? 'Akumulasi Antarpulau' : 'Orang / Bulan Terpantau'}
+            <div className="text-[11px] text-sky-600 dark:text-sky-400 font-medium mt-0.5">
+              Orang / Bulan Terpantau
             </div>
           </div>
 
@@ -458,13 +503,13 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
         )}
       </div>
 
-      {/* 4. SANKEY DIAGRAM SVG CANVAS */}
+      {/* 4. SANKEY DIAGRAM SVG CANVAS (Adaptive, Fits screen seamlessly, Zero Cut-off) */}
       <div
         ref={containerRef}
         onMouseMove={handleMouseMove}
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-5 shadow-2xs relative overflow-hidden"
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-5 shadow-2xs relative"
       >
-        <div className="w-full overflow-hidden rounded-xl bg-slate-50/70 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800/80 p-2 sm:p-4">
+        <div className="w-full rounded-xl bg-slate-50/70 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800/80 p-2 sm:p-4">
           <svg
             viewBox={`0 0 ${layout.width} ${layout.height}`}
             className="w-full h-auto select-none"
@@ -491,25 +536,25 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
             {/* COLUMN HEADERS */}
             <text
               x={layout.padX}
-              y={28}
-              fontSize="12"
+              y={22}
+              fontSize="10"
               fontWeight="bold"
               fill={isDarkMode ? '#60a5fa' : '#2563eb'}
               className="font-sans"
             >
-              {isIsland ? '🛫 PULAU / WILAYAH ASAL' : '🛫 BANDARA ASAL (ORIGIN HUB)'}
+              {isIsland ? '🛫 ASAL' : '🛫 ASAL (HUB)'}
             </text>
 
             <text
               x={layout.width - layout.padX}
-              y={28}
+              y={22}
               textAnchor="end"
-              fontSize="12"
+              fontSize="10"
               fontWeight="bold"
               fill={isDarkMode ? '#34d399' : '#059669'}
               className="font-sans"
             >
-              {isIsland ? '🛬 PULAU / WILAYAH TUJUAN' : '🛬 BANDARA TUJUAN (DESTINATION)'}
+              {isIsland ? '🛬 TUJUAN' : '🛬 TUJUAN (DEST)'}
             </text>
 
             {/* FLOW RIBBONS */}
@@ -523,7 +568,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
                   ? link.flow.source === hoveredNode || link.flow.target === hoveredNode
                   : false;
 
-                let opacity = isDarkMode ? 0.58 : 0.50;
+                let opacity = isDarkMode ? 0.58 : 0.5;
                 let stroke = 'none';
                 let strokeWidth = 0;
 
@@ -573,7 +618,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
               })}
             </g>
 
-            {/* NODE BARS & LABELS (High readability, zero vertical overlap) */}
+            {/* NODE BARS & LABELS (High readability, single line, 100% immune to cut-off) */}
             <g className="nodes-group">
               {layout.nodes.map((node) => {
                 const isNodeActive = selectedNode === node.name;
@@ -590,6 +635,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
                 const subColor = isDarkMode ? '#94a3b8' : '#64748b';
 
                 const paxStr = `${formatDecimal(node.value / 1000, 1)}k`;
+                const cleanName = cleanAirportName(node.name);
 
                 return (
                   <g
@@ -607,34 +653,34 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
                     <rect
                       x={node.x}
                       y={node.y}
-                      width={24}
+                      width={14}
                       height={node.height}
-                      rx={5}
+                      rx={3}
                       fill={node.color}
                       stroke={isNodeActive ? '#f59e0b' : '#ffffff'}
-                      strokeWidth={isNodeActive ? 3 : 0.8}
+                      strokeWidth={isNodeActive ? 2 : 0.5}
                       className="hover:brightness-125 transition-all"
                     />
 
-                    {/* Node Text Label (Single line if tight, two lines if tall) */}
-                    {node.height >= 34 ? (
+                    {/* Clean unclipped typography with ample margin */}
+                    {node.height >= 30 ? (
                       <>
                         <text
-                          x={node.isSource ? node.x - 12 : node.x + 24 + 12}
+                          x={node.isSource ? node.x - 7 : node.x + 14 + 7}
                           y={node.y + node.height / 2 - 2}
                           textAnchor={node.isSource ? 'end' : 'start'}
-                          fontSize="13"
+                          fontSize="9.5"
                           fontWeight="700"
                           fill={textColor}
                           className="font-sans"
                         >
-                          {node.name}
+                          {cleanName}
                         </text>
                         <text
-                          x={node.isSource ? node.x - 12 : node.x + 24 + 12}
-                          y={node.y + node.height / 2 + 14}
+                          x={node.isSource ? node.x - 7 : node.x + 14 + 7}
+                          y={node.y + node.height / 2 + 10}
                           textAnchor={node.isSource ? 'end' : 'start'}
-                          fontSize="11"
+                          fontSize="8"
                           fill={subColor}
                           className="font-mono font-medium"
                         >
@@ -643,18 +689,15 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
                       </>
                     ) : (
                       <text
-                        x={node.isSource ? node.x - 12 : node.x + 24 + 12}
-                        y={node.y + node.height / 2 + 4}
+                        x={node.isSource ? node.x - 7 : node.x + 14 + 7}
+                        y={node.y + node.height / 2 + 3.5}
                         textAnchor={node.isSource ? 'end' : 'start'}
-                        fontSize="12"
+                        fontSize="9.5"
                         fontWeight="600"
                         fill={textColor}
                         className="font-sans"
                       >
-                        {node.name}{' '}
-                        <tspan fill={subColor} fontSize="11" fontWeight="normal" className="font-mono">
-                          ({paxStr})
-                        </tspan>
+                        {cleanName}
                       </text>
                     )}
                   </g>

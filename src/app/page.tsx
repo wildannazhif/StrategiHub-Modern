@@ -150,13 +150,15 @@ export default function Home() {
             direction={globalDirection}
           />
 
-          {/* FILTER UTAMA ANALITIK (Sinkron Otomatis Lintas Seluruh Modul) */}
-          <GlobalFilterBar
-            metric={globalMetric}
-            direction={globalDirection}
-            onChangeMetric={setGlobalMetric}
-            onChangeDirection={setGlobalDirection}
-          />
+          {/* FILTER UTAMA ANALITIK (Disembunyikan di Tab OD karena data OD spesifik koridor penerbangan) */}
+          {activeTab !== 'od_map' && activeTab !== 'sankey' && (
+            <GlobalFilterBar
+              metric={globalMetric}
+              direction={globalDirection}
+              onChangeMetric={setGlobalMetric}
+              onChangeDirection={setGlobalDirection}
+            />
+          )}
 
           {/* ACTIVE TAB CONTENT */}
           <div className="transition-all duration-150">
