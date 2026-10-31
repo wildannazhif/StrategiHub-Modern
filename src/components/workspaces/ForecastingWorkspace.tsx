@@ -24,70 +24,6 @@ const ALL_PROVINCES = [
   'Sumatera Barat', 'Sumatera Selatan', 'Sumatera Utara'
 ];
 
-const NATARU_SHOCKS: Record<string, number> = {
-  '12-18': 1.1196, '12-19': 1.3565, '12-20': 1.2709,
-  '12-21': 1.5626, '12-22': 1.7465, '12-23': 1.6903,
-  '12-24': 1.6839, '12-25': 1.4234, '12-26': 1.4458,
-  '12-27': 1.3030, '12-28': 1.6995, '12-29': 1.6913,
-  '12-30': 1.5773, '12-31': 1.3690, '01-01': 1.0902,
-  '01-02': 1.2845, '01-03': 1.1538, '01-04': 1.3091
-};
-
-// V1 Pure Mathematical Time-Series Forecasting Engine (Holt-Winters Damped with 7-day Seasonality)
-function computeTimeSeriesForecast(hist: number[], futureDates: string[]): number[] {
-  const n = hist.length;
-  if (!n || hist.every((v) => v === 0)) {
-    return futureDates.map(() => 0);
-  }
-
-  const mean_s = hist.reduce((a, b) => a + b, 0) / n;
-  const floor = Math.max(1, 0.2 * mean_s);
-  const last7 = hist.slice(-7);
-  const mean7 = last7.reduce((a, b) => a + b, 0) / 7;
-  const n_fc = futureDates.length;
-
-  const s_period = 7;
-  const s_factors = Array(s_period).fill(1.0);
-  for (let i = 0; i < s_period; i++) {
-    let sum_r = 0;
-    let cnt = 0;
-    for (let k = i; k < n; k += s_period) {
-      sum_r += hist[k];
-      cnt++;
-    }
-    s_factors[i] = (sum_r / (cnt || 1)) / (mean7 || 1);
-  }
-
-  const phi = 0.98;
-  let l_hw = hist[0] / (s_factors[0] || 1);
-  let b_hw = 0;
-  const a_hw = 0.25;
-  const b_hw_param = 0.05;
-  const g_hw = 0.1;
-
-  for (let i = 0; i < n; i++) {
-    const s_idx = i % s_period;
-    const l_prev = l_hw;
-    const s_prev = s_factors[s_idx] || 1.0;
-    l_hw = a_hw * (hist[i] / s_prev) + (1 - a_hw) * (l_hw + phi * b_hw);
-    b_hw = b_hw_param * (l_hw - l_prev) + (1 - b_hw_param) * (phi * b_hw);
-    s_factors[s_idx] = g_hw * (hist[i] / l_hw) + (1 - g_hw) * s_prev;
-  }
-
-  return futureDates.map((dateStr, h) => {
-    const step = h + 1;
-    const s_idx = (n + h) % s_period;
-    let trendComp = 0;
-    for (let k = 0; k < step; k++) {
-      trendComp += Math.pow(phi, k + 1) * b_hw;
-    }
-    const base = Math.max(floor, (l_hw + trendComp) * (s_factors[s_idx] || 1.0));
-    const md = dateStr.slice(5);
-    const shock = NATARU_SHOCKS[md] || 1.0;
-    return Math.round(base * shock);
-  });
-}
-
 export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
   forecastData,
   timeline2025 = [],
@@ -105,7 +41,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
   const isAllProv = selectedProv === 'ALL';
   const provData = useMemo(() => {
     if (isAllProv) return null;
-    return forecastData.by_province?.[selectedProv] || null;
+    return forecastData?.by_province?.[selectedProv] || null;
   }, [forecastData, selectedProv, isAllProv]);
 
   // Active modes in province
@@ -119,7 +55,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
   // Model Specs & Accuracy
   const championModel = useMemo(() => {
     if (isAllProv) {
-      return forecastData.champion_model || {
+      return forecastData?.champion_model || {
         name: 'Holt-Winters Mul Damped (phi=0.98)',
         code: 'hw_mul_damped',
         mape: 4.10,
@@ -129,26 +65,21 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         dir_acc: 89.3,
       };
     }
-    return provData?.champion_model || forecastData.champion_model;
+    return provData?.champion_model || forecastData?.champion_model;
   }, [isAllProv, provData, forecastData]);
 
   const benchmarkList = useMemo(() => {
-    if (isAllProv) return forecastData.benchmarks || [];
-    return provData?.benchmarks || forecastData.benchmarks || [];
+    if (isAllProv) return forecastData?.benchmarks || [];
+    return provData?.benchmarks || forecastData?.benchmarks || [];
   }, [isAllProv, provData, forecastData]);
-
-  // Future 100 Dates
-  const futureDates = useMemo(() => {
-    const pts = forecastData.scenarios?.moderat || [];
-    return pts.map((p: any) => p.date);
-  }, [forecastData]);
 
   // 1. Train Series (272 Days: 2026-01-01 to 2026-09-29)
   const { trainDates, trainValues } = useMemo(() => {
     if (isAllProv) {
-      const histPoints = timeline.filter((d: any) => d.date <= '2026-09-29');
+      const histPoints = (timeline || []).filter((d: any) => d.date <= '2026-09-29');
       const dates = histPoints.map((d: any) => d.date);
       const values = histPoints.map((d: any) => {
+        if (!isOperating) return 0;
         if (selectedMetric === 'pnp') {
           return Number(d[selectedModa]) || 0;
         } else {
@@ -163,59 +94,66 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
     const dates = h.dates || [];
     let values: number[] = [];
-    if (selectedMetric === 'pnp') {
+    if (!isOperating) {
+      values = dates.map(() => 0);
+    } else if (selectedMetric === 'pnp') {
       values = (h[selectedModa] || []).map((v: any) => Number(v) || 0);
     } else {
       values = (h[`arm_${selectedModa}`] || []).map((v: any) => Number(v) || 0);
     }
     return { trainDates: dates, trainValues: values };
-  }, [isAllProv, provData, timeline, selectedMetric, selectedModa]);
+  }, [isAllProv, provData, timeline, selectedMetric, selectedModa, isOperating]);
 
-  // 2. Forecast Series (100 Days: 2026-09-30 to 2027-01-07)
-  const futureValues = useMemo(() => {
+  // 2. Future 100-Day Forecast Points (from official PUSDATIN precomputed model)
+  const futurePoints: any[] = useMemo(() => {
+    if (isAllProv) {
+      return forecastData?.scenarios?.moderat || [];
+    }
+    return provData?.scenarios?.moderat || [];
+  }, [isAllProv, provData, forecastData]);
+
+  const futureDates: string[] = useMemo(() => {
+    return futurePoints.map((p: any) => p.date);
+  }, [futurePoints]);
+
+  const futureValues: number[] = useMemo(() => {
     if (!isOperating) return futureDates.map(() => 0);
-
-    // If national and total, use bundle benchmark numbers
-    if (isAllProv && selectedModa === 'TOTAL') {
-      const pts = forecastData.scenarios?.moderat || [];
-      return pts.map((p: any) => (selectedMetric === 'pnp' ? Number(p.TOTAL) : Number(p.arm_TOTAL)) || 0);
-    }
-
-    // Run dynamic Holt-Winters Damped time-series engine with 7-day seasonality
-    if (trainValues.length > 0 && !trainValues.every((v) => v === 0)) {
-      return computeTimeSeriesForecast(trainValues, futureDates);
-    }
-
-    // Fallback to pre-indexed points
-    const pts = (!isAllProv ? provData?.scenarios?.moderat : null) || forecastData.scenarios?.moderat || [];
-    return pts.map((p: any) => {
+    return futurePoints.map((p: any) => {
       if (selectedMetric === 'pnp') {
         return Number(p[selectedModa]) || 0;
       } else {
         return Number(p[`arm_${selectedModa}`]) || 0;
       }
     });
-  }, [isOperating, isAllProv, selectedModa, selectedMetric, forecastData, provData, trainValues, futureDates]);
+  }, [futurePoints, futureDates, selectedMetric, selectedModa, isOperating]);
 
-  // 2025 Baseline Map
+  // 3. 2025 Baseline Map
   const map2025 = useMemo(() => {
     const map: Record<string, number> = {};
     if (isAllProv) {
-      timeline2025.forEach((r: any) => {
+      (timeline2025 || []).forEach((r: any) => {
         const md = r.date.slice(5);
-        map[md] = selectedMetric === 'pnp' ? (Number(r.pbrg_TOTAL) || 0) : (Number(r.abrg_TOTAL) || 0);
+        if (selectedMetric === 'pnp') {
+          map[md] = Number(r[selectedModa]) || Number(r[`pbrg_${selectedModa}`]) || 0;
+        } else {
+          map[md] = Number(r[`arm_${selectedModa}`]) || Number(r[`abrg_${selectedModa}`]) || 0;
+        }
       });
     } else {
-      const map25Md = provData?.history_2025_md || {};
-      Object.entries(map25Md).forEach(([md, val]: [string, any]) => {
-        const num = Number(val) || 0;
-        map[md] = selectedMetric === 'pnp' ? Math.round(num * 0.58) : Math.round(num * 0.016);
+      // Province-level 2025 baseline
+      futurePoints.forEach((p: any) => {
+        const md = p.date.slice(5);
+        if (selectedMetric === 'pnp') {
+          map[md] = Number(p.TOTAL_2025) || 0;
+        } else {
+          map[md] = Number(p.arm_2025) || 0;
+        }
       });
     }
     return map;
-  }, [isAllProv, timeline2025, provData, selectedMetric]);
+  }, [isAllProv, timeline2025, futurePoints, selectedMetric, selectedModa]);
 
-  // 4 Summary KPI Cards
+  // 4. Summary KPI Cards
   const kpis = useMemo(() => {
     let fc18Tot = 0;
     let base25Tot = 0;
@@ -223,8 +161,10 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     let nyVal = 0;
     let xmas25 = 0;
     let ny25 = 0;
+    let oppPeakVal = 0;
 
-    futureDates.forEach((d: string, idx: number) => {
+    futurePoints.forEach((p: any, idx: number) => {
+      const d = p.date;
       const val = futureValues[idx] || 0;
       const md = d.slice(5);
       const val25 = map2025[md] || 0;
@@ -232,6 +172,12 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       if (d >= '2026-12-18' && d <= '2027-01-04') {
         fc18Tot += val;
         base25Tot += val25;
+
+        // Opposing metric for this specific moda
+        const oppVal = selectedMetric === 'pnp'
+          ? (Number(p[`arm_${selectedModa}`]) || 0)
+          : (Number(p[selectedModa]) || 0);
+        if (oppVal > oppPeakVal) oppPeakVal = oppVal;
       }
       if (d === '2026-12-24') {
         xmasVal = val;
@@ -248,16 +194,6 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     const yoyXmas = xmas25 > 0 ? ((xmasVal / xmas25 - 1) * 100) : 0;
     const yoyNy = ny25 > 0 ? ((nyVal / ny25 - 1) * 100) : 0;
 
-    // Peak Opposing Metric (Armada if pnp, Penumpang if arm)
-    let oppPeakVal = 0;
-    const pts = (!isAllProv ? provData?.scenarios?.moderat : null) || forecastData.scenarios?.moderat || [];
-    pts.forEach((p: any) => {
-      if (p.date >= '2026-12-18' && p.date <= '2027-01-04') {
-        const val = selectedMetric === 'pnp' ? (Number(p.arm_TOTAL) || 0) : (Number(p.TOTAL) || 0);
-        if (val > oppPeakVal) oppPeakVal = val;
-      }
-    });
-
     return {
       fc18Tot,
       avg18,
@@ -270,15 +206,15 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       yoyNy,
       oppPeakVal,
     };
-  }, [futureDates, futureValues, map2025, isAllProv, provData, forecastData, selectedMetric]);
+  }, [futurePoints, futureValues, map2025, selectedMetric, selectedModa]);
 
-  // ECharts Options (Zero CI bounds, clean continuous line)
+  // 5. ECharts Configuration (Zero CI bounds, explicit Data Latih vs Hasil Forecasting)
   const chartOptions = useMemo(() => {
     const textColor = isDarkMode ? '#cbd5e1' : '#475569';
     const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
 
     const modaColor = (COLOR as any)[selectedModa] || (isDarkMode ? '#38bdf8' : '#0284c7');
-    const forecastColor = '#6366f1'; // Indigo 500
+    const forecastColor = '#8b5cf6'; // Vivid Violet / Purple
 
     let xAxisData: string[] = [];
     let series: any[] = [];
@@ -290,7 +226,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       // Train line (solid)
       const trainSeriesData = [...trainValues, ...futureDates.map(() => null)];
 
-      // Forecast line (dashed, joined from last train date)
+      // Forecast line (dashed, seamlessly joined from last train date)
       const forecastSeriesData = [
         ...trainValues.slice(0, Math.max(0, trainValues.length - 1)).map(() => null),
         lastTrainVal,
@@ -299,16 +235,16 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
       series = [
         {
-          name: `Realisasi Historis 2026 (${selectedMetric === 'pnp' ? 'Pnp' : 'Armada'})`,
+          name: 'Data Latih (Train 2026: 1 Jan – 29 Sep)',
           type: 'line',
           smooth: 0.15,
           showSymbol: false,
           data: trainSeriesData,
-          lineStyle: { width: 2, color: modaColor },
+          lineStyle: { width: 2.2, color: modaColor },
           itemStyle: { color: modaColor },
         },
         {
-          name: `Hasil Peramalan 2026/2027 (${selectedMetric === 'pnp' ? 'Pnp' : 'Armada'})`,
+          name: 'Data Hasil Forecasting (30 Sep 2026 – 7 Jan 2027)',
           type: 'line',
           smooth: 0.2,
           showSymbol: false,
@@ -317,11 +253,11 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           itemStyle: { color: forecastColor },
           markPoint: {
             symbol: 'pin',
-            symbolSize: 40,
+            symbolSize: 42,
             itemStyle: { color: '#f59e0b' },
             label: { fontSize: 9, color: '#ffffff', fontWeight: 'bold' },
             data: [
-              { name: 'Puncak Natal', coord: ['2026-12-24', kpis.xmasVal], value: 'Natal' },
+              { name: 'Puncak Mudik Natal', coord: ['2026-12-24', kpis.xmasVal], value: 'Natal' },
               { name: 'Puncak Balik', coord: ['2027-01-03', kpis.nyVal], value: 'Balik' },
             ],
           },
@@ -333,7 +269,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
       series = [
         {
-          name: `Hasil Peramalan Nataru 2026/2027 (${selectedMetric === 'pnp' ? 'Pnp' : 'Armada'})`,
+          name: 'Data Hasil Forecasting (30 Sep 2026 – 7 Jan 2027)',
           type: 'line',
           smooth: 0.2,
           showSymbol: false,
@@ -341,7 +277,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           lineStyle: { width: 3, color: forecastColor },
           itemStyle: { color: forecastColor },
           areaStyle: {
-            color: isDarkMode ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.08)',
+            color: isDarkMode ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.08)',
           },
           markPoint: {
             symbol: 'pin',
@@ -366,19 +302,16 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         formatter: (params: any[]) => {
           if (!params || !params.length) return '';
           const dateStr = params[0].axisValue;
-          const md = dateStr.slice(5);
-          const shock = NATARU_SHOCKS[md];
           let shockTag = '';
           if (dateStr === '2026-12-24') shockTag = ' 🔥 Puncak Mudik Natal (H-1)';
           else if (dateStr === '2027-01-03') shockTag = ' 🚀 Puncak Balik Tahun Baru';
-          else if (shock) shockTag = ` ⚡ Shock Nataru (+${Math.round((shock - 1) * 100)}%)`;
 
           let html = `<div class="font-bold text-xs pb-1 mb-1 border-b border-slate-200 dark:border-slate-700">${dateStr}${shockTag}</div>`;
           params.forEach((p) => {
             if (p.value !== null && p.value !== undefined) {
               html += `<div class="flex items-center justify-between gap-4 text-xs">
                 <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:${p.color}"></span>${p.seriesName}</span>
-                <span class="font-bold font-mono">${formatNumber(p.value)} ${selectedMetric === 'pnp' ? 'orang' : 'trip'}</span>
+                <span class="font-bold font-mono">${formatNumber(p.value)} ${selectedMetric === 'pnp' ? 'orang' : 'trip armada'}</span>
               </div>`;
             }
           });
@@ -402,9 +335,8 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         type: 'category',
         data: xAxisData,
         axisLabel: {
-          color: isDarkMode ? '#e2e8f0' : '#334155',
+          color: isDarkMode ? '#cbd5e1' : '#475569',
           fontSize: 10,
-          fontWeight: 500,
           rotate: xAxisData.length > 50 ? 40 : 0,
           interval: xAxisData.length > 150 ? 14 : xAxisData.length > 50 ? 7 : 2,
           showMaxLabel: true,
@@ -427,13 +359,12 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     };
   }, [horizonView, trainDates, trainValues, futureDates, futureValues, selectedModa, selectedMetric, isDarkMode, kpis]);
 
-  // Multimodal Comparison Rows (18 Days Nataru)
+  // 6. Multimodal Comparison Rows (18 Days Nataru)
   const comparisonRows = useMemo(() => {
     const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT' | 'TOTAL'> = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT', 'TOTAL'];
 
     let total2026Sum = 0;
-    const pts = (!isAllProv ? provData?.scenarios?.moderat : null) || forecastData.scenarios?.moderat || [];
-    pts.forEach((p: any) => {
+    futurePoints.forEach((p: any) => {
       if (p.date >= '2026-12-18' && p.date <= '2027-01-04') {
         total2026Sum += selectedMetric === 'pnp' ? (Number(p.TOTAL) || 0) : (Number(p.arm_TOTAL) || 0);
       }
@@ -444,16 +375,22 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       let fcSum = 0;
       let base25Sum = 0;
 
-      pts.forEach((p: any) => {
+      futurePoints.forEach((p: any) => {
         if (p.date >= '2026-12-18' && p.date <= '2027-01-04') {
           const val = selectedMetric === 'pnp' ? (Number(p[m]) || 0) : (Number(p[`arm_${m}`]) || 0);
           fcSum += val;
 
           const md = p.date.slice(5);
-          const val25 = isAllProv
-            ? (selectedMetric === 'pnp' ? (Number(p.TOTAL_2025) || 0) : (Number(p.arm_2025) || 0))
-            : (map2025[md] || 0);
-          base25Sum += val25;
+          if (isAllProv) {
+            const r25 = (timeline2025 || []).find((r: any) => r.date.slice(5) === md);
+            if (r25) {
+              base25Sum += selectedMetric === 'pnp'
+                ? (Number(r25[m]) || Number(r25[`pbrg_${m}`]) || 0)
+                : (Number(r25[`arm_${m}`]) || Number(r25[`abrg_${m}`]) || 0);
+            }
+          } else {
+            base25Sum += selectedMetric === 'pnp' ? (Number(p.TOTAL_2025) || 0) : (Number(p.arm_2025) || 0);
+          }
         }
       });
 
@@ -470,19 +407,18 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         share,
       };
     });
-  }, [isAllProv, provData, forecastData, selectedMetric, activeModes, map2025]);
+  }, [futurePoints, activeModes, selectedMetric, isAllProv, timeline2025]);
 
-  // 100-Day Daily Breakdown Table Rows
+  // 7. 100-Day Daily Breakdown Table Rows
   const dailyRows = useMemo(() => {
-    const pts = (!isAllProv ? provData?.scenarios?.moderat : null) || forecastData.scenarios?.moderat || [];
-    let list = pts;
+    let list = futurePoints;
     if (tableRange === 'nataru') {
-      list = pts.filter((p: any) => p.date >= '2026-12-18' && p.date <= '2027-01-04');
+      list = futurePoints.filter((p: any) => p.date >= '2026-12-18' && p.date <= '2027-01-04');
     } else if (tableRange === 'q4') {
-      list = pts.filter((p: any) => p.date <= '2026-12-31');
+      list = futurePoints.filter((p: any) => p.date <= '2026-12-31');
     }
     return list;
-  }, [isAllProv, provData, forecastData, tableRange]);
+  }, [futurePoints, tableRange]);
 
   return (
     <div className="space-y-6">
@@ -503,10 +439,10 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
           <div className="flex items-center gap-2 text-xs font-mono">
             <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded border border-emerald-200 dark:border-emerald-800">
-              Basis Latih 2026: 272H (1 Jan – 29 Sep)
+              Data Latih (Train): 272H (1 Jan – 29 Sep 2026)
             </span>
             <span className="px-2.5 py-1 bg-indigo-50 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 rounded border border-indigo-200 dark:border-indigo-800">
-              Horizon Prediksi: 100H (30 Sep – 7 Jan)
+              Data Forecasting: 100H (30 Sep 2026 – 7 Jan 2027)
             </span>
           </div>
         </div>
@@ -586,7 +522,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
                   : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950'
               }`}
             >
-              📊 Train + Forecasting (272H + 100H)
+              📊 Data Train + Forecasting (272H + 100H)
             </button>
             <button
               onClick={() => setHorizonView('forecast_only')}
@@ -596,7 +532,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
                   : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950'
               }`}
             >
-              📈 Forecasting Saja (100H)
+              📈 Data Forecasting Saja (100H)
             </button>
           </div>
         </div>
@@ -667,7 +603,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
             {formatNumber(kpis.oppPeakVal)}
           </div>
           <div className="text-[11px] text-slate-500 mt-1">
-            {selectedMetric === 'pnp' ? 'Trip armada beroperasi harian' : 'Total penumpang pergerakan harian'}
+            {selectedMetric === 'pnp' ? `Trip armada ${MODA_DISPLAY_NAME[selectedModa]} beroperasi` : `Total pergerakan ${MODA_DISPLAY_NAME[selectedModa]}`}
           </div>
         </div>
       </div>
@@ -678,12 +614,12 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           <div>
             <h4 className="font-bold text-slate-900 dark:text-white text-sm">
               {horizonView === 'train_plus_forecast'
-                ? `Tren Berkelanjutan: Data Historis 2026 Tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]})`
+                ? `Tren Berkelanjutan: Data Latih 2026 Tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]})`
                 : `Horizon Proyeksi Nataru 2026/2027 (100 Hari: 30 Sep 2026 – 7 Jan 2027) (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]})`}
             </h4>
             <p className="text-xs text-slate-500">
               {horizonView === 'train_plus_forecast'
-                ? 'Garis solid mewakili realisasi historis (1 Jan – 29 Sep 2026), tersambung ke garis putus-putus ungu proyeksi model champion (30 Sep 2026 – 7 Jan 2027).'
+                ? 'Garis solid berwarna mewakili Data Latih (1 Jan – 29 Sep 2026), tersambung mulus ke garis putus-putus ungu Data Hasil Forecasting (30 Sep 2026 – 7 Jan 2027).'
                 : 'Menampilkan kurva prediksi harian model champion dengan penyesuaian event shock liburan Natal dan Tahun Baru.'}
               {!isOperating && ' ⚠️ Catatan: Moda ini tidak beroperasi di wilayah terpilih (nilai 0).'}
             </p>
@@ -691,7 +627,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
           <div className="flex items-center gap-2 text-xs font-mono">
             <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Model: {championModel.name.split(' ')[0]}
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Model Champion: {championModel.name}
             </span>
           </div>
         </div>
@@ -971,8 +907,13 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {dailyRows.map((r: any, idx: number) => {
-                const val = futureValues[idx] || (selectedMetric === 'pnp' ? (Number(r[selectedModa]) || 0) : (Number(r[`arm_${selectedModa}`]) || 0));
+              {dailyRows.map((r: any) => {
+                const val = !isOperating
+                  ? 0
+                  : selectedMetric === 'pnp'
+                  ? (Number(r[selectedModa]) || 0)
+                  : (Number(r[`arm_${selectedModa}`]) || 0);
+
                 const md = r.date.slice(5);
                 const val25 = map2025[md] || (isAllProv ? (selectedMetric === 'pnp' ? r.TOTAL_2025 : r.arm_2025) : 0) || 0;
                 const yoy = val25 > 0 ? ((val / val25 - 1) * 100) : 0;

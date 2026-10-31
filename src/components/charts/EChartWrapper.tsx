@@ -39,7 +39,7 @@ export const EChartWrapper: React.FC<EChartWrapperProps> = ({
       });
     } else {
       chart.hideLoading();
-      chart.setOption(options, { notMerge: true, lazyUpdate: true });
+      chart.setOption(options, true);
     }
 
     const resizeObserver = new ResizeObserver(() => {
