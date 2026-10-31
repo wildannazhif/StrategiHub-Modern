@@ -626,8 +626,8 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Model Champion: {championModel.name}
+            <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Model: {championModel.name}
             </span>
           </div>
         </div>
