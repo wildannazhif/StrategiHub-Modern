@@ -1,131 +1,279 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Peta Rute OD Udara Indonesia • ECharts WebGL Canvas (Anti-Flicker)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script>
+    tailwind = {
+      darkMode: 'class',
+    };
+    function detectTheme() {
+      const params = new URLSearchParams(window.location.search);
+      let isDark = false;
+      if (params.get('dark') === '1') isDark = true;
+      else if (params.get('dark') === '0') isDark = false;
+      else {
+        try {
+          if (window.parent && window.parent.document.documentElement.classList.contains('dark')) isDark = true;
+          else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) isDark = true;
+        } catch(e) {}
+      }
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      return isDark;
+    }
+    detectTheme();
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'theme_change') {
+        if (e.data.isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        if (typeof renderEChartsMap === 'function') {
+          renderEChartsMap();
+        }
+      }
+    });
+  </script>
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     :root {
+      --background: #f8fafc;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --card-sub: #f1f5f9;
+      --border: #e2e8f0;
+      --muted: #64748b;
+      --accent: #0284c7;
+    }
+    .dark {
       --background: #020617;
       --foreground: #f8fafc;
-      --card: #0b1329;
+      --card: #0f172a;
+      --card-sub: #1e293b;
       --border: #1e293b;
-      --muted-foreground: #94a3b8;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
     }
     body {
-      background: var(--background);
+      background: transparent;
       color: var(--foreground);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .panel-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      margin-bottom: 14px;
+    }
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .pill-badge-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .dark .pill-badge-emerald {
+      background: rgba(16, 185, 129, 0.20);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .pill-badge-sky {
+      background: rgba(2, 132, 199, 0.12);
+      color: #0284c7;
+      border: 1px solid rgba(2, 132, 199, 0.25);
+    }
+    .dark .pill-badge-sky {
+      background: rgba(56, 189, 248, 0.15);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .segmented-group {
+      display: inline-flex;
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 3px;
+    }
+    .btn-seg {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-seg.active {
+      background: var(--card);
+      color: var(--foreground);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .dark .btn-seg.active {
+      background: #0284c7;
+      color: #ffffff;
+    }
+    .form-select {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: var(--foreground);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+    }
+    .btn-reset {
+      border: 1px solid var(--border);
+      background: var(--card-sub);
+      color: var(--foreground);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-reset:hover {
+      background: var(--border);
     }
   </style>
 </head>
-<body class="bg-transparent text-[var(--foreground)] antialiased p-3 sm:p-5">
-  <div class="max-w-7xl mx-auto space-y-4">
+<body class="bg-transparent text-[var(--foreground)] antialiased p-0">
+  <div class="w-full space-y-4">
 
-    <!-- HEADER CARD -->
-    <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <!-- HEADER PANEL -->
+    <div class="panel-card">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;">
         <div>
-          <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              ⚡ GPU Canvas Engine (Apache ECharts) • 100% Bebas Kedip
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+            <span class="pill-badge pill-badge-emerald">
+              ⚡ GPU Canvas ECharts • Bebas Kedip
             </span>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-500/30">
-              227 Bandara Aktif • Animasi Rute Partikel
+            <span class="pill-badge pill-badge-sky">
+              227 Bandara Aktif • Animasi Rute
             </span>
           </div>
-          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--foreground)]">
+          <h2 style="font-size: 18px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 3px;">
             Peta Geospasial Jaringan Rute Penerbangan Indonesia (OD Udara)
-          </h1>
-          <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-0.5">
+          </h2>
+          <p style="font-size: 12px; color: var(--muted);">
             Eksplorasi spasial interaktif berbasis GPU Canvas: klik bandara mana pun untuk mengisolasi jaringan rute tanpa kedap-kedip.
           </p>
         </div>
 
         <!-- SKEMA SELECTION BADGES -->
-        <div class="flex items-center bg-[var(--background)] p-1 rounded-xl border border-[var(--border)] self-start lg:self-auto">
-          <button id="btn-scheme-exc" onclick="setScheme('EXCLUDE')" class="scheme-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 bg-[var(--card)] text-[var(--foreground)] shadow-sm">
+        <div class="segmented-group">
+          <button id="btn-scheme-exc" onclick="setScheme('EXCLUDE')" class="btn-seg active">
             ✨ Skema 2: EXCLUDE (997 Rute Komersial)
           </button>
-          <button id="btn-scheme-inc" onclick="setScheme('INCLUDE')" class="scheme-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
-            📦 Skema 1: INCLUDE (1.273 Rute + Kargo/P=0)
+          <button id="btn-scheme-inc" onclick="setScheme('INCLUDE')" class="btn-seg">
+            📦 Skema 1: INCLUDE (1.273 Rute + Kargo)
           </button>
         </div>
       </div>
     </div>
 
-    <!-- FILTER & CONTROLS TOOLBAR -->
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3.5 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
-      <div class="flex flex-wrap items-center gap-3">
-        <!-- Hub Dropdown -->
-        <div class="flex items-center gap-2">
-          <span class="font-semibold text-[var(--muted-foreground)]">Fokus Hub:</span>
-          <select id="hub-select" onchange="applyHubFilter()" class="bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] rounded-lg px-2.5 py-1.5 text-xs font-medium focus:ring-1 focus:ring-blue-500 focus:outline-none">
-            <option value="ALL">🌐 Seluruh Indonesia (Nasional)</option>
-            <option value="CGK">CGK - Jakarta (Soekarno-Hatta)</option>
-            <option value="SUB">SUB - Surabaya (Juanda)</option>
-            <option value="DPS">DPS - Bali (I Gusti Ngurah Rai)</option>
-            <option value="UPG">UPG - Makassar (Sultan Hasanuddin)</option>
-            <option value="KNO">KNO - Medan (Kualanamu)</option>
-            <option value="BPN">BPN - Balikpapan (SAMS Sepinggan)</option>
-            <option value="BTH">BTH - Batam (Hang Nadim)</option>
-            <option value="YIA">YIA - Yogyakarta International</option>
-            <option value="BDJ">BDJ - Banjarmasin (Syamsudin Noor)</option>
-            <option value="LOP">LOP - Lombok (Zainuddin Abdul Madjid)</option>
-          </select>
-        </div>
+    <!-- FILTER TOOLBAR -->
+    <div class="panel-card" style="padding: 12px 18px; margin-bottom: 14px;">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+          <!-- Fokus Hub -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 600; color: var(--muted);">Fokus Hub:</span>
+            <select id="hub-select" onchange="applyHubFilter()" class="form-select">
+              <option value="ALL">🌐 Seluruh Indonesia (Nasional)</option>
+              <option value="CGK">CGK - Jakarta (Soekarno-Hatta)</option>
+              <option value="SUB">SUB - Surabaya (Juanda)</option>
+              <option value="DPS">DPS - Bali (I Gusti Ngurah Rai)</option>
+              <option value="UPG">UPG - Makassar (Sultan Hasanuddin)</option>
+              <option value="KNO">KNO - Medan (Kualanamu)</option>
+              <option value="BPN">BPN - Balikpapan (SAMS Sepinggan)</option>
+              <option value="BTH">BTH - Batam (Hang Nadim)</option>
+              <option value="YIA">YIA - Yogyakarta International</option>
+              <option value="BDJ">BDJ - Banjarmasin (Syamsudin Noor)</option>
+              <option value="LOP">LOP - Lombok (Zainuddin Abdul Madjid)</option>
+            </select>
+          </div>
 
-        <!-- Metric Switcher -->
-        <div class="flex items-center gap-1.5">
-          <span class="font-semibold text-[var(--muted-foreground)]">Metrik:</span>
-          <div class="inline-flex rounded-lg border border-[var(--border)] bg-[var(--background)] p-0.5">
-            <button id="metric-pax" onclick="setMetric('pax')" class="px-2.5 py-1.5 rounded-md font-medium text-xs bg-[var(--card)] text-[var(--foreground)] shadow-xs">
-              👥 Penumpang
-            </button>
-            <button id="metric-flt" onclick="setMetric('flt')" class="px-2.5 py-1.5 rounded-md font-medium text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
-              ✈️ Frekuensi
-            </button>
-            <button id="metric-crg" onclick="setMetric('crg')" class="px-2.5 py-1.5 rounded-md font-medium text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
-              📦 Kargo
-            </button>
+          <!-- Metrik Switcher -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 600; color: var(--muted);">Metrik:</span>
+            <div class="segmented-group">
+              <button id="metric-pax" onclick="setMetric('pax')" class="btn-seg active">
+                👥 Penumpang
+              </button>
+              <button id="metric-flt" onclick="setMetric('flt')" class="btn-seg">
+                ✈️ Frekuensi
+              </button>
+              <button id="metric-crg" onclick="setMetric('crg')" class="btn-seg">
+                📦 Kargo
+              </button>
+            </div>
+          </div>
+
+          <!-- Min Pax -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 600; color: var(--muted);">Min Pax:</span>
+            <select id="pax-threshold" onchange="applyThreshold()" class="form-select">
+              <option value="0">Semua Rute (0+)</option>
+              <option value="1000">≥ 1.000 pax</option>
+              <option value="5000">≥ 5.000 pax (Koridor Aktif)</option>
+              <option value="20000">≥ 20.000 pax (Rute Utama)</option>
+              <option value="50000">≥ 50.000 pax (Trunk Route Padat)</option>
+            </select>
           </div>
         </div>
 
-        <!-- Threshold Slider -->
-        <div class="flex items-center gap-2">
-          <span class="font-semibold text-[var(--muted-foreground)]">Min Pax:</span>
-          <select id="pax-threshold" onchange="applyThreshold()" class="bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] rounded-lg px-2 py-1.5 text-xs font-medium">
-            <option value="0">Semua Rute (0+)</option>
-            <option value="1000">≥ 1.000 pax</option>
-            <option value="5000">≥ 5.000 pax (Koridor Aktif)</option>
-            <option value="20000">≥ 20.000 pax (Rute Utama)</option>
-            <option value="50000">≥ 50.000 pax (Trunk Route Padat)</option>
-          </select>
-        </div>
+        <button onclick="clearAirportPin()" class="btn-reset">
+          🎯 Reset Isolasi Rute
+        </button>
       </div>
-
-      <!-- Action Button -->
-      <button onclick="clearAirportPin()" class="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--card)] text-xs font-medium text-[var(--muted-foreground)] hover:text-white transition">
-        🎯 Reset Isolasi Rute
-      </button>
     </div>
 
     <!-- MAIN MAP CANVAS CONTAINER -->
-    <div class="relative bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+    <div class="panel-card" style="padding: 0; overflow: hidden; position: relative;">
       <div id="echarts-map-container" style="width: 100%; height: 750px;"></div>
 
       <!-- PINNED AIRPORT FLOATING CARD -->
-      <div id="pin-card" class="hidden absolute top-4 left-4 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl p-3.5 shadow-2xl z-30 text-xs min-w-[260px] animate-fade-in pointer-events-auto">
-        <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-700">
-          <span id="pin-code" class="font-bold text-sm text-blue-400">CGK - Jakarta</span>
-          <button onclick="clearAirportPin()" class="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded bg-slate-800">✕ Tutup</button>
+      <div id="pin-card" class="hidden absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-700/80 rounded-xl p-3.5 shadow-2xl z-30 text-xs min-w-[260px] animate-fade-in pointer-events-auto text-slate-800 dark:text-slate-200">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+          <span id="pin-code" class="font-bold text-sm text-blue-600 dark:text-blue-400">CGK - Jakarta</span>
+          <button onclick="clearAirportPin()" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">✕ Tutup</button>
         </div>
-        <div class="space-y-1.5 text-slate-300">
-          <div class="flex justify-between"><span class="text-slate-400">Total Rute Terhubung:</span><span id="pin-routes" class="font-bold text-white">0</span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Total Penumpang OD:</span><span id="pin-pax" class="font-bold text-amber-400">0</span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Total Frekuensi Terbang:</span><span id="pin-flt" class="font-bold text-emerald-400">0</span></div>
+        <div class="space-y-1.5 text-slate-600 dark:text-slate-300">
+          <div class="flex justify-between"><span class="text-slate-400">Total Rute Terhubung:</span><span id="pin-routes" class="font-bold text-slate-900 dark:text-white">0</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Total Penumpang OD:</span><span id="pin-pax" class="font-bold text-amber-600 dark:text-amber-400">0</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Total Frekuensi Terbang:</span><span id="pin-flt" class="font-bold text-emerald-600 dark:text-emerald-400">0</span></div>
         </div>
       </div>
     </div>
@@ -156,6 +304,8 @@
     const topHubs = ['CGK', 'SUB', 'DPS', 'UPG', 'KNO', 'BPN', 'BTH', 'YIA', 'BDJ', 'LOP'];
 
     function buildChartOptions() {
+      const isDark = document.documentElement.classList.contains('dark');
+
       // Filter routes
       const visibleRoutes = mapData.routes.filter(r => {
         if (currentScheme === 'EXCLUDE' && r.zp) return false;
@@ -166,27 +316,27 @@
 
       // Convert routes to ECharts lines data
       const linesData = visibleRoutes.map(r => {
-        let color = '#38bdf8';
+        let color = isDark ? '#38bdf8' : '#2563eb';
         let width = 1.2;
-        let opacity = 0.45;
+        let opacity = isDark ? 0.45 : 0.40;
 
         if (r.zp) {
-          color = '#f59e0b';
+          color = isDark ? '#f59e0b' : '#d97706';
           width = 1.0;
           opacity = 0.6;
         } else if (currentMetric === 'pax') {
-          if (r.pax >= 50000) { color = '#f59e0b'; width = 3.2; opacity = 0.85; }
-          else if (r.pax >= 20000) { color = '#38bdf8'; width = 2.2; opacity = 0.75; }
-          else if (r.pax >= 5000) { color = '#60a5fa'; width = 1.5; opacity = 0.6; }
-          else { color = '#64748b'; width = 0.8; opacity = 0.35; }
+          if (r.pax >= 50000) { color = isDark ? '#f59e0b' : '#ea580c'; width = 3.2; opacity = 0.90; }
+          else if (r.pax >= 20000) { color = isDark ? '#38bdf8' : '#2563eb'; width = 2.2; opacity = 0.80; }
+          else if (r.pax >= 5000) { color = isDark ? '#60a5fa' : '#0284c7'; width = 1.5; opacity = 0.65; }
+          else { color = isDark ? '#64748b' : '#94a3b8'; width = 0.8; opacity = 0.35; }
         } else if (currentMetric === 'flt') {
-          if (r.flt >= 400) { color = '#34d399'; width = 3.0; opacity = 0.85; }
-          else if (r.flt >= 100) { color = '#38bdf8'; width = 1.8; opacity = 0.7; }
-          else { color = '#64748b'; width = 0.8; opacity = 0.35; }
+          if (r.flt >= 400) { color = isDark ? '#34d399' : '#16a34a'; width = 3.0; opacity = 0.90; }
+          else if (r.flt >= 100) { color = isDark ? '#38bdf8' : '#0284c7'; width = 1.8; opacity = 0.75; }
+          else { color = isDark ? '#64748b' : '#94a3b8'; width = 0.8; opacity = 0.35; }
         } else if (currentMetric === 'crg') {
-          if (r.crg >= 500000) { color = '#c084fc'; width = 3.0; opacity = 0.85; }
-          else if (r.crg >= 100000) { color = '#818cf8'; width = 1.8; opacity = 0.7; }
-          else { color = '#64748b'; width = 0.8; opacity = 0.35; }
+          if (r.crg >= 500000) { color = isDark ? '#c084fc' : '#9333ea'; width = 3.0; opacity = 0.90; }
+          else if (r.crg >= 100000) { color = isDark ? '#818cf8' : '#6366f1'; width = 1.8; opacity = 0.75; }
+          else { color = isDark ? '#64748b' : '#94a3b8'; width = 0.8; opacity = 0.35; }
         }
 
         return {
@@ -208,8 +358,8 @@
           value: [apt.lon, apt.lat, apt.total_pax],
           aptInfo: apt,
           itemStyle: {
-            color: isPinned ? '#ffffff' : (isTop ? '#f59e0b' : '#38bdf8'),
-            borderColor: isPinned ? '#f59e0b' : '#0f172a',
+            color: isPinned ? (isDark ? '#ffffff' : '#0f172a') : (isTop ? (isDark ? '#f59e0b' : '#ea580c') : (isDark ? '#38bdf8' : '#0284c7')),
+            borderColor: isPinned ? '#f59e0b' : (isDark ? '#0f172a' : '#ffffff'),
             borderWidth: isPinned ? 3 : 1
           }
         };
@@ -222,37 +372,37 @@
       });
 
       return {
-        backgroundColor: '#0b1329',
+        backgroundColor: isDark ? '#0b1329' : '#f8fafc',
         tooltip: {
           trigger: 'item',
-          backgroundColor: '#0f172a',
-          borderColor: '#334155',
-          textStyle: { color: '#f8fafc', fontSize: 12 },
+          backgroundColor: isDark ? '#0f172a' : '#ffffff',
+          borderColor: isDark ? '#334155' : '#e2e8f0',
+          textStyle: { color: isDark ? '#f8fafc' : '#0f172a', fontSize: 12 },
           formatter: function(params) {
             if (params.seriesType === 'lines') {
               const r = params.data.routeInfo;
               return `
-                <div style="font-weight:bold; border-bottom:1px solid #334155; padding-bottom:4px; margin-bottom:6px;">
+                <div style="font-weight:bold; border-bottom:1px solid ${isDark ? '#334155' : '#e2e8f0'}; padding-bottom:4px; margin-bottom:6px;">
                   ${r.oc} ➔ ${r.dc}
-                  <span style="font-size:10px; color:${r.zp ? '#fbbf24' : '#60a5fa'};">
+                  <span style="font-size:10px; color:${r.zp ? '#d97706' : (isDark ? '#60a5fa' : '#2563eb')};">
                     ${r.zp ? '[Kargo/0 Pax]' : '[Komersial]'}
                   </span>
                 </div>
                 <div>${r.on} ➔ ${r.dn}</div>
                 <div>Jarak: <b>${r.dist} km</b></div>
-                <div>Penumpang: <b style="color:#fbbf24;">${Number(r.pax).toLocaleString('id-ID')} orang</b></div>
-                <div>Frekuensi: <b style="color:#34d399;">${r.flt} flights</b></div>
-                <div>Kargo: <b style="color:#c084fc;">${(r.crg / 1000).toFixed(1)} ton</b></div>
+                <div>Penumpang: <b style="color:${isDark ? '#fbbf24' : '#d97706'};">${Number(r.pax).toLocaleString('id-ID')} orang</b></div>
+                <div>Frekuensi: <b style="color:${isDark ? '#34d399' : '#16a34a'};">${r.flt} flights</b></div>
+                <div>Kargo: <b style="color:${isDark ? '#c084fc' : '#7c3aed'};">${(r.crg / 1000).toFixed(1)} ton</b></div>
               `;
             } else if (params.seriesType === 'scatter' || params.seriesType === 'effectScatter') {
               const a = params.data.aptInfo;
               return `
-                <div style="font-weight:bold; border-bottom:1px solid #334155; padding-bottom:4px; margin-bottom:6px; color:#38bdf8;">
+                <div style="font-weight:bold; border-bottom:1px solid ${isDark ? '#334155' : '#e2e8f0'}; padding-bottom:4px; margin-bottom:6px; color:${isDark ? '#38bdf8' : '#2563eb'};">
                   ${a.code} - ${a.name}
                 </div>
-                <div>Total Penumpang: <b style="color:#fbbf24;">${Number(a.total_pax).toLocaleString('id-ID')} pax</b></div>
-                <div>Total Penerbangan: <b style="color:#34d399;">${Number(a.total_flt).toLocaleString('id-ID')} flights</b></div>
-                <div style="font-size:10px; color:#94a3b8; margin-top:4px; font-style:italic;">Klik untuk mengisolasi rute</div>
+                <div>Total Penumpang: <b style="color:${isDark ? '#fbbf24' : '#d97706'};">${Number(a.total_pax).toLocaleString('id-ID')} pax</b></div>
+                <div>Total Penerbangan: <b style="color:${isDark ? '#34d399' : '#16a34a'};">${Number(a.total_flt).toLocaleString('id-ID')} flights</b></div>
+                <div style="font-size:10px; color:${isDark ? '#94a3b8' : '#64748b'}; margin-top:4px; font-style:italic;">Klik untuk mengisolasi rute</div>
               `;
             }
           }
@@ -264,12 +414,12 @@
           center: [118.0, -2.5],
           label: { show: false },
           itemStyle: {
-            areaColor: '#172554',
-            borderColor: '#3b82f6',
+            areaColor: isDark ? '#172554' : '#e2e8f0',
+            borderColor: isDark ? '#3b82f6' : '#94a3b8',
             borderWidth: 0.8
           },
           emphasis: {
-            itemStyle: { areaColor: '#1e3a8a' }
+            itemStyle: { areaColor: isDark ? '#1e3a8a' : '#bfdbfe' }
           }
         },
         series: [
@@ -291,7 +441,7 @@
               trailLength: 0.6,
               symbol: 'circle',
               symbolSize: 3.5,
-              color: '#ffffff'
+              color: isDark ? '#ffffff' : '#2563eb'
             },
             lineStyle: { opacity: 0, curveness: 0.2 },
             data: linesData.slice(0, 300) // animate top 300 busy routes
@@ -319,9 +469,25 @@
       };
     }
 
+    let currentChartTheme = null;
     function renderEChartsMap() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const neededTheme = isDark ? 'dark' : null;
+      if (currentChartTheme !== neededTheme) {
+        if (myChart) {
+          myChart.dispose();
+        }
+        myChart = echarts.init(chartDom, neededTheme, { renderer: 'canvas' });
+        currentChartTheme = neededTheme;
+        myChart.on('click', function(params) {
+          if (params.seriesType === 'scatter' || params.seriesType === 'effectScatter') {
+            pinAirport(params.data.aptInfo.code);
+          }
+        });
+      }
       const opt = buildChartOptions();
       myChart.setOption(opt, true);
+      notifyHeight();
     }
 
     // Click handler for airport pinning
@@ -365,15 +531,15 @@
 
     function setScheme(s) {
       currentScheme = s;
-      document.getElementById('btn-scheme-exc').className = s === 'EXCLUDE' ? 'scheme-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-[var(--card)] text-[var(--foreground)] shadow-sm' : 'scheme-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)]';
-      document.getElementById('btn-scheme-inc').className = s === 'INCLUDE' ? 'scheme-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-[var(--card)] text-[var(--foreground)] shadow-sm' : 'scheme-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)]';
+      document.getElementById('btn-scheme-exc').className = s === 'EXCLUDE' ? 'btn-seg active' : 'btn-seg';
+      document.getElementById('btn-scheme-inc').className = s === 'INCLUDE' ? 'btn-seg active' : 'btn-seg';
       renderEChartsMap();
     }
 
     function setMetric(m) {
       currentMetric = m;
       ['pax', 'flt', 'crg'].forEach(k => {
-        document.getElementById('metric-' + k).className = k === m ? 'px-2.5 py-1.5 rounded-md font-medium text-xs bg-[var(--card)] text-[var(--foreground)] shadow-xs' : 'px-2.5 py-1.5 rounded-md font-medium text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]';
+        document.getElementById('metric-' + k).className = k === m ? 'btn-seg active' : 'btn-seg';
       });
       renderEChartsMap();
     }
