@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Table as TableIcon, FileText, Download } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Table as TableIcon } from 'lucide-react';
 import { MetaKpis, MonthlySummaryEntry } from '@/types/mobility';
 import { formatNumber, formatDecimal, formatPercent } from '@/lib/constants';
 
@@ -11,41 +11,43 @@ interface MatrixWorkspaceProps {
 }
 
 export const MatrixWorkspace: React.FC<MatrixWorkspaceProps> = ({ meta, monthly }) => {
-  // Compute YTD sums per moda from monthly
+  // Compute YTD sums per moda from monthly_summary entries
   const modes = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const;
 
-  const modeTotals = modes.reduce((acc, m) => {
-    let pnp_dat = 0;
-    let pnp_brg = 0;
-    let pnp_tot = 0;
-    let arm_dat = 0;
-    let arm_brg = 0;
-    let arm_tot = 0;
+  const modeTotals = useMemo(() => {
+    return modes.reduce((acc, m) => {
+      let pnp_dat = 0;
+      let pnp_brg = 0;
+      let pnp_tot = 0;
+      let arm_dat = 0;
+      let arm_brg = 0;
+      let arm_tot = 0;
 
-    monthly.forEach((mo) => {
-      pnp_dat += mo[m]?.pnp_dat || 0;
-      pnp_brg += mo[m]?.pnp_brg || 0;
-      pnp_tot += mo[m]?.pnp_tot || 0;
-      arm_dat += mo[m]?.arm_dat || 0;
-      arm_brg += mo[m]?.arm_brg || 0;
-      arm_tot += mo[m]?.arm_tot || 0;
-    });
+      (monthly || []).forEach((mo: any) => {
+        pnp_dat += Number(mo[`pdat_${m}`]) || 0;
+        pnp_brg += Number(mo[`pbrg_${m}`]) || 0;
+        pnp_tot += Number(mo[m]) || 0;
+        arm_dat += Number(mo[`adat_${m}`]) || 0;
+        arm_brg += Number(mo[`abrg_${m}`]) || 0;
+        arm_tot += Number(mo[`arm_${m}`]) || 0;
+      });
 
-    acc[m] = {
-      pnp_dat,
-      pnp_brg,
-      pnp_tot,
-      arm_dat,
-      arm_brg,
-      arm_tot,
-      lf_dat: arm_dat ? pnp_dat / arm_dat : 0,
-      lf_brg: arm_brg ? pnp_brg / arm_brg : 0,
-      lf_tot: arm_tot ? pnp_tot / arm_tot : 0,
-    };
-    return acc;
-  }, {} as Record<string, any>);
+      acc[m] = {
+        pnp_dat,
+        pnp_brg,
+        pnp_tot,
+        arm_dat,
+        arm_brg,
+        arm_tot,
+        lf_dat: arm_dat ? pnp_dat / arm_dat : 0,
+        lf_brg: arm_brg ? pnp_brg / arm_brg : 0,
+        lf_tot: arm_tot ? pnp_tot / arm_tot : 0,
+      };
+      return acc;
+    }, {} as Record<string, any>);
+  }, [monthly]);
 
-  // 13 Indicators Definition
+  // 13 Indicators Definition (100% legacy parity with real calculated sums)
   const indicators = [
     {
       id: 1,
@@ -71,6 +73,7 @@ export const MatrixWorkspace: React.FC<MatrixWorkspaceProps> = ({ meta, monthly 
       getValue: (m: string) => formatNumber(modeTotals[m]?.pnp_tot),
       getTotal: () => formatNumber(meta.total_passengers_ytd),
       isBold: true,
+      isRowHighlight: true,
     },
     {
       id: 4,
@@ -96,13 +99,14 @@ export const MatrixWorkspace: React.FC<MatrixWorkspaceProps> = ({ meta, monthly 
       getValue: (m: string) => formatNumber(modeTotals[m]?.arm_tot),
       getTotal: () => formatNumber(meta.total_armada_ytd),
       isBold: true,
+      isRowHighlight: true,
     },
     {
       id: 7,
       name: '7. Rasio Beban Datang (Load Factor Inbound)',
       unit: 'pnp/arm',
       formula: 'P_datang / Trip_datang',
-      getValue: (m: string) => formatDecimal(modeTotals[m]?.lf_dat),
+      getValue: (m: string) => (modeTotals[m]?.arm_dat > 0 ? formatDecimal(modeTotals[m]?.lf_dat) : '-'),
       getTotal: () => formatDecimal(meta.total_pnp_dat_ytd / (meta.total_arm_dat_ytd || 1)),
     },
     {
@@ -127,7 +131,7 @@ export const MatrixWorkspace: React.FC<MatrixWorkspaceProps> = ({ meta, monthly 
       name: '10. Pangsa Pasar Penumpang (Modal Split %)',
       unit: '%',
       formula: '(P_moda / Total_Nasional) × 100%',
-      getValue: (m: string) => formatPercent((modeTotals[m]?.pnp_tot / meta.total_passengers_ytd) * 100),
+      getValue: (m: string) => formatPercent((modeTotals[m]?.pnp_tot / (meta.total_passengers_ytd || 1)) * 100, 1),
       getTotal: () => '100,0%',
       isBold: true,
     },
@@ -136,7 +140,7 @@ export const MatrixWorkspace: React.FC<MatrixWorkspaceProps> = ({ meta, monthly 
       name: '11. Pangsa Pasar Armada (%)',
       unit: '%',
       formula: '(Arm_moda / Total_Armada) × 100%',
-      getValue: (m: string) => formatPercent((modeTotals[m]?.arm_tot / meta.total_armada_ytd) * 100),
+      getValue: (m: string) => formatPercent((modeTotals[m]?.arm_tot / (meta.total_armada_ytd || 1)) * 100, 1),
       getTotal: () => '100,0%',
     },
     {
@@ -214,14 +218,16 @@ export const MatrixWorkspace: React.FC<MatrixWorkspaceProps> = ({ meta, monthly 
                   key={ind.id}
                   className={`hover:bg-slate-50/60 dark:hover:bg-slate-800/40 ${
                     ind.isHighlight
-                      ? 'bg-amber-50/40 dark:bg-amber-950/20 font-bold'
+                      ? 'bg-amber-50/50 dark:bg-amber-950/20 font-bold'
+                      : ind.isRowHighlight
+                      ? 'bg-slate-50/70 dark:bg-slate-800/50 font-bold'
                       : ind.isBold
                       ? 'font-bold'
                       : ''
                   }`}
                 >
                   <td className="py-2.5 font-sans font-medium text-slate-800 dark:text-slate-200">
-                    <div>{ind.name}</div>
+                    <div className="font-semibold text-slate-900 dark:text-white">{ind.name}</div>
                     <div className="text-[10px] font-mono text-slate-400 mt-0.5">{ind.formula}</div>
                   </td>
                   <td className="py-2.5 text-center font-sans text-slate-500 text-[11px]">{ind.unit}</td>
