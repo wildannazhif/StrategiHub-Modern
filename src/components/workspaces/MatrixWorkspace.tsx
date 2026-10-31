@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Table as TableIcon } from 'lucide-react';
+import { Table as TableIcon, MoveRight } from 'lucide-react';
 import { MetaKpis, MonthlySummaryEntry } from '@/types/mobility';
 import { formatNumber, formatDecimal, formatPercent } from '@/lib/constants';
 
@@ -183,31 +183,40 @@ export const MatrixWorkspace: React.FC<MatrixWorkspaceProps> = ({ meta, monthly 
     <div className="space-y-6">
       {/* HEADER */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
-        <div className="flex items-center gap-2">
-          <TableIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-          <h3 className="font-bold text-slate-900 dark:text-white text-base">
-            Matriks Rekapitulasi 13 Indikator Utama Operasional Kemenhub
-          </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <TableIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                Matriks Rekapitulasi 13 Indikator Utama Operasional Kemenhub
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
+              Tabel komparasi matriks analitik lintas 5 moda transportasi dan agregat nasional (Periode: 1 Jan – 13 Okt 2026 • 286 Hari).
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 sm:hidden">
+            <span>Geser tabel ke samping</span>
+            <MoveRight className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
+          </div>
         </div>
-        <p className="text-xs text-slate-500 mt-1">
-          Tabel komparasi matriks analitik lintas 5 moda transportasi dan agregat nasional (Periode: 1 Jan – 13 Okt 2026 • 286 Hari).
-        </p>
       </div>
 
-      {/* MATRIX TABLE */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
+      {/* MATRIX TABLE CONTAINER (min-w-[1020px] and px-4 padding on all columns to guarantee ZERO overlap) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-5 shadow-2xs">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[1040px] text-xs text-left border-collapse">
             <thead>
               <tr className="border-b-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-                <th className="py-3 font-bold w-72">Indikator Kinerja Operasional</th>
-                <th className="py-3 font-semibold text-center w-24">Satuan</th>
-                <th className="py-3 font-semibold text-right w-32">✈ Udara</th>
-                <th className="py-3 font-semibold text-right w-32">🚆 Kereta Api</th>
-                <th className="py-3 font-semibold text-right w-32">🚌 Jalan (Bus)</th>
-                <th className="py-3 font-semibold text-right w-32">⛴ ASDP Feri</th>
-                <th className="py-3 font-semibold text-right w-32">🚢 Laut</th>
-                <th className="py-3 font-bold text-right w-36 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white border-l border-slate-200 dark:border-slate-700">
+                <th className="py-3 px-4 font-bold min-w-[280px]">Indikator Kinerja Operasional</th>
+                <th className="py-3 px-3 font-semibold text-center min-w-[80px]">Satuan</th>
+                <th className="py-3 px-4 font-semibold text-right min-w-[125px]">✈ Udara</th>
+                <th className="py-3 px-4 font-semibold text-right min-w-[125px]">🚆 Kereta Api</th>
+                <th className="py-3 px-4 font-semibold text-right min-w-[125px]">🚌 Jalan (Bus)</th>
+                <th className="py-3 px-4 font-semibold text-right min-w-[125px]">⛴ ASDP Feri</th>
+                <th className="py-3 px-4 font-semibold text-right min-w-[125px]">🚢 Laut</th>
+                <th className="py-3 px-5 font-bold text-right min-w-[155px] bg-slate-100/90 dark:bg-slate-800/90 text-slate-900 dark:text-white border-l-2 border-slate-200 dark:border-slate-700">
                   Total Nasional
                 </th>
               </tr>
@@ -216,27 +225,39 @@ export const MatrixWorkspace: React.FC<MatrixWorkspaceProps> = ({ meta, monthly 
               {indicators.map((ind) => (
                 <tr
                   key={ind.id}
-                  className={`hover:bg-slate-50/60 dark:hover:bg-slate-800/40 ${
+                  className={`hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors ${
                     ind.isHighlight
                       ? 'bg-amber-50/50 dark:bg-amber-950/20 font-bold'
                       : ind.isRowHighlight
-                      ? 'bg-slate-50/70 dark:bg-slate-800/50 font-bold'
+                      ? 'bg-slate-50/80 dark:bg-slate-800/60 font-bold'
                       : ind.isBold
                       ? 'font-bold'
                       : ''
                   }`}
                 >
-                  <td className="py-2.5 font-sans font-medium text-slate-800 dark:text-slate-200">
+                  <td className="py-3 px-4 font-sans font-medium text-slate-800 dark:text-slate-200">
                     <div className="font-semibold text-slate-900 dark:text-white">{ind.name}</div>
                     <div className="text-[10px] font-mono text-slate-400 mt-0.5">{ind.formula}</div>
                   </td>
-                  <td className="py-2.5 text-center font-sans text-slate-500 text-[11px]">{ind.unit}</td>
-                  <td className="py-2.5 text-right text-slate-700 dark:text-slate-300">{ind.getValue('UDARA')}</td>
-                  <td className="py-2.5 text-right text-slate-700 dark:text-slate-300">{ind.getValue('KA')}</td>
-                  <td className="py-2.5 text-right text-slate-700 dark:text-slate-300">{ind.getValue('BUS')}</td>
-                  <td className="py-2.5 text-right text-slate-700 dark:text-slate-300">{ind.getValue('ASDP')}</td>
-                  <td className="py-2.5 text-right text-slate-700 dark:text-slate-300">{ind.getValue('LAUT')}</td>
-                  <td className="py-2.5 text-right font-bold text-slate-900 dark:text-white bg-slate-50/50 dark:bg-slate-800/50 border-l border-slate-200 dark:border-slate-700">
+                  <td className="py-3 px-3 text-center font-sans text-slate-500 text-[11px] whitespace-nowrap">
+                    {ind.unit}
+                  </td>
+                  <td className="py-3 px-4 text-right whitespace-nowrap text-slate-700 dark:text-slate-300">
+                    {ind.getValue('UDARA')}
+                  </td>
+                  <td className="py-3 px-4 text-right whitespace-nowrap text-slate-700 dark:text-slate-300">
+                    {ind.getValue('KA')}
+                  </td>
+                  <td className="py-3 px-4 text-right whitespace-nowrap text-slate-700 dark:text-slate-300">
+                    {ind.getValue('BUS')}
+                  </td>
+                  <td className="py-3 px-4 text-right whitespace-nowrap text-slate-700 dark:text-slate-300">
+                    {ind.getValue('ASDP')}
+                  </td>
+                  <td className="py-3 px-4 text-right whitespace-nowrap text-slate-700 dark:text-slate-300">
+                    {ind.getValue('LAUT')}
+                  </td>
+                  <td className="py-3 px-5 text-right whitespace-nowrap font-bold text-slate-900 dark:text-white bg-slate-50/80 dark:bg-slate-800/70 border-l-2 border-slate-200 dark:border-slate-700">
                     {ind.getTotal()}
                   </td>
                 </tr>
