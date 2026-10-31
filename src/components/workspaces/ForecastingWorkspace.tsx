@@ -210,11 +210,22 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
   // 5. ECharts Configuration (Zero CI bounds, explicit Data Latih vs Hasil Forecasting)
   const chartOptions = useMemo(() => {
-    const textColor = isDarkMode ? '#cbd5e1' : '#475569';
-    const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
+    const isDark = (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')) || isDarkMode;
+    const textColor = isDark ? '#cbd5e1' : '#475569';
+    const splitLineColor = isDark ? '#1e293b' : '#f1f5f9';
 
-    const modaColor = (COLOR as any)[selectedModa] || (isDarkMode ? '#38bdf8' : '#0284c7');
-    const forecastColor = '#8b5cf6'; // Vivid Violet / Purple
+    // High-contrast, vivid colors tailored for BOTH Light and Dark backgrounds
+    const TRAIN_COLORS: Record<string, string> = {
+      TOTAL: isDark ? '#00f0ff' : '#1d4ed8', // Radiant Neon Cyan in Dark, Deep Sapphire Blue in Light
+      UDARA: isDark ? '#38bdf8' : '#2563eb', // Vivid Blue
+      KA: isDark ? '#fb923c' : '#c2410c',    // Deep Amber / Orange
+      BUS: isDark ? '#34d399' : '#15803d',   // Deep Emerald Green
+      ASDP: isDark ? '#c084fc' : '#7e22ce',  // Deep Violet / Purple
+      LAUT: isDark ? '#22d3ee' : '#0e7490',  // Deep Cyan / Teal
+    };
+
+    const trainColor = TRAIN_COLORS[selectedModa] || (isDark ? '#00f0ff' : '#1d4ed8');
+    const forecastColor = isDark ? '#facc15' : '#d97706'; // Vibrant Gold/Amber with high contrast on both
 
     let xAxisData: string[] = [];
     let series: any[] = [];
@@ -223,7 +234,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       xAxisData = [...trainDates, ...futureDates];
       const lastTrainVal = trainValues.length > 0 ? trainValues[trainValues.length - 1] : 0;
 
-      // Train line (solid)
+      // Train line (solid, thick 3.5px with translucent area fill)
       const trainSeriesData = [...trainValues, ...futureDates.map(() => null)];
 
       // Forecast line (dashed, seamlessly joined from last train date)
@@ -240,8 +251,12 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           smooth: 0.15,
           showSymbol: false,
           data: trainSeriesData,
-          lineStyle: { width: 2.2, color: modaColor },
-          itemStyle: { color: modaColor },
+          color: trainColor,
+          lineStyle: { width: 3.5, color: trainColor },
+          itemStyle: { color: trainColor },
+          areaStyle: {
+            color: isDark ? 'rgba(0, 240, 255, 0.12)' : 'rgba(29, 78, 216, 0.08)',
+          },
         },
         {
           name: 'Data Hasil Forecasting (30 Sep 2026 – 7 Jan 2027)',
@@ -249,12 +264,13 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           smooth: 0.2,
           showSymbol: false,
           data: forecastSeriesData,
-          lineStyle: { width: 2.5, color: forecastColor, type: 'dashed' },
+          color: forecastColor,
+          lineStyle: { width: 3.2, color: forecastColor, type: 'dashed' },
           itemStyle: { color: forecastColor },
           markPoint: {
             symbol: 'pin',
-            symbolSize: 42,
-            itemStyle: { color: '#f59e0b' },
+            symbolSize: 44,
+            itemStyle: { color: '#ef4444' },
             label: { fontSize: 9, color: '#ffffff', fontWeight: 'bold' },
             data: [
               { name: 'Puncak Mudik Natal', coord: ['2026-12-24', kpis.xmasVal], value: 'Natal' },
@@ -274,15 +290,16 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           smooth: 0.2,
           showSymbol: false,
           data: futureValues,
-          lineStyle: { width: 3, color: forecastColor },
+          color: forecastColor,
+          lineStyle: { width: 3.5, color: forecastColor },
           itemStyle: { color: forecastColor },
           areaStyle: {
-            color: isDarkMode ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.08)',
+            color: isDark ? 'rgba(250, 204, 21, 0.15)' : 'rgba(217, 119, 6, 0.08)',
           },
           markPoint: {
             symbol: 'pin',
-            symbolSize: 42,
-            itemStyle: { color: '#f59e0b' },
+            symbolSize: 44,
+            itemStyle: { color: '#ef4444' },
             label: { fontSize: 9, color: '#ffffff', fontWeight: 'bold' },
             data: [
               { name: 'Puncak Mudik Natal', coord: ['2026-12-24', kpis.xmasVal], value: 'Natal' },

@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { SimpulRecommendation, TransportModa } from '@/types/mobility';
-import { MODA_DISPLAY_NAME, MODA_BADGE_CLASS, formatNumber, formatDecimal, formatPercent } from '@/lib/constants';
-import { Sliders, Search, AlertTriangle, ArrowUpDown, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { MODA_DISPLAY_NAME, MODA_BADGE_CLASS, formatNumber, formatDecimal } from '@/lib/constants';
+import { Sliders, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SimulatorWorkspaceProps {
   simpulList: SimpulRecommendation[];
@@ -34,9 +34,7 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
       list = list.filter(
         (s) =>
           s.name.toLowerCase().includes(term) ||
-          s.prov.toLowerCase().includes(term) ||
-          s.saranaType.toLowerCase().includes(term) ||
-          s.fieldAction.toLowerCase().includes(term)
+          s.prov.toLowerCase().includes(term)
       );
     }
 
@@ -71,12 +69,12 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Menghitung simulasi penambahan armada kapal/kereta/bus/pesawat agar rasio beban hari puncak setara dengan hari normal (Total: <strong>1.010 Simpul</strong>).
+              Menghitung simulasi penambahan armada angkutan agar rasio beban hari puncak setara dengan hari normal (Total: <strong>1.010 Simpul</strong>).
             </p>
           </div>
         </div>
 
-        {/* TOP CRITICAL HIGHLIGHT CARDS */}
+        {/* TOP CRITICAL HIGHLIGHT CARDS (Cleaned: No saranaType & No fieldAction) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
           {criticalHighlights.map((hub) => (
             <div
@@ -90,12 +88,13 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
                 </span>
               </div>
               <div className="mt-2 text-xs flex items-center justify-between font-mono">
-                <span className="text-slate-500">Beban: {formatDecimal(hub.lfBiasa)} ➔ {formatDecimal(hub.lfPuncak)} pnp</span>
+                <span className="text-slate-500">Beban: {formatDecimal(hub.lfBiasa)} ➔ {formatDecimal(hub.lfPuncak)} pnp/trip</span>
                 <span className="font-bold text-rose-700 dark:text-rose-400">+{hub.pctTambah}% armada</span>
               </div>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 line-clamp-2">
-                <strong>Aksi:</strong> {hub.fieldAction}
-              </p>
+              <div className="mt-1 text-[11px] font-mono text-slate-600 dark:text-slate-400 flex items-center justify-between">
+                <span>Trip Tambahan: <strong>+{hub.addArm} trip/hari</strong></span>
+                <span>Total: <strong>{hub.totalArm} trip/hari</strong></span>
+              </div>
             </div>
           ))}
         </div>
@@ -152,7 +151,7 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Cari simpul..."
+                placeholder="Cari simpul atau provinsi..."
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -165,7 +164,7 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
         </div>
       </div>
 
-      {/* TABLE */}
+      {/* TABLE (Cleaned: No Kapal Feri / Pelni text & No Rekomendasi Aksi Lapangan column) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-3">
         <div className="flex items-center justify-between text-xs text-slate-500">
           <span>
@@ -196,15 +195,15 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500">
-                <th className="py-2.5 font-semibold">Simpul & Wilayah</th>
-                <th className="py-2.5 font-semibold">Moda & Sarana</th>
-                <th className="py-2.5 text-right font-semibold">Beban Hari Normal</th>
-                <th className="py-2.5 text-right font-semibold">Beban Hari Puncak</th>
-                <th className="py-2.5 text-right font-semibold text-purple-700 dark:text-purple-300">Simulasi % Tambah</th>
-                <th className="py-2.5 text-right font-semibold">Kebutuhan Armada</th>
-                <th className="py-2.5 text-center font-semibold">Status Kepadatan</th>
-                <th className="py-2.5 font-semibold w-72">Rekomendasi Aksi Lapangan</th>
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold">
+                <th className="py-2.5">Simpul & Wilayah</th>
+                <th className="py-2.5">Moda Transportasi</th>
+                <th className="py-2.5 text-right">Beban Hari Normal</th>
+                <th className="py-2.5 text-right">Beban Hari Puncak</th>
+                <th className="py-2.5 text-right text-purple-700 dark:text-purple-300">Simulasi % Tambah</th>
+                <th className="py-2.5 text-right">Kebutuhan Armada Tambahan</th>
+                <th className="py-2.5 text-right">Total Armada Operasi</th>
+                <th className="py-2.5 text-center">Status Kepadatan</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
@@ -215,10 +214,9 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
                     <div className="text-[10px] text-slate-400">{row.prov}</div>
                   </td>
                   <td className="py-2.5 font-sans">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${MODA_BADGE_CLASS[row.moda] || ''}`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${MODA_BADGE_CLASS[row.moda] || ''}`}>
                       {row.modaLabel || row.moda}
                     </span>
-                    <div className="text-[10px] text-slate-400 mt-0.5">{row.saranaType}</div>
                   </td>
                   <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
                     {formatDecimal(row.lfBiasa)} <span className="text-[10px] font-sans">pnp/trip</span>
@@ -228,22 +226,19 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
                     {formatDecimal(row.lfPuncak)} <span className="text-[10px] font-sans">pnp/trip</span>
                     <div className="text-[10px] text-slate-400">({formatNumber(row.pnpPuncak)} pnp)</div>
                   </td>
-                  <td className="py-2.5 text-right font-bold text-purple-700 dark:text-purple-400">
+                  <td className="py-2.5 text-right font-bold text-purple-700 dark:text-purple-400 text-sm">
                     +{row.pctTambah}%
                   </td>
-                  <td className="py-2.5 text-right">
-                    <div className="font-bold text-slate-900 dark:text-white">
-                      +{row.addArm} <span className="text-[10px] font-normal text-slate-400">trip</span>
-                    </div>
-                    <div className="text-[10px] text-slate-400">Total: {row.totalArm} trip</div>
+                  <td className="py-2.5 text-right font-bold text-indigo-700 dark:text-indigo-400">
+                    +{formatNumber(row.addArm)} <span className="text-[10px] font-normal text-slate-400">trip/hari</span>
+                  </td>
+                  <td className="py-2.5 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                    {formatNumber(row.totalArm)} <span className="text-[10px] font-normal text-slate-400">trip/hari</span>
                   </td>
                   <td className="py-2.5 text-center font-sans">
-                    <span className={`px-2 py-0.5 rounded font-semibold text-[10px] ${row.statusBadge}`}>
+                    <span className={`px-2.5 py-0.5 rounded font-semibold text-[10px] ${row.statusBadge}`}>
                       {row.statusText}
                     </span>
-                  </td>
-                  <td className="py-2.5 font-sans text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                    {row.fieldAction}
                   </td>
                 </tr>
               ))}
