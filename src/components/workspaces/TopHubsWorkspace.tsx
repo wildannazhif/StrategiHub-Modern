@@ -15,23 +15,14 @@ interface TopHubsWorkspaceProps {
 export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
   topHubsPeak,
   topHubsYtd,
-  globalMetric,
-  globalDirection,
+  globalMetric = 'pnp',
+  globalDirection = 'brg',
 }) => {
   const [period, setPeriod] = useState<'peak' | 'ytd'>('peak');
   const [selectedModa, setSelectedModa] = useState<TransportModa>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>(globalMetric || 'pnp');
-  const [selectedDirection, setSelectedDirection] = useState<'brg' | 'dat' | 'tot'>(globalDirection || 'brg');
-
-  // React to Master Filter
-  React.useEffect(() => {
-    if (globalMetric) setSelectedMetric(globalMetric);
-  }, [globalMetric]);
-
-  React.useEffect(() => {
-    if (globalDirection) setSelectedDirection(globalDirection);
-  }, [globalDirection]);
+  const selectedMetric = globalMetric;
+  const selectedDirection = globalDirection;
 
   const currentDataset = period === 'peak' ? topHubsPeak : topHubsYtd;
 

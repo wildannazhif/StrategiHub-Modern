@@ -41,7 +41,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
             <SlidersHorizontal className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-            <span>Master Filter Analitik:</span>
+            <span>Filter:</span>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-200 dark:border-sky-800/80">
@@ -50,7 +50,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
           </div>
 
           <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
-            • Sinkron otomatis lintas seluruh modul & chart
+            • Sinkron otomatis ke seluruh grafik dashboard
           </span>
         </div>
 
@@ -61,7 +61,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
             className="self-start lg:self-auto inline-flex items-center gap-1.5 text-xs text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 font-medium transition-colors"
           >
             <RefreshCw className="w-3 h-3" />
-            <span>Reset ke Penumpang Berangkat (Default)</span>
+            <span>Reset ke Default (Penumpang Berangkat)</span>
           </button>
         )}
       </div>
@@ -75,6 +75,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
           </span>
           <div className="flex items-center rounded-xl p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
             <button
+              id="filter-btn-pnp"
               onClick={() => onChangeMetric('pnp')}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
                 metric === 'pnp'
@@ -86,6 +87,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
               <span>Penumpang</span>
             </button>
             <button
+              id="filter-btn-arm"
               onClick={() => onChangeMetric('arm')}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
                 metric === 'arm'
@@ -106,6 +108,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
           </span>
           <div className="flex items-center rounded-xl p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
             <button
+              id="filter-btn-brg"
               onClick={() => onChangeDirection('brg')}
               className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium transition-all ${
                 direction === 'brg'
@@ -117,6 +120,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
               <span>Berangkat</span>
             </button>
             <button
+              id="filter-btn-dat"
               onClick={() => onChangeDirection('dat')}
               className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium transition-all ${
                 direction === 'dat'
@@ -128,6 +132,7 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
               <span>Datang</span>
             </button>
             <button
+              id="filter-btn-tot"
               onClick={() => onChangeDirection('tot')}
               className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium transition-all ${
                 direction === 'tot'

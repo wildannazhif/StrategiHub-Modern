@@ -2,13 +2,15 @@
 
 import React, { useState, useMemo } from 'react';
 import { EChartWrapper } from '@/components/charts/EChartWrapper';
-import { LebaranDailyEntry, SurgeSummary } from '@/types/mobility';
+import { LebaranDailyEntry, SurgeSummary, MonthlySummaryEntry } from '@/types/mobility';
 import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatPercent } from '@/lib/constants';
 import { Flame } from 'lucide-react';
 
 interface LebaranWorkspaceProps {
   lebaranDaily: LebaranDailyEntry[];
   surgeSummary: SurgeSummary;
+  monthlySummary?: MonthlySummaryEntry[];
+  metricsSummary?: Record<string, any>;
   isDarkMode: boolean;
   globalMetric?: 'pnp' | 'arm';
   globalDirection?: 'brg' | 'dat' | 'tot';
@@ -17,28 +19,23 @@ interface LebaranWorkspaceProps {
 export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
   lebaranDaily,
   surgeSummary,
+  monthlySummary = [],
+  metricsSummary,
   isDarkMode,
-  globalMetric,
-  globalDirection,
+  globalMetric = 'pnp',
+  globalDirection = 'brg',
 }) => {
   const [selectedDayIdx, setSelectedDayIdx] = useState<number>(11); // H+3 default (Peak Day: 24 Mar 2026)
   const [chartMode, setChartMode] = useState<'modes' | 'total'>('modes');
-  const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>(globalMetric || 'pnp');
-  const [selectedDirection, setSelectedDirection] = useState<'brg' | 'dat' | 'tot'>(globalDirection || 'brg'); // Default: Berangkat
+  const selectedMetric = globalMetric;
+  const selectedDirection = globalDirection;
 
-  // React to Master Filter
-  React.useEffect(() => {
-    if (globalMetric) setSelectedMetric(globalMetric);
-  }, [globalMetric]);
-
-  React.useEffect(() => {
-    if (globalDirection) setSelectedDirection(globalDirection);
-  }, [globalDirection]);
-
+  const isPnp = selectedMetric === 'pnp';
   const selectedDay = lebaranDaily[selectedDayIdx] || lebaranDaily[0];
 
   // Helper to extract metric value for a mode on a given day
   const getLebaranValue = (d: any, m: string) => {
+    if (!d) return 0;
     if (selectedMetric === 'pnp') {
       const key = selectedDirection === 'brg' ? `pbrg_${m}` : selectedDirection === 'dat' ? `pdat_${m}` : m;
       return Number(d[key]) || Number(d[m]) || 0;
@@ -49,6 +46,7 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
   };
 
   const getLebaranTotal = (d: any) => {
+    if (!d) return 0;
     if (selectedMetric === 'pnp') {
       const key = selectedDirection === 'brg' ? 'pbrg_TOTAL' : selectedDirection === 'dat' ? 'pdat_TOTAL' : 'TOTAL';
       return Number(d[key]) || Number(d.TOTAL) || 0;
@@ -57,6 +55,13 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
       return Number(d[key]) || Number(d.arm_TOTAL) || 0;
     }
   };
+
+  // Dynamic banner stats based on active Filter
+  const comboKey = `${selectedMetric}_${selectedDirection}`;
+  const bannerStats = metricsSummary?.[comboKey];
+  const balikDay = useMemo(() => lebaranDaily.find((d) => d.date === '2026-03-24') || lebaranDaily[0], [lebaranDaily]);
+  const peakBalikVal = bannerStats?.peak_val ?? getLebaranTotal(balikDay);
+  const peakBalikSurge = bannerStats?.peak_surge_pct ?? 103.2;
 
   // 17-day line chart
   const lebaranLineChartOption = useMemo(() => {
@@ -83,7 +88,7 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
       });
     } else {
       // SEMUA MODA ONLY (National macro peak)
-      const dirLabel = selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Total';
+      const dirLabel = selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Dua Arah';
       const metLabel = selectedMetric === 'pnp' ? 'Penumpang' : 'Armada';
       series = [
         {
@@ -108,7 +113,7 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
         backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
         borderColor: isDarkMode ? '#334155' : '#e2e8f0',
         textStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a', fontSize: 12 },
-        valueFormatter: (value: any) => `${formatNumber(value)} ${selectedMetric === 'pnp' ? 'orang' : 'trip'}`,
+        valueFormatter: (value: any) => `${formatNumber(value)} ${isPnp ? 'orang' : 'trip'}`,
       },
       legend: {
         bottom: 0,
@@ -139,7 +144,125 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
       },
       series,
     };
-  }, [lebaranDaily, isDarkMode, chartMode, selectedDirection]);
+  }, [lebaranDaily, isDarkMode, chartMode, selectedMetric, selectedDirection]);
+
+  // Modal share stacked area chart (Dinamika Pangsa Pasar 17 Hari)
+  const modalShareAreaOption = useMemo(() => {
+    const dates = lebaranDaily.map((d: any) => d.tag || d.h_tag);
+    const textColor = isDarkMode ? '#cbd5e1' : '#475569';
+    const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
+
+    const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT'> = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'];
+    const series = modes.map((m) => ({
+      name: MODA_DISPLAY_NAME[m],
+      type: 'line',
+      stack: 'Total',
+      areaStyle: { opacity: 0.65 },
+      emphasis: { focus: 'series' },
+      data: lebaranDaily.map((d: any) => {
+        const tot = getLebaranTotal(d) || 1;
+        const val = getLebaranValue(d, m);
+        return Number(((val / tot) * 100).toFixed(1));
+      }),
+      itemStyle: { color: COLOR[m] },
+    }));
+
+    return {
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+        borderColor: isDarkMode ? '#334155' : '#e2e8f0',
+        textStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a', fontSize: 12 },
+        valueFormatter: (value: any) => `${value}%`,
+      },
+      legend: {
+        bottom: 0,
+        textStyle: { color: textColor, fontSize: 10 },
+        itemGap: 8,
+      },
+      grid: {
+        top: 20,
+        left: '2%',
+        right: '2%',
+        bottom: 50,
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: dates,
+        axisLabel: { color: textColor, fontSize: 9, rotate: 25 },
+      },
+      yAxis: {
+        type: 'value',
+        max: 100,
+        splitLine: { lineStyle: { color: splitLineColor } },
+        axisLabel: { color: textColor, fontSize: 10, formatter: '{value}%' },
+      },
+      series,
+    };
+  }, [lebaranDaily, isDarkMode, selectedMetric, selectedDirection]);
+
+  // Dynamic surge calculations for the heatmap table
+  const dynamicSurgeData = useMemo(() => {
+    const feb = monthlySummary?.[1] as any;
+    const d_mudik = lebaranDaily.find((d) => d.date === '2026-03-18');
+    const d_balik1 = lebaranDaily.find((d) => d.date === '2026-03-24');
+    const d_balik2 = lebaranDaily.find((d) => d.date === '2026-03-29');
+
+    const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT' | 'TOTAL'> = [
+      'UDARA',
+      'KA',
+      'BUS',
+      'ASDP',
+      'LAUT',
+      'TOTAL',
+    ];
+
+    return modes.map((m) => {
+      let baseline = 0;
+      if (feb) {
+        if (m === 'TOTAL') {
+          if (selectedMetric === 'pnp') {
+            const key = selectedDirection === 'brg' ? 'pbrg_TOTAL' : selectedDirection === 'dat' ? 'pdat_TOTAL' : 'TOTAL';
+            baseline = Math.round((Number(feb[key]) || Number(feb.TOTAL) || 0) / 28);
+          } else {
+            const key = selectedDirection === 'brg' ? 'abrg_TOTAL' : selectedDirection === 'dat' ? 'adat_TOTAL' : 'arm_TOTAL';
+            baseline = Math.round((Number(feb[key]) || Number(feb.arm_TOTAL) || 0) / 28);
+          }
+        } else {
+          if (selectedMetric === 'pnp') {
+            const key = selectedDirection === 'brg' ? `pbrg_${m}` : selectedDirection === 'dat' ? `pdat_${m}` : m;
+            baseline = Math.round((Number(feb[key]) || Number(feb[m]) || 0) / 28);
+          } else {
+            const key = selectedDirection === 'brg' ? `abrg_${m}` : selectedDirection === 'dat' ? `adat_${m}` : `arm_${m}`;
+            baseline = Math.round((Number(feb[key]) || Number(feb[`arm_${m}`]) || 0) / 28);
+          }
+        }
+      } else {
+        baseline = surgeSummary[m]?.baseline || 1;
+      }
+
+      const mudikVal = m === 'TOTAL' ? (d_mudik ? getLebaranTotal(d_mudik) : 0) : (d_mudik ? getLebaranValue(d_mudik, m) : 0);
+      const balik1Val = m === 'TOTAL' ? (d_balik1 ? getLebaranTotal(d_balik1) : 0) : (d_balik1 ? getLebaranValue(d_balik1, m) : 0);
+      const balik2Val = m === 'TOTAL' ? (d_balik2 ? getLebaranTotal(d_balik2) : 0) : (d_balik2 ? getLebaranValue(d_balik2, m) : 0);
+
+      const surgeMudik = baseline > 0 ? ((mudikVal - baseline) / baseline) * 100 : 0;
+      const surgeBalik1 = baseline > 0 ? ((balik1Val - baseline) / baseline) * 100 : 0;
+      const surgeBalik2 = baseline > 0 ? ((balik2Val - baseline) / baseline) * 100 : 0;
+
+      return {
+        modaKey: m,
+        baseline,
+        mudikVal,
+        surgeMudik,
+        balik1Val,
+        surgeBalik1,
+        balik2Val,
+        surgeBalik2,
+      };
+    });
+  }, [lebaranDaily, monthlySummary, surgeSummary, selectedMetric, selectedDirection]);
 
   return (
     <div className="space-y-6">
@@ -154,11 +277,13 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
               </h3>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-              Periode Operasional 17 Hari: <strong>13 – 29 Maret 2026</strong> (H-8 s/d H+8 • Hari H: 21 Maret 2026).
+              Periode Operasional 17 Hari: <strong>13 – 29 Maret 2026</strong> (H-8 s/d H+8 • Hari H: 21 Maret 2026) —{' '}
+              {isPnp ? 'Mobilitas Penumpang' : 'Operasional Armada'}{' '}
+              ({selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Dua Arah'}).
             </p>
           </div>
-          <div className="text-xs font-mono text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/80 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-900">
-            Rekor Arus Balik: 2.415.296 Pnp (+103,2% Surge)
+          <div className="text-xs font-mono text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/80 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-900 whitespace-nowrap">
+            Rekor Arus Balik: {formatNumber(peakBalikVal)} {isPnp ? 'Pnp' : 'Armada'} (+{formatPercent(peakBalikSurge)} Surge)
           </div>
         </div>
 
@@ -193,7 +318,7 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
         </div>
       </div>
 
-      {/* SELECTED DAY DETAIL CARD */}
+      {/* SELECTED DAY DETAIL CARD (Dynamic to active Filter) */}
       {selectedDay && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs">
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -206,17 +331,17 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
               </span>
             </div>
             <div className="text-xs font-mono">
-              <span className="text-slate-400">Total Penumpang: </span>
+              <span className="text-slate-400">Total {isPnp ? 'Penumpang' : 'Armada'} ({selectedDirection === 'brg' ? 'Berangkat' : selectedDirection === 'dat' ? 'Datang' : 'Total'}): </span>
               <span className="font-bold text-slate-900 dark:text-white text-base">
-                {formatNumber((selectedDay as any).TOTAL || (selectedDay.TOTAL ? selectedDay.TOTAL.pnp_tot : 0))} orang
+                {formatNumber(getLebaranTotal(selectedDay))} {isPnp ? 'orang' : 'trip'}
               </span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-3">
             {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => {
-              const val = Number((selectedDay as any)[m]) || 0;
-              const totalVal = Number((selectedDay as any).TOTAL) || 1;
+              const val = getLebaranValue(selectedDay, m);
+              const totalVal = getLebaranTotal(selectedDay) || 1;
               return (
                 <div
                   key={m}
@@ -230,7 +355,7 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
                     />
                   </div>
                   <div className="text-sm font-bold font-mono text-slate-800 dark:text-slate-200">
-                    {formatNumber(val)}
+                    {formatNumber(val)} {isPnp ? 'org' : 'trip'}
                   </div>
                   <div className="text-[10px] text-slate-400 mt-0.5">
                     {((val / totalVal) * 100).toFixed(1)}% pangsa
@@ -242,82 +367,65 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
         </div>
       )}
 
-      {/* LEBARAN LINE CHART (1:1 Paritas V1) */}
-      <div className="w-full">
+      {/* CHARTS ROW: LINE CHART + DINAMIKA PANGSA PASAR AREA CHART */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* LEBARAN LINE CHART */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div>
               <h4 className="font-bold text-slate-900 dark:text-white text-sm">
                 Grafik Fluktuasi H-8 s/d H+8 Lebaran 2026 {chartMode === 'modes' ? '(5 Moda Terpisah)' : '(Total Nasional)'}
               </h4>
-              <span className="text-[11px] font-mono text-slate-400">Satuan: Orang</span>
+              <span className="text-[11px] font-mono text-slate-400">
+                Satuan: {isPnp ? 'Orang' : 'Trip'} • {selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Dua Arah'}
+              </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Direction Selector (Default: Berangkat) */}
-              <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
-                <button
-                  onClick={() => setSelectedDirection('brg')}
-                  className={`px-2 py-1 rounded-md font-medium transition-colors ${
-                    selectedDirection === 'brg'
-                      ? 'bg-rose-600 text-white shadow-2xs font-semibold'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                  }`}
-                >
-                  Berangkat
-                </button>
-                <button
-                  onClick={() => setSelectedDirection('dat')}
-                  className={`px-2 py-1 rounded-md font-medium transition-colors ${
-                    selectedDirection === 'dat'
-                      ? 'bg-rose-600 text-white shadow-2xs font-semibold'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                  }`}
-                >
-                  Datang
-                </button>
-                <button
-                  onClick={() => setSelectedDirection('tot')}
-                  className={`px-2 py-1 rounded-md font-medium transition-colors ${
-                    selectedDirection === 'tot'
-                      ? 'bg-rose-600 text-white shadow-2xs font-semibold'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                  }`}
-                >
-                  Total
-                </button>
-              </div>
-
-              {/* Mode Selector: 5 Moda vs Total */}
-              <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
-                <button
-                  onClick={() => setChartMode('modes')}
-                  className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                    chartMode === 'modes'
-                      ? 'bg-rose-600 text-white shadow-2xs font-semibold'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                  }`}
-                >
-                  5 Moda
-                </button>
-                <button
-                  onClick={() => setChartMode('total')}
-                  className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                    chartMode === 'total'
-                      ? 'bg-rose-600 text-white shadow-2xs font-semibold'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                  }`}
-                >
-                  Total Nasional
-                </button>
-              </div>
+            {/* Mode Selector: 5 Moda vs Total (No duplicate Direction toggle) */}
+            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+              <button
+                onClick={() => setChartMode('modes')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  chartMode === 'modes'
+                    ? 'bg-rose-600 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                5 Moda
+              </button>
+              <button
+                onClick={() => setChartMode('total')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  chartMode === 'total'
+                    ? 'bg-rose-600 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                Total Nasional
+              </button>
             </div>
           </div>
-          <EChartWrapper options={lebaranLineChartOption} style={{ height: '360px', width: '100%' }} />
+          <EChartWrapper options={lebaranLineChartOption} style={{ height: '340px', width: '100%' }} />
+        </div>
+
+        {/* DINAMIKA PANGSA PASAR 17 HARI (MODAL SHARE STACKED AREA) */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                Dinamika Pangsa Pasar (Modal Share) 17 Hari
+              </h4>
+              <span className="text-[11px] font-mono text-slate-400">
+                Komposisi 100% ({isPnp ? 'Penumpang' : 'Armada'} • {selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Total'})
+              </span>
+            </div>
+            <span className="text-[11px] font-mono text-slate-400">100% Stacked</span>
+          </div>
+          <EChartWrapper options={modalShareAreaOption} style={{ height: '340px', width: '100%' }} />
         </div>
       </div>
 
-      {/* HEATMAP LONJAKAN LEBARAN & TABEL KOMPARASI */}
+      {/* HEATMAP LONJAKAN LEBARAN & TABEL KOMPARASI (Dynamically updated to Filter) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -325,7 +433,7 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
               Matriks Heatmap Lonjakan Volume (Surge Rate %) vs Hari Normal
             </h4>
             <p className="text-xs text-slate-500">
-              Perbandingan terhadap baseline normal non-libur (Februari 2026: 1.188.900 orang/hari)
+              Perbandingan terhadap baseline normal non-libur (Februari 2026) — {isPnp ? 'Penumpang' : 'Armada'} ({selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Dua Arah'})
             </p>
           </div>
         </div>
@@ -345,43 +453,43 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
-              {Object.entries(surgeSummary).map(([modaKey, stats]) => {
-                const isTotal = modaKey === 'TOTAL';
+              {dynamicSurgeData.map((item) => {
+                const isTotal = item.modaKey === 'TOTAL';
                 return (
                   <tr
-                    key={modaKey}
+                    key={item.modaKey}
                     className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
                       isTotal ? 'font-bold bg-slate-50/70 dark:bg-slate-800/60' : ''
                     }`}
                   >
                     <td className="py-2.5 font-sans font-semibold text-slate-800 dark:text-slate-200">
-                      {MODA_DISPLAY_NAME[modaKey] || modaKey}
+                      {MODA_DISPLAY_NAME[item.modaKey] || item.modaKey}
                     </td>
                     <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
-                      {formatNumber(stats.baseline)}
+                      {formatNumber(item.baseline)}
                     </td>
                     <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
-                      {formatNumber(stats.peak_mudik)}
+                      {formatNumber(item.mudikVal)}
                     </td>
                     <td className="py-2.5 text-right">
                       <span className="px-1.5 py-0.5 rounded font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
-                        {formatPercent(stats.surge_mudik_pct)}
+                        {formatPercent(item.surgeMudik)}
                       </span>
                     </td>
                     <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
-                      {formatNumber(stats.peak_balik1)}
+                      {formatNumber(item.balik1Val)}
                     </td>
                     <td className="py-2.5 text-right">
                       <span className="px-1.5 py-0.5 rounded font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
-                        {formatPercent(stats.surge_balik1_pct)}
+                        {formatPercent(item.surgeBalik1)}
                       </span>
                     </td>
                     <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
-                      {formatNumber(stats.peak_balik2)}
+                      {formatNumber(item.balik2Val)}
                     </td>
                     <td className="py-2.5 text-right">
                       <span className="px-1.5 py-0.5 rounded font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
-                        {formatPercent(stats.surge_balik2_pct)}
+                        {formatPercent(item.surgeBalik2)}
                       </span>
                     </td>
                   </tr>

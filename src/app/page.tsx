@@ -142,10 +142,15 @@ export default function Home() {
 
         {/* MAIN WORKSPACE CONTENT */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
-          {/* OVERVIEW KPI CARDS (Always visible) */}
-          <OverviewKpiCards meta={data.meta} />
+          {/* OVERVIEW KPI CARDS (Always visible, dynamic to active Filter) */}
+          <OverviewKpiCards
+            meta={data.meta}
+            metricsSummary={data.metrics_summary}
+            metric={globalMetric}
+            direction={globalDirection}
+          />
 
-          {/* MASTER FILTER ANALITIK (Sinkron Otomatis Lintas Seluruh Modul) */}
+          {/* FILTER UTAMA ANALITIK (Sinkron Otomatis Lintas Seluruh Modul) */}
           <GlobalFilterBar
             metric={globalMetric}
             direction={globalDirection}
@@ -171,6 +176,8 @@ export default function Home() {
               <LebaranWorkspace
                 lebaranDaily={data.lebaran_daily}
                 surgeSummary={data.surge_summary}
+                monthlySummary={data.monthly_summary}
+                metricsSummary={data.metrics_summary}
                 isDarkMode={isDarkMode}
                 globalMetric={globalMetric}
                 globalDirection={globalDirection}
@@ -180,7 +187,11 @@ export default function Home() {
             {activeTab === 'loadfactor' && (
               <LoadFactorWorkspace
                 loadFactorStats={data.load_factor_stats}
+                monthlySummary={data.monthly_summary}
+                lebaranDaily={data.lebaran_daily}
                 isDarkMode={isDarkMode}
+                globalMetric={globalMetric}
+                globalDirection={globalDirection}
               />
             )}
 

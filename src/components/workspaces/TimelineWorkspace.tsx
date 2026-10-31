@@ -22,21 +22,13 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
   dow,
   provinceGrowthData = {},
   isDarkMode,
-  globalMetric,
-  globalDirection,
+  globalMetric = 'pnp',
+  globalDirection = 'brg',
 }) => {
-  // State (Default: Penumpang Berangkat)
-  const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>(globalMetric || 'pnp');
-  const [selectedDirection, setSelectedDirection] = useState<'tot' | 'dat' | 'brg'>(globalDirection || 'brg');
+  // Direct use of active Filter (Single source of truth, zero state delay)
+  const selectedMetric = globalMetric;
+  const selectedDirection = globalDirection;
 
-  // React immediately to Master Filter changes
-  React.useEffect(() => {
-    if (globalMetric) setSelectedMetric(globalMetric);
-  }, [globalMetric]);
-
-  React.useEffect(() => {
-    if (globalDirection) setSelectedDirection(globalDirection);
-  }, [globalDirection]);
   const [chartViewMode, setChartViewMode] = useState<'modes' | 'total'>('modes');
   const [timeRange, setTimeRange] = useState<'all' | 't1' | 't2' | 't3' | 'lebaran' | 'custom'>('all');
   const [customStart, setCustomStart] = useState('2026-03-01');
@@ -47,14 +39,18 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
   const [selectedProvModa, setSelectedProvModa] = useState<string>('ALL');
 
   const provincesList = useMemo(() => {
-    const list = Object.keys(provinceGrowthData.by_province || {}).sort();
+    const comboKey = `${selectedMetric}_${selectedDirection}`;
+    const activePmd = provinceGrowthData?.[comboKey] || provinceGrowthData;
+    const list = Object.keys(activePmd?.by_province || {}).sort();
     return list.length > 0 ? list : ['Jawa Timur', 'Jawa Barat', 'Jawa Tengah', 'DKI Jakarta', 'Banten', 'Sumatera Utara', 'Bali'];
-  }, [provinceGrowthData]);
+  }, [provinceGrowthData, selectedMetric, selectedDirection]);
 
-  // Current Province Data
+  // Current Province Data (Dynamic to active Filter: Penumpang/Armada x Berangkat/Datang/Total)
   const currentProvData = useMemo(() => {
-    return (provinceGrowthData.by_province || {})[selectedProv] || null;
-  }, [provinceGrowthData, selectedProv]);
+    const comboKey = `${selectedMetric}_${selectedDirection}`;
+    const activePmd = provinceGrowthData?.[comboKey] || provinceGrowthData;
+    return (activePmd?.by_province || {})[selectedProv] || null;
+  }, [provinceGrowthData, selectedProv, selectedMetric, selectedDirection]);
 
   // Filtered timeline data
   const filteredTimeline = useMemo(() => {
@@ -233,90 +229,31 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* TOOLBAR CONTROLS */}
+      {/* TOOLBAR CONTROLS (Clean, no duplicate Filter buttons) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Metrik & Direction */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
-              <button
-                onClick={() => setSelectedMetric('pnp')}
-                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-                  selectedMetric === 'pnp'
-                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Penumpang
-              </button>
-              <button
-                onClick={() => setSelectedMetric('arm')}
-                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-                  selectedMetric === 'arm'
-                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Armada
-              </button>
-            </div>
-
-            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
-              <button
-                onClick={() => setSelectedDirection('brg')}
-                className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
-                  selectedDirection === 'brg'
-                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Berangkat
-              </button>
-              <button
-                onClick={() => setSelectedDirection('dat')}
-                className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
-                  selectedDirection === 'dat'
-                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Datang
-              </button>
-              <button
-                onClick={() => setSelectedDirection('tot')}
-                className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
-                  selectedDirection === 'tot'
-                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Total
-              </button>
-            </div>
-
-            {/* View Mode: 5 Moda vs Total Multimoda */}
-            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
-              <button
-                onClick={() => setChartViewMode('modes')}
-                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-                  chartViewMode === 'modes'
-                    ? 'bg-sky-900 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                📊 5 Moda (Detail)
-              </button>
-              <button
-                onClick={() => setChartViewMode('total')}
-                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-                  chartViewMode === 'total'
-                    ? 'bg-sky-900 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                📈 Total Multimoda
-              </button>
-            </div>
+          {/* View Mode: 5 Moda vs Total Multimoda */}
+          <div className="flex items-center rounded-xl p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+            <button
+              onClick={() => setChartViewMode('modes')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                chartViewMode === 'modes'
+                  ? 'bg-sky-600 text-white shadow-xs font-bold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              📊 5 Moda (Detail)
+            </button>
+            <button
+              onClick={() => setChartViewMode('total')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                chartViewMode === 'total'
+                  ? 'bg-sky-600 text-white shadow-xs font-bold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              📈 Total Multimoda
+            </button>
           </div>
 
           {/* Preset Rentang Tanggal */}
@@ -435,14 +372,14 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
             <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
               <span className="text-slate-400 font-sans text-[11px]">Total YTD Provinsi:</span>
               <div className="font-bold text-slate-900 dark:text-white text-sm mt-0.5">
-                {formatNumber(currentProvData.total || currentProvData.total_brg || 0)} orang
+                {formatNumber(currentProvData.total || currentProvData.total_brg || 0)} {selectedMetric === 'pnp' ? 'orang' : 'trip'}
               </div>
             </div>
 
             <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
               <span className="text-slate-400 font-sans text-[11px]">Bulan Puncak:</span>
               <div className="font-bold text-rose-700 dark:text-rose-400 text-sm mt-0.5">
-                {currentProvData.peak_month} • {formatNumber(currentProvData.peak_vol)} orang
+                {currentProvData.peak_month} • {formatNumber(currentProvData.peak_vol)} {selectedMetric === 'pnp' ? 'orang' : 'trip'}
               </div>
             </div>
 

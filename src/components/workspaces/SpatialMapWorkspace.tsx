@@ -51,8 +51,8 @@ interface SpatialMapWorkspaceProps {
 export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
   nodes,
   isDarkMode,
-  globalMetric,
-  globalDirection,
+  globalMetric = 'pnp',
+  globalDirection = 'brg',
 }) => {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<any>(null);
@@ -60,8 +60,8 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     const choroplethGroupRef = useRef<any>(null);
 
     const [selectedModa, setSelectedModa] = useState<string>('ALL');
-    const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>(globalMetric || 'pnp');
-    const [selectedDirection, setSelectedDirection] = useState<'brg' | 'dat' | 'tot'>(globalDirection || 'brg'); // Default: Penumpang Berangkat
+    const selectedMetric = globalMetric;
+    const selectedDirection = globalDirection;
     const [selectedScale, setSelectedScale] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [selectedNode, setSelectedNode] = useState<any | null>(null);
@@ -69,15 +69,6 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     const [showHeatmap, setShowHeatmap] = useState<boolean>(true);
     const [showNodes, setShowNodes] = useState<boolean>(true);
     const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
-
-    // React to Master Filter
-    useEffect(() => {
-      if (globalMetric) setSelectedMetric(globalMetric);
-    }, [globalMetric]);
-
-    useEffect(() => {
-      if (globalDirection) setSelectedDirection(globalDirection);
-    }, [globalDirection]);
 
   // Helper to extract node volume based on metric & direction
   const getNodeVol = (n: any) => {
@@ -508,54 +499,6 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
               <option value="top50">Top 50 Simpul Terpadat</option>
               <option value="pareto80">Pareto 80% Volume</option>
             </select>
-
-            {/* Metric Toggle */}
-            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <button
-                onClick={() => setSelectedMetric('pnp')}
-                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                  selectedMetric === 'pnp' ? 'bg-white dark:bg-slate-900 font-bold shadow-2xs text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                Penumpang
-              </button>
-              <button
-                onClick={() => setSelectedMetric('arm')}
-                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                  selectedMetric === 'arm' ? 'bg-white dark:bg-slate-900 font-bold shadow-2xs text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                Armada
-              </button>
-            </div>
-
-            {/* Direction Toggle (Default: Berangkat) */}
-            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <button
-                onClick={() => setSelectedDirection('brg')}
-                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                  selectedDirection === 'brg' ? 'bg-sky-600 text-white font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Berangkat
-              </button>
-              <button
-                onClick={() => setSelectedDirection('dat')}
-                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                  selectedDirection === 'dat' ? 'bg-sky-600 text-white font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Datang
-              </button>
-              <button
-                onClick={() => setSelectedDirection('tot')}
-                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                  selectedDirection === 'tot' ? 'bg-sky-600 text-white font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Total
-              </button>
-            </div>
 
             {/* Search */}
             <div className="relative w-44">
