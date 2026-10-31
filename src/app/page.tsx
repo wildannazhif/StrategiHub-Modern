@@ -14,6 +14,7 @@ import { ForecastingWorkspace } from '@/components/workspaces/ForecastingWorkspa
 import { SimulatorWorkspace } from '@/components/workspaces/SimulatorWorkspace';
 import { ODMapWorkspace, ODSankeyWorkspace } from '@/components/workspaces/ODWorkspaces';
 import { GlossaryWorkspace } from '@/components/workspaces/GlossaryWorkspace';
+import { GlobalFilterBar, MobilityMetric, MobilityDirection } from '@/components/dashboard/GlobalFilterBar';
 import { MobilityDataBundle } from '@/types/mobility';
 import { getBasePath } from '@/lib/constants';
 
@@ -24,6 +25,10 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>('timeline');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to Dark Mode matching user preference
+
+  // Master Filter State (Default: Penumpang Berangkat)
+  const [globalMetric, setGlobalMetric] = useState<MobilityMetric>('pnp');
+  const [globalDirection, setGlobalDirection] = useState<MobilityDirection>('brg');
 
   // Responsive sidebar & Theme initialization
   useEffect(() => {
@@ -140,6 +145,14 @@ export default function Home() {
           {/* OVERVIEW KPI CARDS (Always visible) */}
           <OverviewKpiCards meta={data.meta} />
 
+          {/* MASTER FILTER ANALITIK (Sinkron Otomatis Lintas Seluruh Modul) */}
+          <GlobalFilterBar
+            metric={globalMetric}
+            direction={globalDirection}
+            onChangeMetric={setGlobalMetric}
+            onChangeDirection={setGlobalDirection}
+          />
+
           {/* ACTIVE TAB CONTENT */}
           <div className="transition-all duration-150">
             {activeTab === 'timeline' && (
@@ -149,6 +162,8 @@ export default function Home() {
                 dow={data.dow_summary}
                 provinceGrowthData={data.province_monthly_data}
                 isDarkMode={isDarkMode}
+                globalMetric={globalMetric}
+                globalDirection={globalDirection}
               />
             )}
 
@@ -157,6 +172,8 @@ export default function Home() {
                 lebaranDaily={data.lebaran_daily}
                 surgeSummary={data.surge_summary}
                 isDarkMode={isDarkMode}
+                globalMetric={globalMetric}
+                globalDirection={globalDirection}
               />
             )}
 
@@ -171,6 +188,8 @@ export default function Home() {
               <TopHubsWorkspace
                 topHubsPeak={data.top_hubs_peak}
                 topHubsYtd={data.top_hubs_ytd}
+                globalMetric={globalMetric}
+                globalDirection={globalDirection}
               />
             )}
 
@@ -184,8 +203,9 @@ export default function Home() {
             {activeTab === 'spatial' && (
               <SpatialMapWorkspace
                 nodes={data.spatial_nodes}
-                provinceGeojson={data.province_geojson}
                 isDarkMode={isDarkMode}
+                globalMetric={globalMetric}
+                globalDirection={globalDirection}
               />
             )}
 

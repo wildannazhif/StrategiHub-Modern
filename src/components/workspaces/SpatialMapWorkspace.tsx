@@ -3,12 +3,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal, getBasePath } from '@/lib/constants';
 import { MapPin, Search, Layers, Flame, Info, Filter } from 'lucide-react';
-
-interface SpatialMapWorkspaceProps {
-  nodes: any[];
-  provinceGeojson?: any;
-  isDarkMode: boolean;
-}
+import { SpatialNode } from '@/types/mobility';
 
 function normalizeProvinceName(p: string): string {
   if (!p) return '';
@@ -46,25 +41,43 @@ function getHeatmapColor(val: number, maxVal: number, isDark: boolean) {
   }
 }
 
+interface SpatialMapWorkspaceProps {
+  nodes: any[];
+  isDarkMode: boolean;
+  globalMetric?: 'pnp' | 'arm';
+  globalDirection?: 'brg' | 'dat' | 'tot';
+}
+
 export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
   nodes,
   isDarkMode,
+  globalMetric,
+  globalDirection,
 }) => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markerGroupRef = useRef<any>(null);
-  const choroplethGroupRef = useRef<any>(null);
+    const mapContainerRef = useRef<HTMLDivElement>(null);
+    const mapInstanceRef = useRef<any>(null);
+    const markerGroupRef = useRef<any>(null);
+    const choroplethGroupRef = useRef<any>(null);
 
-  const [selectedModa, setSelectedModa] = useState<string>('ALL');
-  const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>('pnp');
-  const [selectedDirection, setSelectedDirection] = useState<'brg' | 'dat' | 'tot'>('brg'); // Default: Penumpang Berangkat
-  const [selectedScale, setSelectedScale] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedNode, setSelectedNode] = useState<any | null>(null);
+    const [selectedModa, setSelectedModa] = useState<string>('ALL');
+    const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>(globalMetric || 'pnp');
+    const [selectedDirection, setSelectedDirection] = useState<'brg' | 'dat' | 'tot'>(globalDirection || 'brg'); // Default: Penumpang Berangkat
+    const [selectedScale, setSelectedScale] = useState<string>('all');
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [selectedNode, setSelectedNode] = useState<any | null>(null);
 
-  const [showHeatmap, setShowHeatmap] = useState<boolean>(true);
-  const [showNodes, setShowNodes] = useState<boolean>(true);
-  const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
+    const [showHeatmap, setShowHeatmap] = useState<boolean>(true);
+    const [showNodes, setShowNodes] = useState<boolean>(true);
+    const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
+
+    // React to Master Filter
+    useEffect(() => {
+      if (globalMetric) setSelectedMetric(globalMetric);
+    }, [globalMetric]);
+
+    useEffect(() => {
+      if (globalDirection) setSelectedDirection(globalDirection);
+    }, [globalDirection]);
 
   // Helper to extract node volume based on metric & direction
   const getNodeVol = (n: any) => {

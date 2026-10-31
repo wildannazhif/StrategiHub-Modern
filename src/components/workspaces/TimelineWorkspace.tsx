@@ -12,6 +12,8 @@ interface TimelineWorkspaceProps {
   dow: DOWSummaryEntry[];
   provinceGrowthData?: any;
   isDarkMode: boolean;
+  globalMetric?: 'pnp' | 'arm';
+  globalDirection?: 'brg' | 'dat' | 'tot';
 }
 
 export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
@@ -20,10 +22,21 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
   dow,
   provinceGrowthData = {},
   isDarkMode,
+  globalMetric,
+  globalDirection,
 }) => {
   // State (Default: Penumpang Berangkat)
-  const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>('pnp');
-  const [selectedDirection, setSelectedDirection] = useState<'tot' | 'dat' | 'brg'>('brg');
+  const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>(globalMetric || 'pnp');
+  const [selectedDirection, setSelectedDirection] = useState<'tot' | 'dat' | 'brg'>(globalDirection || 'brg');
+
+  // React immediately to Master Filter changes
+  React.useEffect(() => {
+    if (globalMetric) setSelectedMetric(globalMetric);
+  }, [globalMetric]);
+
+  React.useEffect(() => {
+    if (globalDirection) setSelectedDirection(globalDirection);
+  }, [globalDirection]);
   const [chartViewMode, setChartViewMode] = useState<'modes' | 'total'>('modes');
   const [timeRange, setTimeRange] = useState<'all' | 't1' | 't2' | 't3' | 'lebaran' | 'custom'>('all');
   const [customStart, setCustomStart] = useState('2026-03-01');

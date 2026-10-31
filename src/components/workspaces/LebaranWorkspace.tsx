@@ -10,18 +10,53 @@ interface LebaranWorkspaceProps {
   lebaranDaily: LebaranDailyEntry[];
   surgeSummary: SurgeSummary;
   isDarkMode: boolean;
+  globalMetric?: 'pnp' | 'arm';
+  globalDirection?: 'brg' | 'dat' | 'tot';
 }
 
 export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
   lebaranDaily,
   surgeSummary,
   isDarkMode,
+  globalMetric,
+  globalDirection,
 }) => {
   const [selectedDayIdx, setSelectedDayIdx] = useState<number>(11); // H+3 default (Peak Day: 24 Mar 2026)
   const [chartMode, setChartMode] = useState<'modes' | 'total'>('modes');
-  const [selectedDirection, setSelectedDirection] = useState<'brg' | 'dat' | 'tot'>('brg'); // Default: Berangkat
+  const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>(globalMetric || 'pnp');
+  const [selectedDirection, setSelectedDirection] = useState<'brg' | 'dat' | 'tot'>(globalDirection || 'brg'); // Default: Berangkat
+
+  // React to Master Filter
+  React.useEffect(() => {
+    if (globalMetric) setSelectedMetric(globalMetric);
+  }, [globalMetric]);
+
+  React.useEffect(() => {
+    if (globalDirection) setSelectedDirection(globalDirection);
+  }, [globalDirection]);
 
   const selectedDay = lebaranDaily[selectedDayIdx] || lebaranDaily[0];
+
+  // Helper to extract metric value for a mode on a given day
+  const getLebaranValue = (d: any, m: string) => {
+    if (selectedMetric === 'pnp') {
+      const key = selectedDirection === 'brg' ? `pbrg_${m}` : selectedDirection === 'dat' ? `pdat_${m}` : m;
+      return Number(d[key]) || Number(d[m]) || 0;
+    } else {
+      const key = selectedDirection === 'brg' ? `abrg_${m}` : selectedDirection === 'dat' ? `adat_${m}` : `arm_${m}`;
+      return Number(d[key]) || Number(d[`arm_${m}`]) || 0;
+    }
+  };
+
+  const getLebaranTotal = (d: any) => {
+    if (selectedMetric === 'pnp') {
+      const key = selectedDirection === 'brg' ? 'pbrg_TOTAL' : selectedDirection === 'dat' ? 'pdat_TOTAL' : 'TOTAL';
+      return Number(d[key]) || Number(d.TOTAL) || 0;
+    } else {
+      const key = selectedDirection === 'brg' ? 'abrg_TOTAL' : selectedDirection === 'dat' ? 'adat_TOTAL' : 'arm_TOTAL';
+      return Number(d[key]) || Number(d.arm_TOTAL) || 0;
+    }
+  };
 
   // 17-day line chart
   const lebaranLineChartOption = useMemo(() => {
@@ -33,31 +68,31 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
     let series: any[] = [];
 
     if (chartMode === 'modes') {
-      // 5 MODA ONLY (scaled to 0 - 700k, visible details)
+      // 5 MODA ONLY (scaled to visible details)
       series = modes.map((m) => {
-        const key = selectedDirection === 'brg' ? `pbrg_${m}` : selectedDirection === 'dat' ? `pdat_${m}` : m;
         return {
           name: MODA_DISPLAY_NAME[m],
           type: 'line',
           smooth: 0.3,
           symbol: 'circle',
           symbolSize: 6,
-          data: lebaranDaily.map((d: any) => Number(d[key]) || Number(d[m]) || 0),
+          data: lebaranDaily.map((d: any) => getLebaranValue(d, m)),
           lineStyle: { width: 2.5, color: COLOR[m] },
           itemStyle: { color: COLOR[m] },
         };
       });
     } else {
-      // SEMUA MODA ONLY (National macro peak 0 - 2.5M)
-      const totKey = selectedDirection === 'brg' ? 'pbrg_TOTAL' : selectedDirection === 'dat' ? 'pdat_TOTAL' : 'TOTAL';
+      // SEMUA MODA ONLY (National macro peak)
+      const dirLabel = selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Total';
+      const metLabel = selectedMetric === 'pnp' ? 'Penumpang' : 'Armada';
       series = [
         {
-          name: `Semua Moda (${selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Total Nasional'})`,
+          name: `Semua Moda (${metLabel} • ${dirLabel})`,
           type: 'line',
           smooth: 0.3,
           symbol: 'diamond',
           symbolSize: 8,
-          data: lebaranDaily.map((d: any) => Number(d[totKey]) || Number(d.TOTAL) || 0),
+          data: lebaranDaily.map((d: any) => getLebaranTotal(d)),
           lineStyle: { width: 3.5, color: isDarkMode ? '#f43f5e' : '#e11d48' },
           itemStyle: { color: isDarkMode ? '#f43f5e' : '#e11d48' },
           areaStyle: {
@@ -73,7 +108,7 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
         backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
         borderColor: isDarkMode ? '#334155' : '#e2e8f0',
         textStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a', fontSize: 12 },
-        valueFormatter: (value: any) => `${formatNumber(value)} orang`,
+        valueFormatter: (value: any) => `${formatNumber(value)} ${selectedMetric === 'pnp' ? 'orang' : 'trip'}`,
       },
       legend: {
         bottom: 0,
@@ -120,8 +155,8 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
       areaStyle: { opacity: 0.65 },
       emphasis: { focus: 'series' },
       data: lebaranDaily.map((d: any) => {
-        const tot = Number(d.TOTAL) || 1;
-        const val = Number(d[m]) || 0;
+        const tot = getLebaranTotal(d) || 1;
+        const val = getLebaranValue(d, m);
         return Number(((val / tot) * 100).toFixed(1));
       }),
       itemStyle: { color: COLOR[m] },

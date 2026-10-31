@@ -8,17 +8,40 @@ import { Anchor, Search } from 'lucide-react';
 interface TopHubsWorkspaceProps {
   topHubsPeak: Record<string, any[]>;
   topHubsYtd: Record<string, any[]>;
+  globalMetric?: 'pnp' | 'arm';
+  globalDirection?: 'brg' | 'dat' | 'tot';
 }
 
 export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
   topHubsPeak,
   topHubsYtd,
+  globalMetric,
+  globalDirection,
 }) => {
   const [period, setPeriod] = useState<'peak' | 'ytd'>('peak');
   const [selectedModa, setSelectedModa] = useState<TransportModa>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>(globalMetric || 'pnp');
+  const [selectedDirection, setSelectedDirection] = useState<'brg' | 'dat' | 'tot'>(globalDirection || 'brg');
+
+  // React to Master Filter
+  React.useEffect(() => {
+    if (globalMetric) setSelectedMetric(globalMetric);
+  }, [globalMetric]);
+
+  React.useEffect(() => {
+    if (globalDirection) setSelectedDirection(globalDirection);
+  }, [globalDirection]);
 
   const currentDataset = period === 'peak' ? topHubsPeak : topHubsYtd;
+
+  const getHubVol = (h: any) => {
+    if (selectedMetric === 'pnp') {
+      return selectedDirection === 'brg' ? (h.p_brg ?? h.pnp) : selectedDirection === 'dat' ? (h.p_dat ?? h.pnp) : (h.pnp ?? h.pnp_tot);
+    } else {
+      return selectedDirection === 'brg' ? (h.a_brg ?? h.arm) : selectedDirection === 'dat' ? (h.a_dat ?? h.arm) : (h.arm ?? h.arm_tot);
+    }
+  };
 
   const hubsList = useMemo(() => {
     let list: any[] = [];
@@ -29,11 +52,12 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
           allLists.push({ ...item, moda: mKey });
         });
       });
-      // Sort by total penumpang descending
-      allLists.sort((a, b) => (Number(b.pnp ?? b.pnp_tot) || 0) - (Number(a.pnp ?? a.pnp_tot) || 0));
+      // Sort by volume descending based on active filter
+      allLists.sort((a, b) => (Number(getHubVol(b)) || 0) - (Number(getHubVol(a)) || 0));
       list = allLists.slice(0, 30).map((item, idx) => ({ ...item, rank: idx + 1 }));
     } else {
-      const arr = currentDataset[selectedModa] || [];
+      const arr = (currentDataset[selectedModa] || []).slice();
+      arr.sort((a, b) => (Number(getHubVol(b)) || 0) - (Number(getHubVol(a)) || 0));
       list = arr.map((item, idx) => ({ ...item, moda: selectedModa, rank: idx + 1 }));
     }
 
@@ -46,7 +70,7 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
       });
     }
     return list;
-  }, [currentDataset, selectedModa, searchTerm]);
+  }, [currentDataset, selectedModa, selectedMetric, selectedDirection, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -131,8 +155,13 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
                 <th className="py-2.5 font-semibold">Nama Simpul Prasarana</th>
                 <th className="py-2.5 font-semibold">Provinsi</th>
                 <th className="py-2.5 font-semibold">Moda</th>
-                <th className="py-2.5 text-right font-semibold">Total Penumpang</th>
-                <th className="py-2.5 text-right font-semibold">Total Armada</th>
+                <th className="py-2.5 text-right font-bold text-sky-600 dark:text-sky-400">
+                  {selectedMetric === 'pnp' ? 'Penumpang' : 'Armada'}{' '}
+                  ({selectedDirection === 'brg' ? 'Berangkat' : selectedDirection === 'dat' ? 'Datang' : 'Total'})
+                </th>
+                <th className="py-2.5 text-right font-semibold">
+                  {selectedMetric === 'pnp' ? 'Armada Beroperasi' : 'Total Penumpang'}
+                </th>
                 <th className="py-2.5 text-right font-semibold">Beban per Trip (LF)</th>
                 <th className="py-2.5 text-center font-semibold">Status Kepadatan</th>
               </tr>
@@ -140,8 +169,10 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
               {hubsList.length > 0 ? (
                 hubsList.map((h, idx) => {
+                  const activeVal = Number(getHubVol(h)) || 0;
                   const pnpVal = Number(h.pnp ?? h.pnp_tot) || 0;
                   const armVal = Number(h.arm ?? h.arm_tot) || 0;
+                  const secondaryVal = selectedMetric === 'pnp' ? armVal : pnpVal;
                   const lf = armVal ? pnpVal / armVal : 0;
                   const hubName = h.nama_prasarana || h.name || 'Simpul';
                   const hubProv = h.provinsi || h.prov || '-';
@@ -182,13 +213,13 @@ export const TopHubsWorkspace: React.FC<TopHubsWorkspaceProps> = ({
                           {MODA_DISPLAY_NAME[h.moda] || h.moda}
                         </span>
                       </td>
-                      <td className="py-2.5 text-right font-bold text-slate-800 dark:text-slate-200">
-                        {formatNumber(pnpVal)}
+                      <td className="py-2.5 text-right font-bold text-sky-600 dark:text-sky-400">
+                        {formatNumber(activeVal)}
                       </td>
                       <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
-                        {formatNumber(armVal)}
+                        {formatNumber(secondaryVal)}
                       </td>
-                      <td className="py-2.5 text-right font-bold text-sky-800 dark:text-sky-300">
+                      <td className="py-2.5 text-right font-bold text-slate-800 dark:text-slate-200">
                         {formatDecimal(lf)} pnp/trip
                       </td>
                       <td className="py-2.5 text-center font-sans">
