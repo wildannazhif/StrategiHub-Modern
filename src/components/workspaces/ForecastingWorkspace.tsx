@@ -252,10 +252,10 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           showSymbol: false,
           data: trainSeriesData,
           color: trainColor,
-          lineStyle: { width: 3.5, color: trainColor },
+          lineStyle: { width: 4, color: trainColor },
           itemStyle: { color: trainColor },
           areaStyle: {
-            color: isDark ? 'rgba(0, 240, 255, 0.12)' : 'rgba(29, 78, 216, 0.08)',
+            color: isDark ? 'rgba(56, 189, 248, 0.22)' : 'rgba(37, 99, 235, 0.15)',
           },
         },
         {
@@ -265,8 +265,11 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           showSymbol: false,
           data: forecastSeriesData,
           color: forecastColor,
-          lineStyle: { width: 3.2, color: forecastColor, type: 'dashed' },
+          lineStyle: { width: 3.8, color: forecastColor, type: 'dashed' },
           itemStyle: { color: forecastColor },
+          areaStyle: {
+            color: isDark ? 'rgba(245, 158, 11, 0.22)' : 'rgba(245, 158, 11, 0.12)',
+          },
           markPoint: {
             symbol: 'pin',
             symbolSize: 44,
