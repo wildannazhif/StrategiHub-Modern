@@ -22,12 +22,14 @@ export default function Home() {
   const [benchmarkResults, setBenchmarkResults] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<TabId>('timeline');
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to Dark Mode matching user preference
 
-  // Load Data Bundle & Benchmarks
+  // Responsive sidebar & Theme initialization
   useEffect(() => {
-    // Check saved theme or media query on mount
+    if (typeof window !== 'undefined') {
+      setIsSidebarOpen(window.innerWidth >= 1024);
+    }
     const saved = localStorage.getItem('sh_theme');
     if (saved) {
       setIsDarkMode(saved === 'dark');

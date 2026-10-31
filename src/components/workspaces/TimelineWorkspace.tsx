@@ -21,9 +21,9 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
   provinceGrowthData = {},
   isDarkMode,
 }) => {
-  // State
+  // State (Default: Penumpang Berangkat)
   const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>('pnp');
-  const [selectedDirection, setSelectedDirection] = useState<'tot' | 'dat' | 'brg'>('tot');
+  const [selectedDirection, setSelectedDirection] = useState<'tot' | 'dat' | 'brg'>('brg');
   const [chartViewMode, setChartViewMode] = useState<'modes' | 'total'>('modes');
   const [timeRange, setTimeRange] = useState<'all' | 't1' | 't2' | 't3' | 'lebaran' | 'custom'>('all');
   const [customStart, setCustomStart] = useState('2026-03-01');
@@ -285,8 +285,8 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
                 onClick={() => setSelectedMetric('pnp')}
                 className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
                   selectedMetric === 'pnp'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Penumpang
@@ -295,8 +295,8 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
                 onClick={() => setSelectedMetric('arm')}
                 className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
                   selectedMetric === 'arm'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Armada
@@ -305,34 +305,34 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
 
             <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
               <button
-                onClick={() => setSelectedDirection('tot')}
-                className={`px-2.5 py-1.5 rounded-md font-medium ${
-                  selectedDirection === 'tot'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400'
+                onClick={() => setSelectedDirection('brg')}
+                className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
+                  selectedDirection === 'brg'
+                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                Total
+                Berangkat
               </button>
               <button
                 onClick={() => setSelectedDirection('dat')}
-                className={`px-2.5 py-1.5 rounded-md font-medium ${
+                className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
                   selectedDirection === 'dat'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400'
+                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Datang
               </button>
               <button
-                onClick={() => setSelectedDirection('brg')}
-                className={`px-2.5 py-1.5 rounded-md font-medium ${
-                  selectedDirection === 'brg'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400'
+                onClick={() => setSelectedDirection('tot')}
+                className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
+                  selectedDirection === 'tot'
+                    ? 'bg-sky-600 text-white shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                Berangkat
+                Total
               </button>
             </div>
 

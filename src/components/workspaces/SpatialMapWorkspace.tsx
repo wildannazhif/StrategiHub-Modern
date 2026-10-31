@@ -57,6 +57,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
 
   const [selectedModa, setSelectedModa] = useState<string>('ALL');
   const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>('pnp');
+  const [selectedDirection, setSelectedDirection] = useState<'brg' | 'dat' | 'tot'>('brg'); // Default: Penumpang Berangkat
   const [selectedScale, setSelectedScale] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedNode, setSelectedNode] = useState<any | null>(null);
@@ -64,6 +65,15 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
   const [showHeatmap, setShowHeatmap] = useState<boolean>(true);
   const [showNodes, setShowNodes] = useState<boolean>(true);
   const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
+
+  // Helper to extract node volume based on metric & direction
+  const getNodeVol = (n: any) => {
+    if (selectedMetric === 'pnp') {
+      return selectedDirection === 'brg' ? (n.p_brg ?? n.pnp) : selectedDirection === 'dat' ? (n.p_dat ?? n.pnp) : (n.pnp ?? n.pnp_tot);
+    } else {
+      return selectedDirection === 'brg' ? (n.a_brg ?? n.arm) : selectedDirection === 'dat' ? (n.a_dat ?? n.arm) : (n.arm ?? n.arm_tot);
+    }
+  };
 
   // Load 38 Provinces GeoJSON once
   useEffect(() => {
@@ -109,13 +119,13 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
 
     // Sort descending by volume
     list.sort((a, b) => {
-      const vA = Number(selectedMetric === 'pnp' ? a.pnp ?? a.pnp_tot : a.arm ?? a.arm_tot) || 0;
-      const vB = Number(selectedMetric === 'pnp' ? b.pnp ?? b.pnp_tot : b.arm ?? b.arm_tot) || 0;
+      const vA = Number(getNodeVol(a)) || 0;
+      const vB = Number(getNodeVol(b)) || 0;
       return vB - vA;
     });
 
     const poolVol = list.reduce(
-      (sum, n) => sum + (Number(selectedMetric === 'pnp' ? n.pnp ?? n.pnp_tot : n.arm ?? n.arm_tot) || 0),
+      (sum, n) => sum + (Number(getNodeVol(n)) || 0),
       0
     );
 
@@ -135,13 +145,13 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
       finalNodes = [];
       for (const n of list) {
         finalNodes.push(n);
-        cum += Number(selectedMetric === 'pnp' ? n.pnp ?? n.pnp_tot : n.arm ?? n.arm_tot) || 0;
+        cum += Number(getNodeVol(n)) || 0;
         if (cum >= threshold) break;
       }
     }
 
     return { filteredNodes: finalNodes, totalPoolVol: poolVol };
-  }, [nodes, selectedModa, selectedMetric, selectedScale, searchTerm]);
+  }, [nodes, selectedModa, selectedMetric, selectedDirection, selectedScale, searchTerm]);
 
   // Aggregate Province Statistics for Choropleth Heatmap
   const { provStats, maxProvVol, nationalVol } = useMemo(() => {
@@ -158,7 +168,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
       if (!stats[pNorm]) {
         stats[pNorm] = { vol: 0, count: 0, modas: {} };
       }
-      const val = Number(selectedMetric === 'pnp' ? n.pnp ?? n.pnp_tot : n.arm ?? n.arm_tot) || 0;
+      const val = Number(getNodeVol(n)) || 0;
       stats[pNorm].vol += val;
       stats[pNorm].count += 1;
       stats[pNorm].modas[moda] = (stats[pNorm].modas[moda] || 0) + val;
@@ -170,7 +180,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     });
 
     return { provStats: stats, maxProvVol: maxVol, nationalVol: natVol };
-  }, [nodes, selectedModa, selectedMetric]);
+  }, [nodes, selectedModa, selectedMetric, selectedDirection]);
 
   // Leaflet Map Initialization and Layer Management
   useEffect(() => {
@@ -279,7 +289,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
       markerGroup.clearLayers();
       if (showNodes) {
         const maxMetricVal = filteredNodes.reduce((max, node) => {
-          const v = Number(selectedMetric === 'pnp' ? node.pnp ?? node.pnp_tot : node.arm ?? node.arm_tot) || 0;
+          const v = Number(getNodeVol(node)) || 0;
           return Math.max(max, v);
         }, 1);
 
@@ -291,7 +301,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           const modaKey = node.m || node.moda || 'UDARA';
           const nodeName = node.nama || node.name || 'Simpul';
           const nodeProv = node.p || node.prov || '';
-          const nodeVal = Number(selectedMetric === 'pnp' ? node.pnp ?? node.pnp_tot : node.arm ?? node.arm_tot) || 0;
+          const nodeVal = Number(getNodeVol(node)) || 0;
           const color = (COLOR as any)[modaKey] || '#1a5287';
           const isTop10 = rankIdx < 10;
 
@@ -490,19 +500,47 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
             <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <button
                 onClick={() => setSelectedMetric('pnp')}
-                className={`px-2.5 py-1 rounded-md font-medium ${
-                  selectedMetric === 'pnp' ? 'bg-white dark:bg-slate-900 font-bold shadow-2xs' : 'text-slate-500'
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  selectedMetric === 'pnp' ? 'bg-white dark:bg-slate-900 font-bold shadow-2xs text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Penumpang
               </button>
               <button
                 onClick={() => setSelectedMetric('arm')}
-                className={`px-2.5 py-1 rounded-md font-medium ${
-                  selectedMetric === 'arm' ? 'bg-white dark:bg-slate-900 font-bold shadow-2xs' : 'text-slate-500'
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  selectedMetric === 'arm' ? 'bg-white dark:bg-slate-900 font-bold shadow-2xs text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Armada
+              </button>
+            </div>
+
+            {/* Direction Toggle (Default: Berangkat) */}
+            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setSelectedDirection('brg')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  selectedDirection === 'brg' ? 'bg-sky-600 text-white font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Berangkat
+              </button>
+              <button
+                onClick={() => setSelectedDirection('dat')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  selectedDirection === 'dat' ? 'bg-sky-600 text-white font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Datang
+              </button>
+              <button
+                onClick={() => setSelectedDirection('tot')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  selectedDirection === 'tot' ? 'bg-sky-600 text-white font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Total
               </button>
             </div>
 
