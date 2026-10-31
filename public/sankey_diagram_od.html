@@ -4,21 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Diagram Sankey OD Udara Nasional</title>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind = {
+      darkMode: 'class',
+    };
+    function detectTheme() {
+      const params = new URLSearchParams(window.location.search);
+      let isDark = false;
+      if (params.get('dark') === '1') isDark = true;
+      else if (params.get('dark') === '0') isDark = false;
+      else {
+        try {
+          if (window.parent && window.parent.document.documentElement.classList.contains('dark')) isDark = true;
+          else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) isDark = true;
+        } catch(e) {}
+      }
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    detectTheme();
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'theme_change') {
+        if (e.data.isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+    });
+  </script>
   <style>
     :root {
       --background: #f8fafc;
       --foreground: #0f172a;
       --card: #ffffff;
+      --card-sub: #f1f5f9;
       --border: #e2e8f0;
       --muted-foreground: #64748b;
     }
     .dark {
-      --background: #0b1120;
+      --background: #020617;
       --foreground: #f8fafc;
       --card: #0f172a;
+      --card-sub: #1e293b;
       --border: #1e293b;
       --muted-foreground: #94a3b8;
+    }
+    body {
+      background: transparent;
+      color: var(--foreground);
     }
     .flow-ribbon {
       transition: opacity 0.15s ease, stroke-width 0.15s ease;
@@ -55,8 +93,8 @@
     }
   </style>
 </head>
-<body class="bg-transparent text-[var(--foreground)] antialiased p-3 sm:p-5">
-  <div class="max-w-7xl mx-auto space-y-4">
+<body class="bg-transparent text-[var(--foreground)] antialiased p-0">
+  <div class="w-full space-y-4">
 
     <!-- HEADER CARD -->
     <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
@@ -91,22 +129,22 @@
 
       <!-- KPI METRIC STRIP -->
       <div id="kpi-strip" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-[var(--border)]">
-        <div class="bg-[var(--background)] rounded-xl p-3 border border-[var(--border)]">
+        <div class="bg-[var(--card-sub)] rounded-xl p-3 border border-[var(--border)]">
           <span class="text-xs text-[var(--muted-foreground)] block">Total Penumpang Terpantau</span>
           <span id="kpi-pax" class="text-lg font-bold text-[var(--foreground)]">1.941.399</span>
           <span class="text-xs text-blue-600 dark:text-blue-400 block font-medium">Orang / Bulan</span>
         </div>
-        <div class="bg-[var(--background)] rounded-xl p-3 border border-[var(--border)]">
+        <div class="bg-[var(--card-sub)] rounded-xl p-3 border border-[var(--border)]">
           <span class="text-xs text-[var(--muted-foreground)] block">Frekuensi Penerbangan</span>
           <span id="kpi-flt" class="text-lg font-bold text-[var(--foreground)]">14.869</span>
           <span class="text-xs text-emerald-600 dark:text-emerald-400 block font-medium">Flights Komersial</span>
         </div>
-        <div class="bg-[var(--background)] rounded-xl p-3 border border-[var(--border)]">
+        <div class="bg-[var(--card-sub)] rounded-xl p-3 border border-[var(--border)]">
           <span class="text-xs text-[var(--muted-foreground)] block">Koridor Terpadat</span>
           <span id="kpi-top" class="text-lg font-bold text-[var(--foreground)]">DPS ⇄ CGK</span>
           <span id="kpi-top-sub" class="text-xs text-amber-600 dark:text-amber-400 block font-medium">266.263 Pax Gabungan</span>
         </div>
-        <div class="bg-[var(--background)] rounded-xl p-3 border border-[var(--border)]">
+        <div class="bg-[var(--card-sub)] rounded-xl p-3 border border-[var(--border)]">
           <span class="text-xs text-[var(--muted-foreground)] block">Rata-rata Kepadatan</span>
           <span id="kpi-density" class="text-lg font-bold text-[var(--foreground)]">130,6</span>
           <span class="text-xs text-purple-600 dark:text-purple-400 block font-medium">Pax / Penerbangan</span>
@@ -121,7 +159,7 @@
       <div id="controls-bar" class="flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex items-center gap-2">
           <label for="filter-hub" class="font-medium text-[var(--foreground)]">Filter Asal:</label>
-          <select id="filter-hub" onchange="applyFilter()" class="bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
+          <select id="filter-hub" onchange="applyFilter()" class="bg-[var(--card-sub)] border border-[var(--border)] text-[var(--foreground)] rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium">
             <option value="ALL">Semua Titik Asal</option>
             <option value="CGK">CGK (Jakarta)</option>
             <option value="SUB">SUB (Surabaya)</option>
@@ -138,7 +176,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="resetHighlight()" class="px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+          <button onclick="resetHighlight()" class="px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card-sub)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors font-medium">
             🔄 Reset Sorotan
           </button>
           <div class="flex items-center gap-1.5 text-[var(--muted-foreground)] text-xs">

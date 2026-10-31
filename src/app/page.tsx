@@ -23,9 +23,19 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<TabId>('timeline');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to Dark Mode matching user preference
 
   // Load Data Bundle & Benchmarks
+  useEffect(() => {
+    // Check saved theme or media query on mount
+    const saved = localStorage.getItem('sh_theme');
+    if (saved) {
+      setIsDarkMode(saved === 'dark');
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setIsDarkMode(true);
+    }
+  }, []);
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -193,9 +203,9 @@ export default function Home() {
               />
             )}
 
-            {activeTab === 'od_map' && <ODMapWorkspace />}
+            {activeTab === 'od_map' && <ODMapWorkspace isDarkMode={isDarkMode} />}
 
-            {activeTab === 'sankey' && <ODSankeyWorkspace />}
+            {activeTab === 'sankey' && <ODSankeyWorkspace isDarkMode={isDarkMode} />}
 
             {activeTab === 'glossary' && <GlossaryWorkspace />}
           </div>

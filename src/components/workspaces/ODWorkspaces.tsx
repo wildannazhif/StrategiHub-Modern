@@ -1,12 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Compass } from 'lucide-react';
 import { getBasePath } from '@/lib/constants';
 
-export const ODMapWorkspace: React.FC = () => {
+interface ODWorkspaceProps {
+  isDarkMode?: boolean;
+}
+
+export const ODMapWorkspace: React.FC<ODWorkspaceProps> = ({ isDarkMode = false }) => {
   const [activeEngine, setActiveEngine] = useState<'echarts' | 'canvas'>('echarts');
   const [iframeHeight, setIframeHeight] = useState<number>(1050);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const basePath = getBasePath();
 
   useEffect(() => {
@@ -18,6 +23,25 @@ export const ODMapWorkspace: React.FC = () => {
     window.addEventListener('message', handleMsg);
     return () => window.removeEventListener('message', handleMsg);
   }, []);
+
+  // Sync theme
+  useEffect(() => {
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow?.postMessage({ type: 'theme_change', isDark: isDarkMode }, '*');
+      try {
+        iframeRef.current.contentDocument?.documentElement.classList.toggle('dark', isDarkMode);
+      } catch (e) {}
+    }
+  }, [isDarkMode]);
+
+  const handleLoad = () => {
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow?.postMessage({ type: 'theme_change', isDark: isDarkMode }, '*');
+      try {
+        iframeRef.current.contentDocument?.documentElement.classList.toggle('dark', isDarkMode);
+      } catch (e) {}
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -63,9 +87,15 @@ export const ODMapWorkspace: React.FC = () => {
       </div>
 
       {/* MAP IFRAME CONTAINER (Isolated stacking context) */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs bg-slate-950 relative isolate z-0">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs relative isolate z-0">
         <iframe
-          src={activeEngine === 'echarts' ? `${basePath}/peta_rute_od_echarts.html` : `${basePath}/peta_rute_od_interaktif.html`}
+          ref={iframeRef}
+          src={
+            activeEngine === 'echarts'
+              ? `${basePath}/peta_rute_od_echarts.html?dark=${isDarkMode ? '1' : '0'}`
+              : `${basePath}/peta_rute_od_interaktif.html?dark=${isDarkMode ? '1' : '0'}`
+          }
+          onLoad={handleLoad}
           style={{ height: `${iframeHeight}px` }}
           className="w-full border-none transition-all duration-150"
           title="Peta Rute OD Udara"
@@ -76,8 +106,9 @@ export const ODMapWorkspace: React.FC = () => {
   );
 };
 
-export const ODSankeyWorkspace: React.FC = () => {
+export const ODSankeyWorkspace: React.FC<ODWorkspaceProps> = ({ isDarkMode = false }) => {
   const [iframeHeight, setIframeHeight] = useState<number>(1450);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const basePath = getBasePath();
 
   useEffect(() => {
@@ -90,14 +121,35 @@ export const ODSankeyWorkspace: React.FC = () => {
     return () => window.removeEventListener('message', handleMsg);
   }, []);
 
+  // Sync theme
+  useEffect(() => {
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow?.postMessage({ type: 'theme_change', isDark: isDarkMode }, '*');
+      try {
+        iframeRef.current.contentDocument?.documentElement.classList.toggle('dark', isDarkMode);
+      } catch (e) {}
+    }
+  }, [isDarkMode]);
+
+  const handleLoad = () => {
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow?.postMessage({ type: 'theme_change', isDark: isDarkMode }, '*');
+      try {
+        iframeRef.current.contentDocument?.documentElement.classList.toggle('dark', isDarkMode);
+      } catch (e) {}
+    }
+  };
+
   return (
     <div className="space-y-4">
-      {/* SANKEY IFRAME CONTAINER (Seamless, full-height downwards without inner scroll) */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs relative isolate z-0">
+      {/* SANKEY IFRAME CONTAINER (Seamless blend directly into dashboard without double container borders) */}
+      <div className="relative isolate z-0 w-full overflow-hidden bg-transparent">
         <iframe
-          src={`${basePath}/sankey_diagram_od.html`}
+          ref={iframeRef}
+          src={`${basePath}/sankey_diagram_od.html?dark=${isDarkMode ? '1' : '0'}`}
+          onLoad={handleLoad}
           style={{ height: `${iframeHeight}px` }}
-          className="w-full border-none transition-all duration-150"
+          className="w-full border-none transition-all duration-150 bg-transparent"
           title="Diagram Sankey OD Multimoda"
           scrolling="no"
         />
