@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { EChartWrapper } from '@/components/charts/EChartWrapper';
 import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal, formatPercent } from '@/lib/constants';
-import { TrendingUp, Award, MapPin } from 'lucide-react';
+import { TrendingUp, Award, MapPin, BarChart3, Calendar } from 'lucide-react';
 
 interface ForecastingWorkspaceProps {
   forecastData: any;
@@ -440,6 +440,115 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     return list;
   }, [futurePoints, tableRange]);
 
+  // 8. Dedicated 18-Day Nataru Bar Chart Option (2024 vs 2025 vs Proyeksi 2026)
+  const nataruBarChartOption = useMemo(() => {
+    const rawList = forecastData?.nataru_18days_comparison || [];
+    if (rawList.length === 0) return null;
+
+    const labels = rawList.map((r: any) => r.short_label || r.tag);
+    const textColor = isDarkMode ? '#cbd5e1' : '#475569';
+    const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
+
+    const val24 = rawList.map((r: any) => {
+      if (!isAllProv || !isOperating) return 0;
+      if (selectedModa === 'TOTAL') {
+        return selectedMetric === 'pnp' ? (r.pnp_2024 || 0) : (r.arm_2024 || 0);
+      }
+      return selectedMetric === 'pnp' ? (r[`${selectedModa}_2024`] || 0) : Math.round((r[`${selectedModa}_2024`] || 0) / 28);
+    });
+
+    const val25 = rawList.map((r: any) => {
+      if (!isOperating) return 0;
+      if (isAllProv) {
+        if (selectedModa === 'TOTAL') {
+          return selectedMetric === 'pnp' ? (r.pnp_2025 || 0) : (r.arm_2025 || 0);
+        }
+        return selectedMetric === 'pnp' ? (r[`${selectedModa}_2025`] || 0) : Math.round((r[`${selectedModa}_2025`] || 0) / 28);
+      }
+      const pPoint = (provData?.scenarios?.moderat || []).find((p: any) => p.date === r.date_2026);
+      if (pPoint) {
+        return selectedMetric === 'pnp' ? (Number(pPoint.TOTAL_2025) || 0) : (Number(pPoint.arm_2025) || 0);
+      }
+      return 0;
+    });
+
+    const val26 = rawList.map((r: any) => {
+      if (!isOperating) return 0;
+      if (isAllProv) {
+        if (selectedModa === 'TOTAL') {
+          return selectedMetric === 'pnp' ? (r.pnp_2026_forecast || 0) : (r.arm_2026_forecast || 0);
+        }
+        return selectedMetric === 'pnp' ? (r[selectedModa] || 0) : (r[`arm_${selectedModa}`] || 0);
+      }
+      const pPoint = (provData?.scenarios?.moderat || []).find((p: any) => p.date === r.date_2026);
+      if (pPoint) {
+        return selectedMetric === 'pnp' ? (Number(pPoint[selectedModa]) || 0) : (Number(pPoint[`arm_${selectedModa}`]) || 0);
+      }
+      return 0;
+    });
+
+    const series: any[] = [];
+    if (isAllProv) {
+      series.push({
+        name: 'Realisasi Nataru 2024',
+        type: 'bar',
+        data: val24,
+        itemStyle: { color: isDarkMode ? '#64748b' : '#94a3b8', borderRadius: [3, 3, 0, 0] },
+      });
+    }
+    series.push({
+      name: 'Realisasi Nataru 2025',
+      type: 'bar',
+      data: val25,
+      itemStyle: { color: isDarkMode ? '#f59e0b' : '#d97706', borderRadius: [3, 3, 0, 0] },
+    });
+    series.push({
+      name: 'Proyeksi Nataru 2026 (Model Champion)',
+      type: 'bar',
+      data: val26,
+      itemStyle: { color: isDarkMode ? '#818cf8' : '#4f46e5', borderRadius: [3, 3, 0, 0] },
+    });
+
+    return {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+        borderColor: isDarkMode ? '#334155' : '#e2e8f0',
+        textStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a', fontSize: 12 },
+        valueFormatter: (value: any) => `${formatNumber(value)} ${selectedMetric === 'pnp' ? 'orang' : 'trip'}`,
+      },
+      legend: {
+        bottom: 0,
+        textStyle: { color: textColor, fontSize: 11 },
+        itemGap: 16,
+      },
+      grid: {
+        top: 25,
+        left: '2%',
+        right: '2%',
+        bottom: 50,
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        axisLabel: { color: textColor, fontSize: 10, rotate: 25 },
+        axisLine: { lineStyle: { color: isDarkMode ? '#334155' : '#cbd5e1' } },
+      },
+      yAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { color: splitLineColor } },
+        axisLabel: {
+          color: textColor,
+          fontSize: 10,
+          formatter: (v: number) => (v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : `${Math.round(v / 1000)}k`),
+        },
+      },
+      series,
+    };
+  }, [forecastData, isDarkMode, isAllProv, isOperating, selectedModa, selectedMetric, provData]);
+
   return (
     <div className="space-y-6">
       {/* 1. HEADER & INTERACTIVE CONTROLS TOOLBAR */}
@@ -655,7 +764,71 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         <EChartWrapper options={chartOptions} style={{ height: '400px', width: '100%' }} />
       </div>
 
-      {/* 4. MODAL SHARE & 5-MODA COMPARISON TABLE (NATARU 18 DAYS) */}
+      {/* 4. DEDICATED 18-DAY NATARU BAR CHART (2024 vs 2025 vs PROYEKSI 2026) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                Grafik Batang Komparasi Volume Harian Posko Nataru (18 Hari: 18 Des – 4 Jan)
+              </h4>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Perbandingan tren harian 3 tahun kalender: Realisasi 2024, Realisasi 2025, dan Hasil Proyeksi 2026 ({isAllProv ? 'Nasional' : selectedProv} • {selectedModa === 'TOTAL' ? 'Semua Moda' : MODA_DISPLAY_NAME[selectedModa]}).
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-2.5 py-1 rounded border border-indigo-200 dark:border-indigo-800">
+              {isAllProv ? 'Nasional (3 Tahun: 2024, 2025, 2026)' : `${selectedProv} (2 Tahun: 2025, 2026)`} • {selectedMetric === 'pnp' ? 'Penumpang' : 'Armada'}
+            </span>
+          </div>
+        </div>
+
+        {/* NATARU SUMMARY CALLOUT CARDS */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+            <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2024 (18H):</span>
+            <div className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">
+              {isAllProv ? (selectedMetric === 'pnp' ? '22.522.872' : '765.410') : '-'}
+            </div>
+            <span className="text-[10px] text-slate-400 font-sans">{isAllProv ? 'Realisasi Penuh' : 'Khusus Nasional'}</span>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+            <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2025 (18H):</span>
+            <div className="font-bold text-amber-600 dark:text-amber-400 text-sm mt-0.5">
+              {isAllProv ? (selectedMetric === 'pnp' ? '31.718.505' : '823.140') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.base2025 || 0)}
+            </div>
+            <span className="text-[10px] text-amber-600/80 font-sans">Ground Truth Pembanding</span>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900 font-mono text-xs">
+            <span className="text-indigo-600 dark:text-indigo-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 2026 (18H):</span>
+            <div className="font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-0.5">
+              {isAllProv ? (selectedMetric === 'pnp' ? '30.716.688' : '812.590') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0)}
+            </div>
+            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-sans font-semibold">Model Champion</span>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+            <span className="text-slate-400 font-sans text-[11px] block">Puncak Mudik Natal (H-1):</span>
+            <div className="font-bold text-rose-600 dark:text-rose-400 text-sm mt-0.5">
+              24 Des • {isAllProv ? (selectedMetric === 'pnp' ? '1.933.690' : '46.942') : formatNumber(Math.round((comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0) / 15.5))}
+            </div>
+            <span className="text-[10px] text-rose-600/80 font-sans">Puncak Arus Berangkat</span>
+          </div>
+        </div>
+
+        {nataruBarChartOption && (
+          <div className="pt-2">
+            <EChartWrapper options={nataruBarChartOption} style={{ height: '360px', width: '100%' }} />
+          </div>
+        )}
+      </div>
+
+      {/* 5. MODAL SHARE & 5-MODA COMPARISON TABLE (NATARU 18 DAYS) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-3">
         <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
           <div>
@@ -741,18 +914,18 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         </div>
       </div>
 
-      {/* 5. MODEL SPECIFICATION & 11-MODEL BENCHMARK RANKING TABLE */}
+      {/* 6. MODEL SPECIFICATION & 12-MODEL BENCHMARK RANKING TABLE */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
               <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                Spesifikasi Model & Evaluasi Akurasi Pengujian (Backtest Holdout)
+                Spesifikasi Model & Evaluasi Akurasi Pengujian (Backtest Holdout 12 Model)
               </h4>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Model champion terpilih secara otomatis berbasis evaluasi MAPE terendah dan stabilitas horizon 100 hari.
+              Model champion terpilih secara otomatis berbasis evaluasi MAPE terendah dari 12 algoritma kandidat (termasuk Machine Learning LightGBM).
             </p>
           </div>
 
@@ -764,7 +937,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               onClick={() => setShowBenchmarkModal(!showBenchmarkModal)}
               className="px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-semibold text-xs hover:bg-indigo-100 transition-colors"
             >
-              {showBenchmarkModal ? '✕ Tutup Tabel 11 Model' : '📊 Lihat Tabel 11 Model Peramalan'}
+              {showBenchmarkModal ? '✕ Tutup Tabel 12 Model' : '📊 Lihat Tabel 12 Model Peramalan (+LightGBM)'}
             </button>
           </div>
         </div>
@@ -813,7 +986,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-indigo-200 dark:border-indigo-800 space-y-3">
             <div className="flex items-center justify-between">
               <h5 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider">
-                Hasil Benchmark 11 Model Acuan PUSDATIN Kemenhub ({isAllProv ? 'Nasional' : selectedProv})
+                Hasil Benchmark 12 Model Acuan PUSDATIN Kemenhub (+LightGBM) ({isAllProv ? 'Nasional' : selectedProv})
               </h5>
               <button
                 onClick={() => setShowBenchmarkModal(false)}

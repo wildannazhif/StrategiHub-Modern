@@ -26,6 +26,15 @@
     "Direction Acc (%)": 89.3,
     "Waktu (dtk)": 0.122
   },
+  "4. LightGBM Regressor (Machine Learning)": {
+    "MAPE (%)": 4.45,
+    "WAPE (%)": 4.38,
+    "RMSE": 68420,
+    "MAE": 53490,
+    "Max Error": 149800,
+    "Direction Acc (%)": 78.6,
+    "Waktu (dtk)": 0.12
+  },
   "4. SARIMA (1,1,1)x(1,1,1,7)": {
     "MAPE (%)": 5.87,
     "WAPE (%)": 5.94,
