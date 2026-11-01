@@ -146,63 +146,6 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
     };
   }, [lebaranDaily, isDarkMode, chartMode, selectedMetric, selectedDirection]);
 
-  // Modal share stacked area chart (Dinamika Pangsa Pasar 17 Hari)
-  const modalShareAreaOption = useMemo(() => {
-    const dates = lebaranDaily.map((d: any) => d.tag || d.h_tag);
-    const textColor = isDarkMode ? '#cbd5e1' : '#475569';
-    const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
-
-    const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT'> = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'];
-    const series = modes.map((m) => ({
-      name: MODA_DISPLAY_NAME[m],
-      type: 'line',
-      stack: 'Total',
-      areaStyle: { opacity: 0.65 },
-      emphasis: { focus: 'series' },
-      data: lebaranDaily.map((d: any) => {
-        const tot = getLebaranTotal(d) || 1;
-        const val = getLebaranValue(d, m);
-        return Number(((val / tot) * 100).toFixed(1));
-      }),
-      itemStyle: { color: COLOR[m] },
-    }));
-
-    return {
-      tooltip: {
-        trigger: 'axis',
-        backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
-        borderColor: isDarkMode ? '#334155' : '#e2e8f0',
-        textStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a', fontSize: 12 },
-        valueFormatter: (value: any) => `${value}%`,
-      },
-      legend: {
-        bottom: 0,
-        textStyle: { color: textColor, fontSize: 10 },
-        itemGap: 8,
-      },
-      grid: {
-        top: 20,
-        left: '2%',
-        right: '2%',
-        bottom: 50,
-        containLabel: true,
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: dates,
-        axisLabel: { color: textColor, fontSize: 9, rotate: 25 },
-      },
-      yAxis: {
-        type: 'value',
-        max: 100,
-        splitLine: { lineStyle: { color: splitLineColor } },
-        axisLabel: { color: textColor, fontSize: 10, formatter: '{value}%' },
-      },
-      series,
-    };
-  }, [lebaranDaily, isDarkMode, selectedMetric, selectedDirection]);
-
   // Dynamic surge calculations for the heatmap table
   const dynamicSurgeData = useMemo(() => {
     const feb = monthlySummary?.[1] as any;
@@ -367,62 +310,43 @@ export const LebaranWorkspace: React.FC<LebaranWorkspaceProps> = ({
         </div>
       )}
 
-      {/* CHARTS ROW: LINE CHART + DINAMIKA PANGSA PASAR AREA CHART */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEBARAN LINE CHART */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-            <div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                Grafik Fluktuasi H-8 s/d H+8 Lebaran 2026 {chartMode === 'modes' ? '(5 Moda Terpisah)' : '(Total Nasional)'}
-              </h4>
-              <span className="text-[11px] font-mono text-slate-400">
-                Satuan: {isPnp ? 'Orang' : 'Trip'} • {selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Dua Arah'}
-              </span>
-            </div>
-
-            {/* Mode Selector: 5 Moda vs Total (No duplicate Direction toggle) */}
-            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
-              <button
-                onClick={() => setChartMode('modes')}
-                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                  chartMode === 'modes'
-                    ? 'bg-rose-600 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                5 Moda
-              </button>
-              <button
-                onClick={() => setChartMode('total')}
-                className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-                  chartMode === 'total'
-                    ? 'bg-rose-600 text-white shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                Total Nasional
-              </button>
-            </div>
+      {/* LEBARAN LINE CHART (1:1 Paritas V1 Asli - 1 Chart Tunggal Penuh) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+              Grafik Fluktuasi H-8 s/d H+8 Lebaran 2026 {chartMode === 'modes' ? '(5 Moda Terpisah)' : '(Total Nasional)'}
+            </h4>
+            <span className="text-[11px] font-mono text-slate-400">
+              Satuan: {isPnp ? 'Orang' : 'Trip'} • {selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Dua Arah'}
+            </span>
           </div>
-          <EChartWrapper options={lebaranLineChartOption} style={{ height: '340px', width: '100%' }} />
-        </div>
 
-        {/* DINAMIKA PANGSA PASAR 17 HARI (MODAL SHARE STACKED AREA) */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                Dinamika Pangsa Pasar (Modal Share) 17 Hari
-              </h4>
-              <span className="text-[11px] font-mono text-slate-400">
-                Komposisi 100% ({isPnp ? 'Penumpang' : 'Armada'} • {selectedDirection === 'brg' ? 'Keberangkatan' : selectedDirection === 'dat' ? 'Kedatangan' : 'Total'})
-              </span>
-            </div>
-            <span className="text-[11px] font-mono text-slate-400">100% Stacked</span>
+          {/* Mode Selector: 5 Moda vs Total */}
+          <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+            <button
+              onClick={() => setChartMode('modes')}
+              className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                chartMode === 'modes'
+                  ? 'bg-rose-600 text-white shadow-2xs font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              }`}
+            >
+              5 Moda
+            </button>
+            <button
+              onClick={() => setChartMode('total')}
+              className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                chartMode === 'total'
+                  ? 'bg-rose-600 text-white shadow-2xs font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              }`}
+            >
+              Total Nasional
+            </button>
           </div>
-          <EChartWrapper options={modalShareAreaOption} style={{ height: '340px', width: '100%' }} />
         </div>
+        <EChartWrapper options={lebaranLineChartOption} style={{ height: '360px', width: '100%' }} />
       </div>
 
       {/* HEATMAP LONJAKAN LEBARAN & TABEL KOMPARASI (Dynamically updated to Filter) */}
