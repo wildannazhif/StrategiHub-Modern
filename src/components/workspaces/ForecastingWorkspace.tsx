@@ -56,12 +56,12 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
   const championModel = useMemo(() => {
     if (isAllProv) {
       return forecastData?.champion_model || {
-        name: 'Holt-Winters Mul Damped (phi=0.98)',
-        code: 'hw_mul_damped',
-        mape: 4.10,
-        rmse: 62051,
-        mae: 49146,
-        wape: 4.02,
+        name: 'LightGBM Regressor (Machine Learning)',
+        code: 'lightgbm',
+        mape: 3.29,
+        rmse: 59271,
+        mae: 40241,
+        wape: 3.24,
         dir_acc: 89.3,
       };
     }
