@@ -54,9 +54,12 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
   const isOperating = selectedModa === 'TOTAL' || activeModes.includes(selectedModa);
 
-  // Model Specs & Accuracy
+  // Model Specs & Accuracy (Dynamically updates based on Province AND Moda)
   const championModel = useMemo(() => {
     if (isAllProv) {
+      if (selectedModa !== 'TOTAL' && forecastData?.metrics?.[selectedModa]) {
+        return forecastData.metrics[selectedModa];
+      }
       return forecastData?.champion_model || {
         name: 'LightGBM Regressor (Machine Learning)',
         code: 'lightgbm',
@@ -67,13 +70,24 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         dir_acc: 89.3,
       };
     }
+    if (selectedModa !== 'TOTAL' && provData?.metrics?.[selectedModa]) {
+      return provData.metrics[selectedModa];
+    }
     return provData?.champion_model || forecastData?.champion_model;
-  }, [isAllProv, provData, forecastData]);
+  }, [isAllProv, provData, forecastData, selectedModa]);
 
   const benchmarkList = useMemo(() => {
-    if (isAllProv) return forecastData?.benchmarks || [];
+    if (isAllProv) {
+      if (selectedModa !== 'TOTAL' && forecastData?.benchmarks_by_moda?.[selectedModa]) {
+        return forecastData.benchmarks_by_moda[selectedModa];
+      }
+      return forecastData?.benchmarks || [];
+    }
+    if (selectedModa !== 'TOTAL' && provData?.benchmarks_by_moda?.[selectedModa]) {
+      return provData.benchmarks_by_moda[selectedModa];
+    }
     return provData?.benchmarks || forecastData?.benchmarks || [];
-  }, [isAllProv, provData, forecastData]);
+  }, [isAllProv, provData, forecastData, selectedModa]);
 
   // Peak values for 2024 and 2025 Nataru
   const val24_peak = useMemo(() => {
@@ -1120,7 +1134,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-indigo-200 dark:border-indigo-800 space-y-3">
             <div className="flex items-center justify-between">
               <h5 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider">
-                Hasil Benchmark 12 Model Acuan PUSDATIN Kemenhub (+LightGBM) ({isAllProv ? 'Nasional' : selectedProv})
+                Hasil Benchmark Model Acuan PUSDATIN Kemenhub (+LightGBM) ({isAllProv ? 'Nasional' : selectedProv} • {selectedModa === 'TOTAL' ? 'Total Multimoda' : MODA_DISPLAY_NAME[selectedModa]})
               </h5>
               <button
                 onClick={() => setShowBenchmarkModal(false)}
