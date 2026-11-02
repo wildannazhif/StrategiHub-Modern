@@ -60,7 +60,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
     } else if (timeRange === 't2') {
       list = timeline.filter((d) => d.date >= '2026-05-01' && d.date <= '2026-08-31');
     } else if (timeRange === 't3') {
-      list = timeline.filter((d) => d.date >= '2026-09-01' && d.date <= '2026-10-13');
+      list = timeline.filter((d) => d.date >= '2026-09-01' && d.date <= '2026-10-31');
     } else if (timeRange === 'lebaran') {
       list = timeline.filter((d) => d.date >= '2026-03-13' && d.date <= '2026-03-29');
     } else if (timeRange === 'custom') {

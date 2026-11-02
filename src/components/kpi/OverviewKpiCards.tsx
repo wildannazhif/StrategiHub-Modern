@@ -83,7 +83,7 @@ export const OverviewKpiCards: React.FC<OverviewKpiCardsProps> = ({
           {formatNumber(s?.avg ?? Math.round(meta.total_passengers_ytd / meta.days_count))}
         </div>
         <div className="mt-1 text-[11px] text-slate-500">
-          <span>Baseline Feb: {formatNumber(s?.baseline_feb ?? meta.baseline_feb_avg)} /hari</span>
+          <span>Baseline Normal: {formatNumber(s?.baseline_feb ?? meta.baseline_feb_avg)} /hari</span>
         </div>
       </div>
 
@@ -100,7 +100,7 @@ export const OverviewKpiCards: React.FC<OverviewKpiCardsProps> = ({
         </div>
         <div className="mt-1 text-[11px] text-amber-600 dark:text-amber-400 font-semibold flex items-center justify-between">
           <span>{s?.mudik_tag ? s.mudik_tag.split('(')[0].trim() : '18 Mar 2026'}</span>
-          <span>+{formatPercent(s?.mudik_surge_pct ?? meta.peak_mudik_surge_pct)} surge</span>
+          <span>{formatPercent(s?.mudik_surge_pct ?? meta.peak_mudik_surge_pct)} surge</span>
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export const OverviewKpiCards: React.FC<OverviewKpiCardsProps> = ({
         </div>
         <div className="mt-1 text-[11px] text-rose-600 dark:text-rose-400 font-semibold flex items-center justify-between">
           <span>{s?.peak_tag ? s.peak_tag.split('(')[0].trim() : '24 Mar 2026 (H+3)'}</span>
-          <span>+{formatPercent(s?.peak_surge_pct ?? meta.all_time_peak_surge_pct)} surge</span>
+          <span>{formatPercent(s?.peak_surge_pct ?? meta.all_time_peak_surge_pct)} surge</span>
         </div>
       </div>
     </div>

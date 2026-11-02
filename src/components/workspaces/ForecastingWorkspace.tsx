@@ -556,29 +556,41 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     const rawList = forecastData?.nataru_18days_comparison || [];
     if (rawList.length === 0) return null;
 
-    const labels = rawList.map((r: any) => r.short_label || r.tag);
+    const labels = rawList.map((r: any) => r.short_label || r.label || r.tag);
     const textColor = isDarkMode ? '#cbd5e1' : '#475569';
     const splitLineColor = isDarkMode ? '#1e293b' : '#f1f5f9';
 
     const val24 = rawList.map((r: any) => {
-      if (!isAllProv || !isOperating) return 0;
-      if (selectedModa === 'TOTAL') {
-        return selectedMetric === 'pnp' ? (r.pnp_2024 || 0) : (r.arm_2024 || 0);
+      if (!isOperating) return 0;
+      if (isAllProv) {
+        if (selectedModa === 'TOTAL') {
+          return selectedMetric === 'pnp' ? (r.pnp_2024 || r.pbrg_2024 || 0) : (r.arm_2024 || r.abrg_2024 || 0);
+        }
+        return selectedMetric === 'pnp' ? (r[`${selectedModa}_2024`] || 0) : (r[`arm_${selectedModa}_2024`] || 0);
       }
-      return selectedMetric === 'pnp' ? (r[`${selectedModa}_2024`] || 0) : Math.round((r[`${selectedModa}_2024`] || 0) / 28);
+      // For province level: calculate proportional share based on provincial 2025 baseline
+      const pPoint = (provData?.scenarios?.moderat || []).find((p: any) => p.date === r.date_2026);
+      if (pPoint) {
+        const base25 = selectedMetric === 'pnp' ? (Number(pPoint.pbrg_TOTAL_2025 || pPoint.TOTAL_2025) || 0) : (Number(pPoint.abrg_TOTAL_2025 || pPoint.arm_2025) || 0);
+        const nat25 = selectedMetric === 'pnp' ? (r.pnp_2025 || 1) : (r.arm_2025 || 1);
+        const ratio = nat25 > 0 ? (base25 / nat25) : 0.05;
+        const nat24 = selectedMetric === 'pnp' ? (r.pnp_2024 || 0) : (r.arm_2024 || 0);
+        return Math.round(nat24 * ratio);
+      }
+      return 0;
     });
 
     const val25 = rawList.map((r: any) => {
       if (!isOperating) return 0;
       if (isAllProv) {
         if (selectedModa === 'TOTAL') {
-          return selectedMetric === 'pnp' ? (r.pnp_2025 || 0) : (r.arm_2025 || 0);
+          return selectedMetric === 'pnp' ? (r.pnp_2025 || r.pbrg_2025 || 0) : (r.arm_2025 || r.abrg_2025 || 0);
         }
-        return selectedMetric === 'pnp' ? (r[`${selectedModa}_2025`] || 0) : Math.round((r[`${selectedModa}_2025`] || 0) / 28);
+        return selectedMetric === 'pnp' ? (r[`${selectedModa}_2025`] || 0) : (r[`arm_${selectedModa}_2025`] || 0);
       }
       const pPoint = (provData?.scenarios?.moderat || []).find((p: any) => p.date === r.date_2026);
       if (pPoint) {
-        return selectedMetric === 'pnp' ? (Number(pPoint.TOTAL_2025) || 0) : (Number(pPoint.arm_2025) || 0);
+        return selectedMetric === 'pnp' ? (Number(pPoint.pbrg_TOTAL_2025 || pPoint.TOTAL_2025) || 0) : (Number(pPoint.abrg_TOTAL_2025 || pPoint.arm_2025) || 0);
       }
       return 0;
     });
@@ -587,38 +599,37 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       if (!isOperating) return 0;
       if (isAllProv) {
         if (selectedModa === 'TOTAL') {
-          return selectedMetric === 'pnp' ? (r.pnp_2026_forecast || 0) : (r.arm_2026_forecast || 0);
+          return selectedMetric === 'pnp' ? (r.pnp_2026_forecast || r.pbrg_2026 || 0) : (r.arm_2026_forecast || r.abrg_2026 || 0);
         }
-        return selectedMetric === 'pnp' ? (r[selectedModa] || 0) : (r[`arm_${selectedModa}`] || 0);
+        return selectedMetric === 'pnp' ? (r[selectedModa] || r[`pbrg_${selectedModa}`] || 0) : (r[`arm_${selectedModa}`] || r[`abrg_${selectedModa}`] || 0);
       }
       const pPoint = (provData?.scenarios?.moderat || []).find((p: any) => p.date === r.date_2026);
       if (pPoint) {
-        return selectedMetric === 'pnp' ? (Number(pPoint[selectedModa]) || 0) : (Number(pPoint[`arm_${selectedModa}`]) || 0);
+        return selectedMetric === 'pnp' ? (Number(pPoint[selectedModa] || pPoint[`pbrg_${selectedModa}`]) || 0) : (Number(pPoint[`arm_${selectedModa}`] || pPoint[`abrg_${selectedModa}`]) || 0);
       }
       return 0;
     });
 
-    const series: any[] = [];
-    if (isAllProv) {
-      series.push({
+    const series = [
+      {
         name: 'Realisasi Nataru 2024',
         type: 'bar',
         data: val24,
         itemStyle: { color: isDarkMode ? '#64748b' : '#94a3b8', borderRadius: [3, 3, 0, 0] },
-      });
-    }
-    series.push({
-      name: 'Realisasi Nataru 2025',
-      type: 'bar',
-      data: val25,
-      itemStyle: { color: isDarkMode ? '#f59e0b' : '#d97706', borderRadius: [3, 3, 0, 0] },
-    });
-    series.push({
-      name: 'Proyeksi Nataru 2026 (Model Champion)',
-      type: 'bar',
-      data: val26,
-      itemStyle: { color: isDarkMode ? '#818cf8' : '#4f46e5', borderRadius: [3, 3, 0, 0] },
-    });
+      },
+      {
+        name: 'Realisasi Nataru 2025',
+        type: 'bar',
+        data: val25,
+        itemStyle: { color: isDarkMode ? '#f59e0b' : '#d97706', borderRadius: [3, 3, 0, 0] },
+      },
+      {
+        name: 'Proyeksi Nataru 2026 (Model Champion)',
+        type: 'bar',
+        data: val26,
+        itemStyle: { color: isDarkMode ? '#818cf8' : '#4f46e5', borderRadius: [3, 3, 0, 0] },
+      },
+    ];
 
     return {
       tooltip: {
@@ -627,7 +638,32 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
         borderColor: isDarkMode ? '#334155' : '#e2e8f0',
         textStyle: { color: isDarkMode ? '#f8fafc' : '#0f172a', fontSize: 12 },
-        valueFormatter: (value: any) => `${formatNumber(value)} ${selectedMetric === 'pnp' ? 'orang' : 'trip'}`,
+        formatter: (params: any[]) => {
+          if (!params || params.length === 0) return '';
+          const idx = params[0].dataIndex;
+          const r = rawList[idx];
+          const md = r?.day_month || '';
+          const tag = r?.tag || '';
+          const d24 = r?.date_2024 || '';
+          const d25 = r?.date_2025 || '';
+          const d26 = r?.date_2026 || '';
+
+          let html = `<div style="font-weight:700;font-size:12px;padding-bottom:5px;margin-bottom:6px;border-bottom:1px solid ${isDarkMode ? '#334155' : '#e2e8f0'}">
+            📅 Tanggal: ${md} (${tag})
+          </div>`;
+
+          params.forEach((p: any) => {
+            const dateStr = p.seriesName.includes('2024') ? d24 : p.seriesName.includes('2025') ? d25 : d26;
+            html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;font-family:monospace;font-size:11px;padding:2px 0;">
+              <span style="display:flex;align-items:center;gap:6px;">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${p.color};"></span>
+                <span style="font-family:sans-serif;color:${isDarkMode ? '#cbd5e1' : '#475569'}">${p.seriesName} (${dateStr}):</span>
+              </span>
+              <strong style="color:${isDarkMode ? '#f8fafc' : '#0f172a'}">${formatNumber(p.value)} ${selectedMetric === 'pnp' ? 'orang' : 'trip'}</strong>
+            </div>`;
+          });
+          return html;
+        },
       },
       legend: {
         bottom: 0,
@@ -659,6 +695,23 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       series,
     };
   }, [forecastData, isDarkMode, isAllProv, isOperating, selectedModa, selectedMetric, provData]);
+
+  // 18-Day Comparison Summary Totals (Matching exact bar chart values)
+  const nataru18Totals = useMemo(() => {
+    if (!nataruBarChartOption) {
+      return { tot24: 0, tot25: 0, tot26: 0, peak26: 0 };
+    }
+    const series = nataruBarChartOption.series || [];
+    const s24: number[] = series.find((s: any) => s.name.includes('2024'))?.data || [];
+    const s25: number[] = series.find((s: any) => s.name.includes('2025'))?.data || [];
+    const s26: number[] = series.find((s: any) => s.name.includes('2026'))?.data || [];
+
+    const tot24 = s24.reduce((acc: number, v: number) => acc + (Number(v) || 0), 0);
+    const tot25 = s25.reduce((acc: number, v: number) => acc + (Number(v) || 0), 0);
+    const tot26 = s26.reduce((acc: number, v: number) => acc + (Number(v) || 0), 0);
+    const peak26 = s26[6] || 0; // Index 6 is 24 Des H-1
+    return { tot24, tot25, tot26, peak26 };
+  }, [nataruBarChartOption]);
 
   return (
     <div className="space-y-6">
@@ -936,23 +989,23 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
                 <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2024 (18H):</span>
                 <div className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">
-                  {isAllProv ? (selectedMetric === 'pnp' ? '12.506.108' : '369.609') : '-'}
+                  {formatNumber(nataru18Totals.tot24)}
                 </div>
-                <span className="text-[10px] text-slate-400 font-sans">{isAllProv ? 'Keberangkatan Penuh' : 'Khusus Nasional'}</span>
+                <span className="text-[10px] text-slate-400 font-sans">Realisasi 2024/2025</span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
                 <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2025 (18H):</span>
                 <div className="font-bold text-amber-600 dark:text-amber-400 text-sm mt-0.5">
-                  {isAllProv ? (selectedMetric === 'pnp' ? '13.911.680' : '305.060') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.base2025 || 0)}
+                  {formatNumber(nataru18Totals.tot25)}
                 </div>
-                <span className="text-[10px] text-amber-600/80 font-sans">Realisasi Keberangkatan</span>
+                <span className="text-[10px] text-amber-600/80 font-sans">Realisasi 2025/2026</span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900 font-mono text-xs">
                 <span className="text-indigo-600 dark:text-indigo-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 2026 (18H):</span>
                 <div className="font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-0.5">
-                  {isAllProv ? (selectedMetric === 'pnp' ? '17.415.758' : '401.029') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0)}
+                  {formatNumber(nataru18Totals.tot26)}
                 </div>
                 <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-sans font-semibold">Model Champion</span>
               </div>
@@ -960,7 +1013,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
                 <span className="text-slate-400 font-sans text-[11px] block">Puncak Mudik Natal (H-1):</span>
                 <div className="font-bold text-rose-600 dark:text-rose-400 text-sm mt-0.5">
-                  24 Des • {isAllProv ? (selectedMetric === 'pnp' ? '1.106.591' : '24.318') : formatNumber(Math.round((comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0) / 15.5))}
+                  24 Des • {formatNumber(nataru18Totals.peak26)}
                 </div>
                 <span className="text-[10px] text-rose-600/80 font-sans">Puncak Arus Berangkat</span>
               </div>
@@ -1001,20 +1054,11 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
                 <th className="py-2.5 text-right font-semibold">Selisih Vol</th>
                 <th className="py-2.5 text-center font-semibold">Pertumbuhan YoY</th>
                 <th className="py-2.5 text-right font-semibold">Pangsa (Share %)</th>
-                <th className="py-2.5 font-semibold">Catatan Operasional</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
               {comparisonRows.map((row) => {
                 const isTotal = row.moda === 'TOTAL';
-                const notes: Record<string, string> = {
-                  UDARA: 'Kapasitas armada optimal; kuota tiket dinamis memfilter demand.',
-                  KA: 'Tingkat isian stabil tinggi (LF 90%+); rel Trans-Jawa primadona.',
-                  BUS: 'Jalan tol Trans-Jawa & Sumatra menjadi koridor utama armada reguler.',
-                  ASDP: 'Lonjakan kendaraan pribadi dan logistik di lintasan Merak–Bakauheni & Ketapang.',
-                  LAUT: 'Pertumbuhan pergerakan antarpulau & rute perintis Indonesia Timur.',
-                  TOTAL: 'Agregasi seluruh pergerakan mobilitas penumpang antarmoda nasional.',
-                };
 
                 return (
                   <tr
@@ -1049,9 +1093,6 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
                     </td>
                     <td className="py-2.5 text-right font-bold text-slate-700 dark:text-slate-300">
                       {row.isOperating && !isTotal ? `${formatDecimal(row.share)}%` : isTotal ? '100%' : '-'}
-                    </td>
-                    <td className="py-2.5 font-sans text-slate-500 text-[11px]">
-                      {row.isOperating ? notes[row.moda] : 'Moda tidak aktif di wilayah provinsi ini.'}
                     </td>
                   </tr>
                 );

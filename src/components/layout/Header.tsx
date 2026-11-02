@@ -42,15 +42,10 @@ export const Header: React.FC<HeaderProps> = ({
               SH
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight">
-                  StrategiHub Analytics
-                </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wider uppercase bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-                  V2 Modern
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-none hidden sm:block">
+              <span className="font-bold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight block">
+                StrategiHub Analytics
+              </span>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-none hidden sm:block mt-0.5">
                 Pusat Data dan Informasi • Kementerian Perhubungan RI
               </p>
             </div>

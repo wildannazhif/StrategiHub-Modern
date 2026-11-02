@@ -54,7 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen
       groupName: 'OPERASIONAL',
       items: [
         { id: 'timeline', label: 'Kronologi Harian', icon: <Calendar className="w-4 h-4 text-sky-500" /> },
-        { id: 'lebaran', label: 'Puncak Lebaran', icon: <Flame className="w-4 h-4 text-rose-500" /> },
+        { id: 'lebaran', label: 'Lebaran 2026', icon: <Flame className="w-4 h-4 text-rose-500" /> },
         { id: 'loadfactor', label: 'Load Factor', icon: <Activity className="w-4 h-4 text-emerald-500" /> },
         { id: 'tophubs', label: 'Top 30 Simpul', icon: <Anchor className="w-4 h-4 text-blue-500" /> },
         { id: 'matrix', label: 'Matriks Kinerja', icon: <Table className="w-4 h-4 text-amber-500" /> },

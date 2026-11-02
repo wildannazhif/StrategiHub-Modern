@@ -102,7 +102,7 @@ export default function Home() {
 
   const tabTitles: Record<TabId, string> = {
     timeline: 'Kronologi Harian',
-    lebaran: 'Puncak Lebaran',
+    lebaran: 'Lebaran 2026',
     loadfactor: 'Load Factor',
     tophubs: 'Top 30 Simpul',
     matrix: 'Matriks Kinerja',
