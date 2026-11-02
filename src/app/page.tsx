@@ -115,8 +115,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
-      {/* HEADER */}
+    <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors overflow-hidden">
+      {/* HEADER (Fixed top, highest z-index) */}
       <Header
         meta={data.meta}
         isSidebarOpen={isSidebarOpen}
@@ -126,8 +126,8 @@ export default function Home() {
         activeTabTitle={tabTitles[activeTab]}
       />
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* SIDEBAR */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        {/* SIDEBAR (Independent scroll, never clashes with header) */}
         <Sidebar
           activeTab={activeTab}
           onSelectTab={(tab) => {
@@ -140,8 +140,8 @@ export default function Home() {
           onClose={() => setIsSidebarOpen(false)}
         />
 
-        {/* MAIN WORKSPACE CONTENT */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* MAIN WORKSPACE CONTENT (Independent scroll container) */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 min-h-0">
           {/* OVERVIEW KPI CARDS (Always visible, dynamic to active Filter) */}
           <OverviewKpiCards
             meta={data.meta}

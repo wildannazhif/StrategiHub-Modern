@@ -89,14 +89,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 top-[57px] bg-slate-950/70 backdrop-blur-xs z-[1150] lg:hidden transition-opacity"
+          className="fixed inset-0 top-14 bg-slate-950/70 backdrop-blur-xs z-[1150] lg:hidden transition-opacity"
           aria-hidden="true"
         />
       )}
 
-      {/* SIDEBAR DRAWER (z-[1200] so it ALWAYS sits on top of Leaflet maps and canvas) */}
+      {/* SIDEBAR DRAWER (z-[1200] so it ALWAYS sits on top of Leaflet maps and canvas, but below Header z-[1300]) */}
       <aside
-        className={`fixed lg:static top-[57px] bottom-0 left-0 z-[1200] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ease-in-out flex flex-col justify-between overflow-y-auto overflow-x-hidden shadow-2xl lg:shadow-none ${
+        className={`fixed lg:static top-14 bottom-0 left-0 z-[1200] h-[calc(100vh-3.5rem)] lg:h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ease-in-out flex flex-col justify-between overflow-y-auto overflow-x-hidden shadow-2xl lg:shadow-none shrink-0 ${
           isOpen
             ? 'w-64 translate-x-0 opacity-100'
             : '-translate-x-full w-64 lg:w-0 lg:translate-x-0 lg:opacity-0 lg:border-r-0 pointer-events-none'
