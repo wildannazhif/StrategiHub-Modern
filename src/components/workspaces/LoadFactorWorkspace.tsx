@@ -106,6 +106,8 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
 
         const peakLF = Math.max(mudikLF, balikLF);
         const surge = baseLF > 0 ? ((peakLF - baseLF) / baseLF) * 100 : 0;
+        const surgeMudik = baseLF > 0 ? ((mudikLF - baseLF) / baseLF) * 100 : 0;
+        const surgeBalik = baseLF > 0 ? ((balikLF - baseLF) / baseLF) * 100 : 0;
 
         res[m] = {
           baseline: baseLF,
@@ -113,6 +115,8 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
           balik: balikLF,
           peak: peakLF,
           surge,
+          surgeMudik,
+          surgeBalik,
         };
       } else {
         // ARMADA VOLUME: TRIP PER HARI
@@ -146,6 +150,8 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
 
         const peakArm = Math.max(mudikArm, balikArm);
         const surge = baseArm > 0 ? ((peakArm - baseArm) / baseArm) * 100 : 0;
+        const surgeMudik = baseArm > 0 ? ((mudikArm - baseArm) / baseArm) * 100 : 0;
+        const surgeBalik = baseArm > 0 ? ((balikArm - baseArm) / baseArm) * 100 : 0;
 
         res[m] = {
           baseline: baseArm,
@@ -153,6 +159,8 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
           balik: balikArm,
           peak: peakArm,
           surge,
+          surgeMudik,
+          surgeBalik,
         };
       }
     });
@@ -318,107 +326,119 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
         </div>
       </div>
 
-      {/* CHART ROW */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-3">
-          <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-            {isPnp
-              ? `Perbandingan Rasio Beban (Penumpang/Armada): Normal vs Mudik vs Balik (${selectedProvince === 'ALL' ? 'Nasional' : selectedProvince})`
-              : `Perbandingan Volume Operasi Armada (Trip/Hari): Normal vs Mudik vs Balik (${selectedProvince === 'ALL' ? 'Nasional' : selectedProvince})`}
-          </h4>
-          <span className="text-[11px] font-mono text-slate-400 shrink-0">
-            {isPnp ? 'P/A Ratio' : 'Trip/Day'} • {dirLabel}
-          </span>
+      {/* 2-COLUMN ROW: CHART (LEFT) + TABEL EVALUASI UTILISASI ARMADA (RIGHT) (Exact V1 Parity) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* LEFT COLUMN (lg:col-span-6): RASIO KEPADATAN PENUMPANG PER ARMADA (CHART) */}
+        <div className="lg:col-span-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-tight">
+                  {isPnp ? 'Rasio Kepadatan Penumpang per Armada' : 'Kapasitas Operasional & Volume Armada'}
+                </h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  {isPnp
+                    ? 'Penumpang per trip armada pada kondisi Normal vs Puncak Arus Mudik vs Puncak Arus Balik'
+                    : 'Trip armada per hari pada kondisi Normal vs Puncak Arus Mudik vs Puncak Arus Balik'}
+                </p>
+              </div>
+              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                {isPnp ? 'Pnp / Armada' : 'Trip / Hari'}
+              </span>
+            </div>
+
+            <div className="mt-2">
+              <EChartWrapper options={chartOption} style={{ height: '320px', width: '100%' }} />
+            </div>
+          </div>
         </div>
-        <EChartWrapper options={chartOption} style={{ height: '360px', width: '100%' }} />
-      </div>
 
-      {/* TABEL STATISTIK & DETEKSI ANOMALI LOAD FACTOR */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs">
-        <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-3">
-          {isPnp ? 'Tabel Komparasi Angka Beban Riil 5 Moda Transportasi' : 'Tabel Komparasi Utilisasi Armada 5 Moda Transportasi'}
-        </h4>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500">
-                <th className="py-2.5 font-semibold">Moda Transportasi</th>
-                <th className="py-2.5 font-semibold">Jenis Sarana Representatif</th>
-                <th className="py-2.5 text-right font-semibold">Beban Hari Normal (Feb)</th>
-                <th className="py-2.5 text-right font-semibold">Beban Arus Mudik (H-3)</th>
-                <th className="py-2.5 text-right font-semibold">Beban Arus Balik (H+3)</th>
-                <th className="py-2.5 text-right font-semibold">Lonjakan Puncak %</th>
-                <th className="py-2.5 font-semibold">Status Utilisasi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
-              {[
-                {
-                  moda: 'UDARA',
-                  sarana: 'Pesawat Jet Narrow-Body (B737/A320)',
-                  stat: computedStats.UDARA || {},
-                },
-                {
-                  moda: 'KA',
-                  sarana: 'Rangkaian Kereta Api Penumpang',
-                  stat: computedStats.KA || {},
-                },
-                {
-                  moda: 'BUS',
-                  sarana: 'Bus AKAP & AKDP Antarkota',
-                  stat: computedStats.BUS || {},
-                },
-                {
-                  moda: 'ASDP',
-                  sarana: 'Kapal Feri Ro-Ro Penyeberangan',
-                  stat: computedStats.ASDP || {},
-                },
-                {
-                  moda: 'LAUT',
-                  sarana: 'Kapal Pelni & Perintis Laut',
-                  stat: computedStats.LAUT || {},
-                },
-              ].map((row) => {
-                const surge = row.stat.surge || 0;
-                const status =
-                  surge > 80
-                    ? { text: 'Sangat Kritis', color: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' }
-                    : surge > 40
-                    ? { text: 'Padat Tinggi', color: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' }
-                    : surge > 15
-                    ? { text: 'Sibuk Terkendali', color: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' }
-                    : { text: 'Stabil Normal', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' };
+        {/* RIGHT COLUMN (lg:col-span-6): TABEL EVALUASI UTILISASI ARMADA (EXACT V1) */}
+        <div className="lg:col-span-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-tight">
+                Tabel Evaluasi Utilisasi Armada
+              </h4>
+              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                {selectedProvince === 'ALL' ? 'Nasional' : selectedProvince}
+              </span>
+            </div>
 
-                return (
-                  <tr key={row.moda} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td className="py-2.5 font-sans font-semibold text-slate-800 dark:text-slate-200">
-                      {MODA_DISPLAY_NAME[row.moda]}
-                    </td>
-                    <td className="py-2.5 font-sans text-slate-500">{row.sarana}</td>
-                    <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
-                      {isPnp ? `${formatDecimal(row.stat.baseline || 0)} pnp/arm` : `${formatNumber(row.stat.baseline || 0)} trip`}
-                    </td>
-                    <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
-                      {isPnp ? `${formatDecimal(row.stat.mudik || 0)} pnp/arm` : `${formatNumber(row.stat.mudik || 0)} trip`}
-                    </td>
-                    <td className="py-2.5 text-right text-slate-600 dark:text-slate-400">
-                      {isPnp ? `${formatDecimal(row.stat.balik || 0)} pnp/arm` : `${formatNumber(row.stat.balik || 0)} trip`}
-                    </td>
-                    <td className="py-2.5 text-right">
-                      <span className="font-bold text-rose-700 dark:text-rose-400">
-                        +{formatPercent(surge)}
-                      </span>
-                    </td>
-                    <td className="py-2.5">
-                      <span className={`px-2 py-0.5 rounded font-sans font-semibold text-[10px] ${status.color}`}>
-                        {status.text}
-                      </span>
-                    </td>
+            <div className="overflow-x-auto mt-3">
+              <table className="w-full text-left table-fixed">
+                <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700 text-[10px]">
+                  <tr>
+                    <th className="py-2 px-1 w-[26%]">Moda</th>
+                    <th className="py-2 px-1 text-right w-[16%]">Normal</th>
+                    <th className="py-2 px-0.5 text-right text-purple-700 dark:text-purple-400 w-[12%]">Mudik</th>
+                    <th className="py-2 px-0.5 text-right text-rose-700 dark:text-rose-400 w-[12%]">Balik</th>
+                    <th className="py-2 px-1 text-right font-bold text-purple-700 dark:text-purple-400 w-[17%]">
+                      <span className="block leading-tight">Lonjakan</span>
+                      <span className="block leading-tight text-[9px] font-normal">Mudik %</span>
+                    </th>
+                    <th className="py-2 px-1 text-right font-bold text-rose-700 dark:text-rose-400 w-[17%]">
+                      <span className="block leading-tight">Lonjakan</span>
+                      <span className="block leading-tight text-[9px] font-normal">Balik %</span>
+                    </th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono text-[10.5px] text-slate-800 dark:text-slate-200">
+                  {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => {
+                    const stat = computedStats[m] || { baseline: 0, mudik: 0, balik: 0, surgeMudik: 0, surgeBalik: 0 };
+                    const hasData = (stat.baseline || 0) > 0;
+                    return (
+                      <tr key={m} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td className="py-2 px-1 font-sans font-semibold text-slate-900 dark:text-slate-100 truncate">
+                          {MODA_DISPLAY_NAME[m]}
+                        </td>
+                        <td className="py-2 px-1 text-right whitespace-nowrap">
+                          {hasData ? `${Math.ceil(stat.baseline)} ${isPnp ? 'pnp/arm' : 'trip'}` : '-'}
+                        </td>
+                        <td className="py-2 px-0.5 text-right text-purple-700 dark:text-purple-400 font-semibold">
+                          {hasData ? formatNumber(Math.ceil(stat.mudik)) : '-'}
+                        </td>
+                        <td className="py-2 px-0.5 text-right text-rose-700 dark:text-rose-400 font-semibold">
+                          {hasData ? formatNumber(Math.ceil(stat.balik)) : '-'}
+                        </td>
+                        <td className="py-2 px-1 text-right font-semibold">
+                          {hasData ? (
+                            stat.surgeMudik > 0 ? (
+                              <span className="text-purple-700 dark:text-purple-400 font-bold">
+                                +{stat.surgeMudik.toFixed(1)}%
+                              </span>
+                            ) : (
+                              <span className="text-slate-500">{stat.surgeMudik.toFixed(1)}%</span>
+                            )
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+                        <td className="py-2 px-1 text-right font-semibold">
+                          {hasData ? (
+                            stat.surgeBalik > 0 ? (
+                              <span className="text-rose-600 dark:text-rose-400 font-bold">
+                                +{stat.surgeBalik.toFixed(1)}%
+                              </span>
+                            ) : (
+                              <span className="text-slate-500">{stat.surgeBalik.toFixed(1)}%</span>
+                            )
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-1">
+            <span>* Normal dihitung dari median periode pra-Lebaran (1 Jan - 12 Mar 2026)</span>
+            <span>Mudik: 18 Mar • Balik: 24 Mar</span>
+          </div>
         </div>
       </div>
     </div>
