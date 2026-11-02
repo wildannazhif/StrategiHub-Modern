@@ -78,16 +78,21 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
   }, [isAllProv, provData, forecastData, selectedModa]);
 
   const benchmarkList = useMemo(() => {
+    let list: any[] = [];
     if (isAllProv) {
       if (selectedModa !== 'TOTAL' && forecastData?.benchmarks_by_moda?.[selectedModa]) {
-        return forecastData.benchmarks_by_moda[selectedModa];
+        list = forecastData.benchmarks_by_moda[selectedModa];
+      } else {
+        list = forecastData?.benchmarks || [];
       }
-      return forecastData?.benchmarks || [];
+    } else {
+      if (selectedModa !== 'TOTAL' && provData?.benchmarks_by_moda?.[selectedModa]) {
+        list = provData.benchmarks_by_moda[selectedModa];
+      } else {
+        list = provData?.benchmarks || forecastData?.benchmarks || [];
+      }
     }
-    if (selectedModa !== 'TOTAL' && provData?.benchmarks_by_moda?.[selectedModa]) {
-      return provData.benchmarks_by_moda[selectedModa];
-    }
-    return provData?.benchmarks || forecastData?.benchmarks || [];
+    return (list || []).slice(0, 5);
   }, [isAllProv, provData, forecastData, selectedModa]);
 
   // Peak values for 2024 and 2025 Nataru
@@ -1045,14 +1050,14 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         </div>
       </div>
 
-      {/* 6. MODEL SPECIFICATION & 12-MODEL BENCHMARK RANKING TABLE */}
+      {/* 6. MODEL SPECIFICATION & TOP 5 BENCHMARK RANKING TABLE */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
               <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                Spesifikasi Model & Evaluasi Akurasi Pengujian (Backtest Holdout 12 Model)
+                Spesifikasi Model & Evaluasi Akurasi Pengujian (Top 5 Model Terbaik)
               </h4>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -1070,7 +1075,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               onClick={() => setShowBenchmarkModal(!showBenchmarkModal)}
               className="px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-semibold text-xs hover:bg-indigo-100 transition-colors"
             >
-              {showBenchmarkModal ? '✕ Tutup Tabel 12 Model' : '📊 Lihat Tabel 12 Model Peramalan (+LightGBM)'}
+              {showBenchmarkModal ? '✕ Tutup Tabel 5 Model' : '📊 Lihat Tabel 5 Model Terbaik (+LightGBM Juara 1)'}
             </button>
           </div>
         </div>
@@ -1131,7 +1136,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-indigo-200 dark:border-indigo-800 space-y-3">
             <div className="flex items-center justify-between">
               <h5 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider">
-                Hasil Benchmark Model Acuan PUSDATIN Kemenhub (+LightGBM) ({isAllProv ? 'Nasional' : selectedProv} • {selectedModa === 'TOTAL' ? 'Total Multimoda' : MODA_DISPLAY_NAME[selectedModa]})
+                Hasil Benchmark 5 Model Terbaik PUSDATIN Kemenhub (+LightGBM Juara 1) ({isAllProv ? 'Nasional' : selectedProv} • {selectedModa === 'TOTAL' ? 'Total Multimoda' : MODA_DISPLAY_NAME[selectedModa]})
               </h5>
               <button
                 onClick={() => setShowBenchmarkModal(false)}
