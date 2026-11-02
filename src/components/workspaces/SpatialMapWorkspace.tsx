@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal, getBasePath } from '@/lib/constants';
+import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal } from '@/lib/constants';
 import { MapPin, Search, Layers, Flame, Info, Filter } from 'lucide-react';
 import { SpatialNode } from '@/types/mobility';
+import provincesGeoJson from '@/data/indonesia_38_provinces.json';
 
 function normalizeProvinceName(p: string): string {
   if (!p) return '';
@@ -18,26 +19,32 @@ function normalizeProvinceName(p: string): string {
   ) {
     return 'Daerah Istimewa Yogyakarta';
   }
+  if (p === 'Bangka Belitung' || p === 'Kep. Bangka Belitung' || p === 'Kepulauan Bangka Belitung') {
+    return 'Kepulauan Bangka Belitung';
+  }
+  if (p === 'NTB' || p === 'Nusa Tenggara Barat') return 'Nusa Tenggara Barat';
+  if (p === 'NTT' || p === 'Nusa Tenggara Timur') return 'Nusa Tenggara Timur';
+  if (p === 'Kep. Riau' || p === 'Kepulauan Riau') return 'Kepulauan Riau';
   if (p.toUpperCase() === 'SULAWESI SELATAN') return 'Sulawesi Selatan';
   return p;
 }
 
 function getHeatmapColor(val: number, maxVal: number, isDark: boolean) {
   if (!val || val <= 0 || maxVal <= 0) {
-    return { color: isDark ? '#334155' : '#cbd5e1', fillOpacity: 0.12 };
+    return { color: isDark ? '#334155' : '#cbd5e1', fillOpacity: isDark ? 0.25 : 0.20 };
   }
   const r = val / maxVal;
   // Sequential Heatmap Gradient: Sky -> Cyan -> Emerald -> Amber -> Red (Puncak)
   if (r < 0.05) {
-    return { color: '#38bdf8', fillOpacity: isDark ? 0.40 : 0.35 };
+    return { color: '#38bdf8', fillOpacity: isDark ? 0.45 : 0.40 };
   } else if (r < 0.15) {
-    return { color: '#06b6d4', fillOpacity: isDark ? 0.48 : 0.42 };
+    return { color: '#06b6d4', fillOpacity: isDark ? 0.52 : 0.48 };
   } else if (r < 0.35) {
-    return { color: '#10b981', fillOpacity: isDark ? 0.58 : 0.52 };
+    return { color: '#10b981', fillOpacity: isDark ? 0.60 : 0.55 };
   } else if (r < 0.65) {
-    return { color: '#f59e0b', fillOpacity: isDark ? 0.68 : 0.62 };
+    return { color: '#f59e0b', fillOpacity: isDark ? 0.70 : 0.65 };
   } else {
-    return { color: '#ef4444', fillOpacity: isDark ? 0.78 : 0.72 };
+    return { color: '#ef4444', fillOpacity: isDark ? 0.82 : 0.78 };
   }
 }
 
@@ -68,7 +75,8 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
 
     const [showHeatmap, setShowHeatmap] = useState<boolean>(true);
     const [showNodes, setShowNodes] = useState<boolean>(true);
-    const [geoJsonData, setGeoJsonData] = useState<any | null>(null);
+    const [mapReady, setMapReady] = useState<boolean>(false);
+    const geoJsonData = provincesGeoJson;
 
   // Helper to extract node volume based on metric & direction
   const getNodeVol = (n: any) => {
@@ -78,27 +86,6 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
       return selectedDirection === 'brg' ? (n.a_brg ?? n.arm) : selectedDirection === 'dat' ? (n.a_dat ?? n.arm) : (n.arm ?? n.arm_tot);
     }
   };
-
-  // Load 38 Provinces GeoJSON once
-  useEffect(() => {
-    let isCancelled = false;
-    async function loadGeo() {
-      try {
-        const basePath = getBasePath();
-        const res = await fetch(`${basePath}/data/indonesia_38_provinces.geojson`);
-        if (res.ok && !isCancelled) {
-          const data = await res.json();
-          setGeoJsonData(data);
-        }
-      } catch (e) {
-        console.warn('Failed to load indonesia_38_provinces.geojson:', e);
-      }
-    }
-    loadGeo();
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
 
   // Filter & rank nodes according to scale (Titik tidak membesar: min 3.2px, max 7.5px)
   const { filteredNodes, totalPoolVol } = useMemo(() => {
@@ -187,6 +174,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
   }, [nodes, selectedModa, selectedMetric, selectedDirection]);
 
   // Leaflet Map Initialization and Layer Management
+  // 1. LEAFLET MAP INITIALIZATION (Runs once on mount, persistent lifecycle)
   useEffect(() => {
     if (typeof window === 'undefined' || !mapContainerRef.current) return;
 
@@ -214,23 +202,77 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           maxZoom: 18,
         }).addTo(map);
 
-        // Layer order: Choropleth (bottom) -> Markers (top)
+        // Persistent layer groups: Choropleth (bottom) -> Markers (top)
         choroplethGroupRef.current = L.layerGroup().addTo(map);
         markerGroupRef.current = L.layerGroup().addTo(map);
         mapInstanceRef.current = map;
+        setMapReady(true);
       }
 
       const map = mapInstanceRef.current;
-      const choroGroup = choroplethGroupRef.current;
-      const markerGroup = markerGroupRef.current;
-      if (!map || !choroGroup || !markerGroup) return;
+      if (map) {
+        map.invalidateSize();
+      }
+    };
 
-      // 1. RENDER CHOROPLETH HEATMAP LAYER
+    initMap();
+
+    const t1 = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 150);
+
+    const t2 = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 400);
+
+    const t3 = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 800);
+
+    const handleResize = () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      window.removeEventListener('resize', handleResize);
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // 2. CHOROPLETH HEATMAP LAYER (Permanently maintained, updates only on data/metric/theme change)
+  useEffect(() => {
+    if (!mapReady || typeof window === 'undefined' || !mapInstanceRef.current || !choroplethGroupRef.current) return;
+
+    let L: any;
+    let isCancelled = false;
+
+    const renderChoropleth = async () => {
+      L = (await import('leaflet')).default;
+      if (isCancelled || !choroplethGroupRef.current) return;
+
+      const choroGroup = choroplethGroupRef.current;
       choroGroup.clearLayers();
-      if (showHeatmap && geoJsonData) {
+
+      if (showHeatmap) {
         const unit = selectedMetric === 'pnp' ? 'penumpang' : 'trip armada';
 
-        const geoLayer = L.geoJSON(geoJsonData, {
+        const geoLayer = L.geoJSON(provincesGeoJson, {
           style: (feature: any) => {
             const provName = normalizeProvinceName(feature.properties?.PROVINSI);
             const stat = provStats[provName] || { vol: 0 };
@@ -238,8 +280,9 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
             return {
               fillColor: c.color,
               fillOpacity: c.fillOpacity,
-              color: isDarkMode ? '#475569' : '#ffffff',
+              color: isDarkMode ? '#1e293b' : '#ffffff',
               weight: 1.2,
+              opacity: 0.9,
               dashArray: '',
             };
           },
@@ -263,7 +306,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
               this.setStyle({
                 weight: 2.5,
                 color: '#1d4ed8',
-                fillOpacity: Math.min(0.9, (this.options.fillOpacity || 0.5) + 0.18),
+                fillOpacity: Math.min(0.92, (this.options.fillOpacity || 0.5) + 0.18),
               });
             });
 
@@ -289,8 +332,37 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
         choroGroup.addLayer(geoLayer);
       }
 
-      // 2. RENDER SIMPUL MARKERS (TITIK TIDAK MEMBESAR: MIN 3.2px, MAX 7.5px)
+      // Keep markers above the choropleth polygon fills
+      if (markerGroupRef.current) {
+        markerGroupRef.current.bringToFront();
+      }
+
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    };
+
+    renderChoropleth();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [mapReady, provStats, maxProvVol, nationalVol, selectedMetric, isDarkMode, showHeatmap]);
+
+  // 3. SIMPUL MARKERS LAYER (Updates on filtered nodes / scale / search)
+  useEffect(() => {
+    if (!mapReady || typeof window === 'undefined' || !mapInstanceRef.current || !markerGroupRef.current) return;
+
+    let L: any;
+    let isCancelled = false;
+
+    const renderMarkers = async () => {
+      L = (await import('leaflet')).default;
+      if (isCancelled || !markerGroupRef.current) return;
+
+      const markerGroup = markerGroupRef.current;
       markerGroup.clearLayers();
+
       if (showNodes) {
         const maxMetricVal = filteredNodes.reduce((max, node) => {
           const v = Number(getNodeVol(node)) || 0;
@@ -337,26 +409,22 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
             setSelectedNode({ ...node, rank: rankIdx + 1 });
           });
 
-          const rankBadge =
-            rankIdx < 50
-              ? `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                  isTop10
-                    ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                    : 'bg-slate-100 text-slate-700'
-                }">Peringkat #${rankIdx + 1}</span>`
-              : '';
+          const rankBadge = isTop10
+            ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Top #${
+                rankIdx + 1
+              }</span>`
+            : `<span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-600">Peringkat #${rankIdx + 1}</span>`;
 
-          const shareOfTotal = totalPoolVol > 0 ? `${formatDecimal((nodeVal / totalPoolVol) * 100, 2)}%` : '-';
+          const shareOfTotal =
+            totalPoolVol > 0 ? `${((nodeVal / totalPoolVol) * 100).toFixed(2)}%` : '0%';
 
           const popupHtml = `
-            <div class="p-2.5 text-xs font-sans space-y-1.5 max-w-[260px]">
-              <div class="flex items-center justify-between gap-2 border-b border-slate-200 pb-1">
-                <span class="font-bold text-slate-900 truncate">${nodeName}</span>
-                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold text-white shrink-0" style="background-color: ${color}">
-                  ${MODA_DISPLAY_NAME[modaKey] || modaKey}
-                </span>
+            <div class="p-1 space-y-1.5 max-w-[220px]">
+              <div class="flex items-center gap-1.5 border-b border-slate-200 pb-1">
+                <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></span>
+                <strong class="text-slate-900 font-sans text-xs">${nodeName}</strong>
               </div>
-              <div class="flex items-center justify-between text-[11px] text-slate-500">
+              <div class="flex justify-between items-center text-[10px] text-slate-500 font-mono">
                 <span>${nodeProv} • Tipe: ${node.tipe || '-'}</span>
                 ${rankBadge}
               </div>
@@ -381,36 +449,17 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           markerGroup.addLayer(circle);
         });
       }
+
+      // Ensure markers remain strictly on top of choropleth
+      markerGroup.bringToFront();
     };
 
-    initMap();
+    renderMarkers();
 
     return () => {
       isCancelled = true;
     };
-  }, [
-    filteredNodes,
-    geoJsonData,
-    provStats,
-    maxProvVol,
-    nationalVol,
-    showHeatmap,
-    showNodes,
-    selectedMetric,
-    selectedModa,
-    totalPoolVol,
-    isDarkMode,
-  ]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, []);
+  }, [mapReady, filteredNodes, showNodes, selectedMetric, totalPoolVol]);
 
   return (
     <div className="space-y-6">
@@ -522,52 +571,48 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           <div ref={mapContainerRef} style={{ height: '580px', width: '100%' }} />
 
           {/* V1 EXACT INTERACTIVE MAP LEGEND (HEATMAP BAR + SIMPUL DOTS) */}
-          <div className="absolute bottom-3 left-3 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-lg space-y-2.5 max-w-[230px]">
-            {/* Heatmap Gradient Bar */}
-            {showHeatmap && (
-              <div>
-                <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-1 text-[11px]">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-sky-400 via-emerald-400 to-rose-500" />
-                  <span>Heatmap Wilayah Provinsi:</span>
+          <div className="absolute bottom-3 left-3 z-[500] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-lg space-y-2.5 max-w-[230px]">
+            {/* Heatmap Gradient Bar (Always visible) */}
+            <div>
+              <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-1 text-[11px]">
+                <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-sky-400 via-emerald-400 to-rose-500" />
+                <span>Heatmap Wilayah:</span>
+              </div>
+              <div className="space-y-1 text-[10px]">
+                <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                  <span>Intensitas:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Rendah ➔ Puncak</span>
                 </div>
-                <div className="space-y-1 text-[10px]">
-                  <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                    <span>Intensitas:</span>
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">Rendah ➔ Puncak</span>
-                  </div>
-                  <div className="h-2 w-full rounded-sm bg-gradient-to-r from-sky-400 via-cyan-400 via-emerald-400 via-amber-400 to-rose-600" />
-                  <div className="flex justify-between text-[9px] text-slate-400 font-mono">
-                    <span>&lt;5%</span>
-                    <span>15%</span>
-                    <span>35%</span>
-                    <span>65%+</span>
-                  </div>
+                <div className="h-2 w-full rounded-sm bg-gradient-to-r from-sky-400 via-cyan-400 via-emerald-400 via-amber-400 to-rose-600" />
+                <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+                  <span>&lt;5%</span>
+                  <span>15%</span>
+                  <span>35%</span>
+                  <span>65%+</span>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Simpul Dots Legend (Neat, tiny GIS dots) */}
-            {showNodes && (
-              <div className={showHeatmap ? 'border-t border-slate-200 dark:border-slate-800 pt-2' : ''}>
-                <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-1 text-[11px]">
-                  <span className="w-2 rounded-full bg-emerald-500" />
-                  <span>Titik Simpul per Moda:</span>
-                </div>
-                <div className="space-y-0.5 text-[10px]">
-                  {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => (
-                    <div key={m} className="flex items-center gap-1.5">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0 border border-white dark:border-slate-800"
-                        style={{ backgroundColor: COLOR[m] }}
-                      />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        {MODA_DISPLAY_NAME[m]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+            <div className="border-t border-slate-200 dark:border-slate-800 pt-2">
+              <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-1 text-[11px]">
+                <span className="w-2 rounded-full bg-emerald-500" />
+                <span>Titik Simpul per Moda:</span>
               </div>
-            )}
+              <div className="space-y-0.5 text-[10px]">
+                {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => (
+                  <div key={m} className="flex items-center gap-1.5">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0 border border-white dark:border-slate-800"
+                      style={{ backgroundColor: COLOR[m] }}
+                    />
+                    <span className="text-slate-600 dark:text-slate-300">
+                      {MODA_DISPLAY_NAME[m]} ({nodes.filter((n) => (n.m || n.moda) === m).length})
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
