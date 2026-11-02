@@ -51,11 +51,6 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
     return filteredList.slice(start, start + pageSize);
   }, [filteredList, currentPage]);
 
-  // Top Critical Hubs Highlights (First 3 critical)
-  const criticalHighlights = useMemo(() => {
-    return simpulList.filter((s) => s.statusText === 'Sangat Kritis').slice(0, 3);
-  }, [simpulList]);
-
   return (
     <div className="space-y-6">
       {/* HEADER */}
@@ -72,31 +67,6 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
               Menghitung simulasi penambahan armada angkutan agar rasio beban hari puncak setara dengan hari normal (Total: <strong>1.010 Simpul</strong>).
             </p>
           </div>
-        </div>
-
-        {/* TOP CRITICAL HIGHLIGHT CARDS (Cleaned: No saranaType & No fieldAction) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-          {criticalHighlights.map((hub) => (
-            <div
-              key={hub.id}
-              className="p-3 rounded-lg border border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20"
-            >
-              <div className="flex items-center justify-between text-xs font-bold text-rose-800 dark:text-rose-300">
-                <span>{hub.name} ({hub.prov})</span>
-                <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-rose-200/80 dark:bg-rose-900 text-rose-900 dark:text-rose-200">
-                  {hub.statusText}
-                </span>
-              </div>
-              <div className="mt-2 text-xs flex items-center justify-between font-mono">
-                <span className="text-slate-500">Beban: {formatDecimal(hub.lfBiasa)} ➔ {formatDecimal(hub.lfPuncak)} pnp/trip</span>
-                <span className="font-bold text-rose-700 dark:text-rose-400">+{hub.pctTambah}% armada</span>
-              </div>
-              <div className="mt-1 text-[11px] font-mono text-slate-600 dark:text-slate-400 flex items-center justify-between">
-                <span>Trip Tambahan: <strong>+{hub.addArm} trip/hari</strong></span>
-                <span>Total: <strong>{hub.totalArm} trip/hari</strong></span>
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* CONTROLS: MODA, STATUS, SEARCH, SORT */}
