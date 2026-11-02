@@ -39,6 +39,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
   const [horizonView, setHorizonView] = useState<'all_train_plus_forecast' | 'train_2026_plus_forecast' | 'forecast_only'>('all_train_plus_forecast');
   const [tableRange, setTableRange] = useState<'nataru' | 'q4' | 'all'>('nataru');
   const [showBenchmarkModal, setShowBenchmarkModal] = useState<boolean>(false);
+  const [isNataruBarMinimized, setIsNataruBarMinimized] = useState<boolean>(false);
 
   const isAllProv = selectedProv === 'ALL';
   const provData = useMemo(() => {
@@ -650,20 +651,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               Simulasi peramalan horizon 100 hari (1 Nov 2026 – 8 Feb 2027) mengantisipasi lonjakan kapasitas angkutan Natal 2026 & Tahun Baru 2027.
             </p>
           </div>
-
-          <div className="flex items-center gap-2 text-xs font-mono">
-          <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded border border-emerald-200 dark:border-emerald-800">
-          {isAllProv
-            ? (horizonView === 'all_train_plus_forecast'
-              ? 'Data Latih (Train): 1.035H (1 Jan 2024 – 31 Okt 2026)'
-              : 'Data Latih (Train): 304H (1 Jan – 31 Okt 2026)')
-            : `Data Latih (Train): 304H (1 Jan – 31 Okt 2026 • ${selectedProv})`}
-          </span>
-          <span className="px-2.5 py-1 bg-indigo-50 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 rounded border border-indigo-200 dark:border-indigo-800">
-          Data Forecasting: 100H (1 Nov 2026 – 8 Feb 2027)
-          </span>
-          </div>
-          </div>
+        </div>
 
           {/* CONTROLS: PROVINCE, MODA, METRIC, HORIZON VIEW */}
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -914,48 +902,59 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
             <span className="text-xs font-mono font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-2.5 py-1 rounded border border-indigo-200 dark:border-indigo-800">
               {isAllProv ? 'Nasional (3 Tahun: 2024, 2025, 2026)' : `${selectedProv} (2 Tahun: 2025, 2026)`} • {selectedMetric === 'pnp' ? 'Penumpang' : 'Armada'}
             </span>
+            <button
+              onClick={() => setIsNataruBarMinimized(!isNataruBarMinimized)}
+              className="text-xs px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium transition-colors"
+              title={isNataruBarMinimized ? 'Tampilkan Grafik Batang' : 'Minimize / Sembunyikan'}
+            >
+              {isNataruBarMinimized ? '▼ Tampilkan' : '▲ Minimize'}
+            </button>
           </div>
         </div>
 
-        {/* NATARU SUMMARY CALLOUT CARDS */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
-            <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2024 (18H):</span>
-            <div className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">
-              {isAllProv ? (selectedMetric === 'pnp' ? '22.522.872' : '765.410') : '-'}
-            </div>
-            <span className="text-[10px] text-slate-400 font-sans">{isAllProv ? 'Realisasi Penuh' : 'Khusus Nasional'}</span>
-          </div>
+        {!isNataruBarMinimized && (
+          <>
+            {/* NATARU SUMMARY CALLOUT CARDS */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+                <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2024 (18H):</span>
+                <div className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">
+                  {isAllProv ? (selectedMetric === 'pnp' ? '22.522.872' : '765.410') : '-'}
+                </div>
+                <span className="text-[10px] text-slate-400 font-sans">{isAllProv ? 'Realisasi Penuh' : 'Khusus Nasional'}</span>
+              </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
-            <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2025 (18H):</span>
-            <div className="font-bold text-amber-600 dark:text-amber-400 text-sm mt-0.5">
-              {isAllProv ? (selectedMetric === 'pnp' ? '31.718.505' : '823.140') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.base2025 || 0)}
-            </div>
-            <span className="text-[10px] text-amber-600/80 font-sans">Ground Truth Pembanding</span>
-          </div>
+              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+                <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2025 (18H):</span>
+                <div className="font-bold text-amber-600 dark:text-amber-400 text-sm mt-0.5">
+                  {isAllProv ? (selectedMetric === 'pnp' ? '31.718.505' : '823.140') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.base2025 || 0)}
+                </div>
+                <span className="text-[10px] text-amber-600/80 font-sans">Ground Truth Pembanding</span>
+              </div>
 
-          <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900 font-mono text-xs">
-            <span className="text-indigo-600 dark:text-indigo-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 2026 (18H):</span>
-            <div className="font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-0.5">
-              {isAllProv ? (selectedMetric === 'pnp' ? '30.716.688' : '812.590') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0)}
-            </div>
-            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-sans font-semibold">Model Champion</span>
-          </div>
+              <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900 font-mono text-xs">
+                <span className="text-indigo-600 dark:text-indigo-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 2026 (18H):</span>
+                <div className="font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-0.5">
+                  {isAllProv ? (selectedMetric === 'pnp' ? '30.716.688' : '812.590') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0)}
+                </div>
+                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-sans font-semibold">Model Champion</span>
+              </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
-            <span className="text-slate-400 font-sans text-[11px] block">Puncak Mudik Natal (H-1):</span>
-            <div className="font-bold text-rose-600 dark:text-rose-400 text-sm mt-0.5">
-              24 Des • {isAllProv ? (selectedMetric === 'pnp' ? '1.933.690' : '46.942') : formatNumber(Math.round((comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0) / 15.5))}
+              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+                <span className="text-slate-400 font-sans text-[11px] block">Puncak Mudik Natal (H-1):</span>
+                <div className="font-bold text-rose-600 dark:text-rose-400 text-sm mt-0.5">
+                  24 Des • {isAllProv ? (selectedMetric === 'pnp' ? '1.933.690' : '46.942') : formatNumber(Math.round((comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0) / 15.5))}
+                </div>
+                <span className="text-[10px] text-rose-600/80 font-sans">Puncak Arus Berangkat</span>
+              </div>
             </div>
-            <span className="text-[10px] text-rose-600/80 font-sans">Puncak Arus Berangkat</span>
-          </div>
-        </div>
 
-        {nataruBarChartOption && (
-          <div className="pt-2">
-            <EChartWrapper options={nataruBarChartOption} style={{ height: '360px', width: '100%' }} />
-          </div>
+            {nataruBarChartOption && (
+              <div className="pt-2">
+                <EChartWrapper options={nataruBarChartOption} style={{ height: '360px', width: '100%' }} />
+              </div>
+            )}
+          </>
         )}
       </div>
 

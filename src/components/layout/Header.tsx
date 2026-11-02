@@ -26,8 +26,13 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
-            className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 focus:outline-none"
+            className={`p-1.5 rounded-lg transition-colors focus:outline-none ${
+              isSidebarOpen
+                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800'
+                : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200 border border-indigo-300 dark:border-indigo-800 shadow-2xs font-bold'
+            }`}
             aria-label="Toggle Sidebar"
+            title={isSidebarOpen ? 'Minimize / Sembunyikan Menu Sidebar' : 'Buka / Tampilkan Menu Sidebar'}
           >
             <Menu className="w-5 h-5" />
           </button>

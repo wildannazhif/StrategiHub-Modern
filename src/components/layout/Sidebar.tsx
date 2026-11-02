@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Share2,
   Compass,
+  PanelLeftClose,
 } from 'lucide-react';
 
 export type TabId =
@@ -95,8 +96,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen
 
       {/* SIDEBAR DRAWER (z-[1200] so it ALWAYS sits on top of Leaflet maps and canvas) */}
       <aside
-        className={`fixed lg:static top-[57px] bottom-0 left-0 z-[1200] w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-transform duration-200 ease-in-out flex flex-col justify-between overflow-y-auto shadow-2xl lg:shadow-none ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed lg:static top-[57px] bottom-0 left-0 z-[1200] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ease-in-out flex flex-col justify-between overflow-y-auto overflow-x-hidden shadow-2xl lg:shadow-none ${
+          isOpen
+            ? 'w-64 translate-x-0 opacity-100'
+            : '-translate-x-full w-64 lg:w-0 lg:translate-x-0 lg:opacity-0 lg:border-r-0 pointer-events-none'
         }`}
       >
         <div className="py-4 px-3 space-y-6">
@@ -143,9 +146,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen
           ))}
         </div>
 
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/50">
-          <p className="font-semibold text-slate-600 dark:text-slate-400">PUSDATIN Kemenhub 2026</p>
-          <p className="text-[10px]">Verified 221.999 Baris Bersih</p>
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+          <div>
+            <p className="font-semibold text-slate-600 dark:text-slate-400">PUSDATIN Kemenhub 2026</p>
+            <p className="text-[10px]">Data Terverifikasi 235.219 Baris</p>
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors flex items-center gap-1 text-[11px] font-semibold"
+              title="Minimize / Sembunyikan Sidebar"
+            >
+              <PanelLeftClose className="w-4 h-4" />
+              <span className="text-[10px]">Minimize</span>
+            </button>
+          )}
         </div>
       </aside>
     </>
