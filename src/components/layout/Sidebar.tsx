@@ -51,34 +51,34 @@ interface NavGroup {
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen, onClose }) => {
   const navGroups: NavGroup[] = [
     {
-      groupName: 'KRONOLOGI & OPERASIONAL',
+      groupName: 'OPERASIONAL',
       items: [
-        { id: 'timeline', label: 'Kronologi Harian (304H)', icon: <Calendar className="w-4 h-4" /> },
-        { id: 'lebaran', label: 'Puncak Lebaran 2026', badge: '17H', icon: <Flame className="w-4 h-4 text-rose-500" /> },
-        { id: 'loadfactor', label: 'Beban Armada (Load Factor)', icon: <Activity className="w-4 h-4 text-emerald-500" /> },
-        { id: 'tophubs', label: 'Registri Simpul (Top 30)', icon: <Anchor className="w-4 h-4 text-blue-500" /> },
-        { id: 'matrix', label: 'Matriks 13 Indikator', badge: 'Rekap', icon: <Table className="w-4 h-4" /> },
+        { id: 'timeline', label: 'Kronologi Harian', icon: <Calendar className="w-4 h-4 text-sky-500" /> },
+        { id: 'lebaran', label: 'Puncak Lebaran', icon: <Flame className="w-4 h-4 text-rose-500" /> },
+        { id: 'loadfactor', label: 'Load Factor', icon: <Activity className="w-4 h-4 text-emerald-500" /> },
+        { id: 'tophubs', label: 'Top 30 Simpul', icon: <Anchor className="w-4 h-4 text-blue-500" /> },
+        { id: 'matrix', label: 'Matriks Kinerja', icon: <Table className="w-4 h-4 text-amber-500" /> },
       ],
     },
     {
-      groupName: 'GEOSPASIAL & RUTE',
+      groupName: 'GEOSPASIAL',
       items: [
-        { id: 'spatial', label: 'Peta Spasial Simpul (GIS)', badge: '1.214', icon: <MapPin className="w-4 h-4 text-red-500" /> },
-        { id: 'od_map', label: 'Peta Rute OD Interaktif', icon: <Compass className="w-4 h-4 text-sky-500" /> },
-        { id: 'sankey', label: 'Diagram Sankey OD Multimoda', icon: <Share2 className="w-4 h-4 text-indigo-500" /> },
+        { id: 'spatial', label: 'Peta Spasial', icon: <MapPin className="w-4 h-4 text-red-500" /> },
+        { id: 'od_map', label: 'Peta Rute OD', icon: <Compass className="w-4 h-4 text-sky-500" /> },
+        { id: 'sankey', label: 'Diagram Sankey', icon: <Share2 className="w-4 h-4 text-indigo-500" /> },
       ],
     },
     {
-      groupName: 'PREDIKSI & SIMULATOR',
+      groupName: 'PREDIKSI & SIMULASI',
       items: [
-        { id: 'forecasting', label: 'Proyeksi Nataru 2026/2027', badge: '100H', icon: <TrendingUp className="w-4 h-4 text-amber-500" /> },
-        { id: 'simulator', label: 'Simulator Kapasitas Armada', badge: '1.010', icon: <Sliders className="w-4 h-4 text-purple-500" /> },
+        { id: 'forecasting', label: 'Proyeksi Nataru', icon: <TrendingUp className="w-4 h-4 text-amber-500" /> },
+        { id: 'simulator', label: 'Simulator Armada', icon: <Sliders className="w-4 h-4 text-purple-500" /> },
       ],
     },
     {
-      groupName: 'METODOLOGI & RUMUS',
+      groupName: 'METODOLOGI',
       items: [
-        { id: 'glossary', label: 'Tentang Data & Kamus Rumus', icon: <HelpCircle className="w-4 h-4" /> },
+        { id: 'glossary', label: 'Data & Rumus', icon: <HelpCircle className="w-4 h-4 text-slate-400" /> },
       ],
     },
   ];

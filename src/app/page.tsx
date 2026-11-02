@@ -101,17 +101,17 @@ export default function Home() {
   }
 
   const tabTitles: Record<TabId, string> = {
-    timeline: 'Kronologi Harian (304H)',
-    lebaran: 'Puncak Lebaran 2026',
-    loadfactor: 'Beban Armada (Load Factor)',
-    tophubs: 'Registri Simpul (Top 30)',
-    matrix: 'Matriks 13 Indikator Operasional',
-    spatial: 'Peta Spasial Simpul (Leaflet GIS)',
-    forecasting: 'Proyeksi Nataru 2026/2027',
-    simulator: 'Simulator Kapasitas Armada',
-    od_map: 'Peta Rute OD Interaktif',
-    sankey: 'Diagram Sankey OD Multimoda',
-    glossary: 'Tentang Data & Kamus Rumus',
+    timeline: 'Kronologi Harian',
+    lebaran: 'Puncak Lebaran',
+    loadfactor: 'Load Factor',
+    tophubs: 'Top 30 Simpul',
+    matrix: 'Matriks Kinerja',
+    spatial: 'Peta Spasial',
+    od_map: 'Peta Rute OD',
+    sankey: 'Diagram Sankey',
+    forecasting: 'Proyeksi Nataru',
+    simulator: 'Simulator Armada',
+    glossary: 'Data & Rumus',
   };
 
   return (
