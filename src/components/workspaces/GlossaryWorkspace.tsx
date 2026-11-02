@@ -232,7 +232,7 @@ export const GlossaryWorkspace: React.FC = () => {
         </div>
       )}
 
-      {/* SECTION 4: 12 MODEL PERAMALAN (+LIGHTGBM CHAMPION) */}
+      {/* SECTION 4: 12 MODEL PERAMALAN (+LIGHTGBM MODEL TERBAIK) */}
       {(activeSection === 'all' || activeSection === 'sec-forecasting-models') && (
         <div className="space-y-4">
           <div className="flex items-center justify-between border-l-4 border-indigo-600 pl-3">
@@ -243,18 +243,18 @@ export const GlossaryWorkspace: React.FC = () => {
               </h3>
             </div>
             <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-              🏆 Champion: LightGBM Regressor (MAPE 3,29%)
+              🏆 Model Terbaik: LightGBM Regressor (MAPE 3,29%)
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 1. LIGHTGBM REGRESSOR */}
             <FormulaBlock
-              title="1. LightGBM Regressor (Juara 1 Champion)"
+              title="1. LightGBM Regressor (Model Terbaik)"
               math="\hat{y}_t^{(M)} = \hat{y}_t^{(0)} + \sum_{m=1}^{M} \eta f_m(\mathbf{x}_t), \quad \min_{f} \sum_{t} |y_t - \hat{y}_t| + \lambda \Omega(f)"
               explanation="Model Machine Learning berbasis Gradient Boosted Decision Trees (GBDT) dengan fungsi objektif L1 (MAE loss). Dilatih menggunakan fitur lag sederhana (lag 1, 2, 7, 14), rolling mean 7 hari, dan kalender hari dalam minggu (DOW) & weekend."
               example="Hasil Uji Posko Nataru: MAPE 3,29%, RMSE 59.271, MAE 40.241, Akurasi Arah 89,3%. Mengungguli 11 model statistik lainnya."
-              badge="Rank 1 • Champion"
+              badge="Rank 1 • Model Terbaik"
             />
 
             {/* 2. HOLT-WINTERS MUL DAMPED */}
@@ -554,7 +554,7 @@ export const GlossaryWorkspace: React.FC = () => {
                     <tr>
                       <td className="py-2 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">LightGBM</td>
                       <td className="py-2 px-3 font-semibold">Light Gradient Boosting Machine</td>
-                      <td className="py-2 px-3">Algoritma Machine Learning berbasis pohon keputusan dengan komputasi cepat dan akurasi tinggi (Model Terpilih/Champion).</td>
+                      <td className="py-2 px-3">Algoritma Machine Learning berbasis pohon keputusan dengan komputasi cepat dan akurasi tinggi (Model Terpilih/Terbaik).</td>
                     </tr>
                     <tr>
                       <td className="py-2 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">MAPE</td>

@@ -624,7 +624,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         itemStyle: { color: isDarkMode ? '#f59e0b' : '#d97706', borderRadius: [3, 3, 0, 0] },
       },
       {
-        name: 'Proyeksi Nataru 2026 (Model Champion)',
+        name: 'Proyeksi Nataru 2026 (Model Terbaik)',
         type: 'bar',
         data: val26,
         itemStyle: { color: isDarkMode ? '#818cf8' : '#4f46e5', borderRadius: [3, 3, 0, 0] },
@@ -1007,7 +1007,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
                 <div className="font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-0.5">
                   {formatNumber(nataru18Totals.tot26)}
                 </div>
-                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-sans font-semibold">Model Champion</span>
+                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-sans font-semibold">Model Terbaik</span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
@@ -1221,7 +1221,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
                         <td className="py-2 px-3 text-center font-sans">
                           {isChamp ? (
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
-                              Terpilih (Champion)
+                              Terpilih (Terbaik)
                             </span>
                           ) : (
                             <span className="text-slate-400 text-[10px]">Kandidat Alternatif</span>
