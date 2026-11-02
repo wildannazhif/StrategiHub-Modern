@@ -665,9 +665,10 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
             onChange={(e) => setSelectedProv(e.target.value)}
             className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2.5 py-1.5 font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-2xs"
           >
-            {ALL_PROVINCES.map((p) => (
+            <option value="ALL">🇮🇩 Seluruh Provinsi (Nasional)</option>
+            {ALL_PROVINCES.filter((p) => p !== 'ALL').map((p) => (
               <option key={p} value={p}>
-                {p === 'ALL' ? '🇮🇩 Seluruh Provinsi (Nasional)' : p}
+                {p}
               </option>
             ))}
           </select>
