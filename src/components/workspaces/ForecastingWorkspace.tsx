@@ -1075,7 +1075,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               onClick={() => setShowBenchmarkModal(!showBenchmarkModal)}
               className="px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-semibold text-xs hover:bg-indigo-100 transition-colors"
             >
-              {showBenchmarkModal ? '✕ Tutup Tabel 5 Model' : '📊 Lihat Tabel 5 Model Terbaik (+LightGBM Juara 1)'}
+              {showBenchmarkModal ? '✕ Tutup Tabel 5 Model' : '📊 Lihat Tabel 5 Model Terbaik'}
             </button>
           </div>
         </div>
@@ -1136,7 +1136,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-indigo-200 dark:border-indigo-800 space-y-3">
             <div className="flex items-center justify-between">
               <h5 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider">
-                Hasil Benchmark 5 Model Terbaik PUSDATIN Kemenhub (+LightGBM Juara 1) ({isAllProv ? 'Nasional' : selectedProv} • {selectedModa === 'TOTAL' ? 'Total Multimoda' : MODA_DISPLAY_NAME[selectedModa]})
+                Hasil Benchmark 5 Model Terbaik PUSDATIN Kemenhub ({isAllProv ? 'Nasional' : selectedProv} • {selectedModa === 'TOTAL' ? 'Total Multimoda' : MODA_DISPLAY_NAME[selectedModa]})
               </h5>
               <button
                 onClick={() => setShowBenchmarkModal(false)}

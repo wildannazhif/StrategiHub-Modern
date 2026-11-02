@@ -16348,59 +16348,50 @@
       "ci_method": "RMSE-based approximate 95% interval / uncertainty approximation (CI = \u0177 \u00b1 1.96 \u00d7 RMSE)"
     },
     "metrics": {
-      "TOTAL": {
-        "model_name": "Holt-Winters Mul Damped (phi=0.98)",
-        "model_code": "hw_mul_damped",
-        "mape": 4.1,
-        "rmse": 62051,
-        "mae": 49146,
-        "wape": 4.02,
-        "dir_acc": 89.3
-      },
       "UDARA": {
         "name": "LightGBM Regressor (Machine Learning)",
         "code": "lightgbm",
-        "mape": 15.8,
-        "rmse": 72536,
-        "mae": 41310,
-        "wape": 11.41,
-        "dir_acc": 37.0
+        "mape": 17.52,
+        "rmse": 75108,
+        "mae": 47624,
+        "wape": 13.16,
+        "dir_acc": 51.9
       },
       "KA": {
         "name": "LightGBM Regressor (Machine Learning)",
         "code": "lightgbm",
-        "mape": 8.04,
-        "rmse": 30451,
-        "mae": 23663,
-        "wape": 8.07,
-        "dir_acc": 74.1
+        "mape": 7.43,
+        "rmse": 28028,
+        "mae": 21850,
+        "wape": 7.45,
+        "dir_acc": 77.8
       },
       "BUS": {
         "name": "LightGBM Regressor (Machine Learning)",
         "code": "lightgbm",
-        "mape": 2.28,
-        "rmse": 7302,
-        "mae": 5916,
-        "wape": 2.25,
-        "dir_acc": 88.9
+        "mape": 2.58,
+        "rmse": 7640,
+        "mae": 6722,
+        "wape": 2.55,
+        "dir_acc": 81.5
       },
       "ASDP": {
         "name": "LightGBM Regressor (Machine Learning)",
         "code": "lightgbm",
         "mape": 5.59,
-        "rmse": 11390,
-        "mae": 6763,
-        "wape": 4.98,
-        "dir_acc": 66.7
+        "rmse": 11359,
+        "mae": 6801,
+        "wape": 5.0,
+        "dir_acc": 63.0
       },
       "LAUT": {
         "name": "LightGBM Regressor (Machine Learning)",
         "code": "lightgbm",
-        "mape": 4.81,
-        "rmse": 10817,
-        "mae": 8715,
-        "wape": 4.74,
-        "dir_acc": 59.3
+        "mape": 4.03,
+        "rmse": 10080,
+        "mae": 7329,
+        "wape": 3.98,
+        "dir_acc": 63.0
       }
     },
     "benchmark_2025": {
@@ -27530,29 +27521,16 @@
     "by_province": {
       "Bali": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 4.59,
-          "rmse": 8239,
-          "mae": 5719,
-          "wape": 4.62,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Bali."
+          "name": "SARIMA (1,1,1)x(1,1,1,7)",
+          "code": "sarima",
+          "mape": 5.1,
+          "rmse": 9020,
+          "mae": 6115,
+          "wape": 4.83,
+          "dir_acc": 64.3,
+          "desc": "Model Champion Terpilih untuk wilayah Bali."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 4.59,
-            "wape": 4.62,
-            "rmse": 8239,
-            "mae": 5719,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 122423,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Bali.",
-            "rank": 1
-          },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
             "model_code": "sarima",
@@ -27563,7 +27541,7 @@
             "dir_acc": 64.3,
             "is_stable": true,
             "pred_mean": 127593,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Linear Regression (Trend + DOW)",
@@ -27575,7 +27553,7 @@
             "dir_acc": 71.4,
             "is_stable": true,
             "pred_mean": 130243,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Mul Standar",
@@ -27587,7 +27565,7 @@
             "dir_acc": 71.4,
             "is_stable": true,
             "pred_mean": 130371,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
@@ -27599,19 +27577,31 @@
             "dir_acc": 53.6,
             "is_stable": true,
             "pred_mean": 127847,
+            "rank": 4
+          },
+          {
+            "model_name": "Simple Exp Smoothing (SES)",
+            "model_code": "ses",
+            "mape": 5.62,
+            "wape": 5.19,
+            "rmse": 10064,
+            "mae": 6567,
+            "dir_acc": 3.6,
+            "is_stable": true,
+            "pred_mean": 129922,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 4.59,
-            "rmse": 8239,
-            "mae": 5719,
-            "wape": 4.62,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Bali."
+            "name": "SARIMA (1,1,1)x(1,1,1,7)",
+            "code": "sarima",
+            "mape": 5.1,
+            "rmse": 9020,
+            "mae": 6115,
+            "wape": 4.83,
+            "dir_acc": 64.3,
+            "desc": "Model Champion Terpilih untuk wilayah Bali."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -50281,25 +50271,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 4.33,
-          "rmse": 8834,
-          "mae": 5554,
-          "wape": 4.03,
-          "dir_acc": 66.7,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Banten."
+          "mape": 4.12,
+          "rmse": 8405,
+          "mae": 5280,
+          "wape": 3.84,
+          "dir_acc": 74.1,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 4.33,
-            "wape": 4.03,
-            "rmse": 8834,
-            "mae": 5554,
-            "dir_acc": 66.7,
+            "mape": 4.12,
+            "wape": 3.84,
+            "rmse": 8405,
+            "mae": 5280,
+            "dir_acc": 74.1,
             "is_stable": true,
             "pred_mean": 137660,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Banten.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -50355,12 +50345,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 4.33,
-            "rmse": 8834,
-            "mae": 5554,
-            "wape": 4.03,
-            "dir_acc": 66.7,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Banten."
+            "mape": 4.12,
+            "rmse": 8405,
+            "mae": 5280,
+            "wape": 3.84,
+            "dir_acc": 74.1,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -73030,25 +73020,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 23.55,
-          "rmse": 426,
-          "mae": 373,
-          "wape": 22.95,
-          "dir_acc": 29.6,
-          "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Bengkulu."
+          "mape": 28.78,
+          "rmse": 506,
+          "mae": 445,
+          "wape": 27.42,
+          "dir_acc": 40.7,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 23.55,
-            "wape": 22.95,
-            "rmse": 426,
-            "mae": 373,
-            "dir_acc": 29.6,
+            "mape": 28.78,
+            "wape": 27.42,
+            "rmse": 506,
+            "mae": 445,
+            "dir_acc": 40.7,
             "is_stable": true,
             "pred_mean": 1623,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Bengkulu.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -73104,12 +73094,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 23.55,
-            "rmse": 426,
-            "mae": 373,
-            "wape": 22.95,
-            "dir_acc": 29.6,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Bengkulu."
+            "mape": 28.78,
+            "rmse": 506,
+            "mae": 445,
+            "wape": 27.42,
+            "dir_acc": 40.7,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -95853,25 +95843,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 8.31,
-          "rmse": 714,
-          "mae": 579,
-          "wape": 8.27,
-          "dir_acc": 85.2,
-          "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah D.I Aceh."
+          "mape": 10.27,
+          "rmse": 874,
+          "mae": 673,
+          "wape": 9.62,
+          "dir_acc": 55.6,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 8.31,
-            "wape": 8.27,
-            "rmse": 714,
-            "mae": 579,
-            "dir_acc": 85.2,
+            "mape": 10.27,
+            "wape": 9.62,
+            "rmse": 874,
+            "mae": 673,
+            "dir_acc": 55.6,
             "is_stable": true,
             "pred_mean": 7000,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah D.I Aceh.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -95927,12 +95917,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 8.31,
-            "rmse": 714,
-            "mae": 579,
-            "wape": 8.27,
-            "dir_acc": 85.2,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah D.I Aceh."
+            "mape": 10.27,
+            "rmse": 874,
+            "mae": 673,
+            "wape": 9.62,
+            "dir_acc": 55.6,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -118600,29 +118590,16 @@
       },
       "D.I Yogyakarta": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 3.91,
-          "rmse": 3247,
-          "mae": 2552,
-          "wape": 4.86,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Add Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah D.I Yogyakarta."
+          "name": "Holt-Winters Add Damped (phi=0.98)",
+          "code": "hw_add_damped",
+          "mape": 4.34,
+          "rmse": 2732,
+          "mae": 2232,
+          "wape": 4.31,
+          "dir_acc": 96.4,
+          "desc": "Model Champion Terpilih untuk wilayah D.I Yogyakarta."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 3.91,
-            "wape": 4.86,
-            "rmse": 3247,
-            "mae": 2552,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 51980,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Add Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah D.I Yogyakarta.",
-            "rank": 1
-          },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
             "model_code": "hw_add_damped",
@@ -118633,7 +118610,7 @@
             "dir_acc": 96.4,
             "is_stable": true,
             "pred_mean": 51154,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
@@ -118645,6 +118622,19 @@
             "dir_acc": 96.4,
             "is_stable": true,
             "pred_mean": 50573,
+            "rank": 2
+          },
+          {
+            "model_name": "LightGBM Regressor (Machine Learning)",
+            "model_code": "lightgbm",
+            "mape": 6.12,
+            "wape": 5.91,
+            "rmse": 3552,
+            "mae": 3073,
+            "dir_acc": 77.8,
+            "is_stable": true,
+            "pred_mean": 51980,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 3
           },
           {
@@ -118674,14 +118664,14 @@
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 3.91,
-            "rmse": 3247,
-            "mae": 2552,
-            "wape": 4.86,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Add Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah D.I Yogyakarta."
+            "name": "Holt-Winters Add Damped (phi=0.98)",
+            "code": "hw_add_damped",
+            "mape": 4.34,
+            "rmse": 2732,
+            "mae": 2232,
+            "wape": 4.31,
+            "dir_acc": 96.4,
+            "desc": "Model Champion Terpilih untuk wilayah D.I Yogyakarta."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -140091,29 +140081,16 @@
       },
       "DKI Jakarta": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 6.91,
-          "rmse": 6394,
-          "mae": 4637,
-          "wape": 6.39,
-          "dir_acc": 92.6,
-          "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah DKI Jakarta."
+          "name": "Holt-Winters Add Damped (phi=0.98)",
+          "code": "hw_add_damped",
+          "mape": 7.72,
+          "rmse": 6437,
+          "mae": 5042,
+          "wape": 7.41,
+          "dir_acc": 89.3,
+          "desc": "Model Champion Terpilih untuk wilayah DKI Jakarta."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 6.91,
-            "wape": 6.39,
-            "rmse": 6394,
-            "mae": 4637,
-            "dir_acc": 92.6,
-            "is_stable": true,
-            "pred_mean": 72607,
-            "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah DKI Jakarta.",
-            "rank": 1
-          },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
             "model_code": "hw_add_damped",
@@ -140124,6 +140101,19 @@
             "dir_acc": 89.3,
             "is_stable": true,
             "pred_mean": 67473,
+            "rank": 1
+          },
+          {
+            "model_name": "LightGBM Regressor (Machine Learning)",
+            "model_code": "lightgbm",
+            "mape": 7.79,
+            "wape": 7.21,
+            "rmse": 7021,
+            "mae": 5238,
+            "dir_acc": 88.9,
+            "is_stable": true,
+            "pred_mean": 72607,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 2
           },
           {
@@ -140165,14 +140155,14 @@
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 6.91,
-            "rmse": 6394,
-            "mae": 4637,
-            "wape": 6.39,
-            "dir_acc": 92.6,
-            "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah DKI Jakarta."
+            "name": "Holt-Winters Add Damped (phi=0.98)",
+            "code": "hw_add_damped",
+            "mape": 7.72,
+            "rmse": 6437,
+            "mae": 5042,
+            "wape": 7.41,
+            "dir_acc": 89.3,
+            "desc": "Model Champion Terpilih untuk wilayah DKI Jakarta."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -162842,25 +162832,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 35.78,
-          "rmse": 499,
-          "mae": 375,
-          "wape": 29.29,
-          "dir_acc": 25.9,
-          "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Gorontalo."
+          "mape": 65.66,
+          "rmse": 693,
+          "mae": 578,
+          "wape": 45.2,
+          "dir_acc": 51.9,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 35.78,
-            "wape": 29.29,
-            "rmse": 499,
-            "mae": 375,
-            "dir_acc": 25.9,
+            "mape": 65.66,
+            "wape": 45.2,
+            "rmse": 693,
+            "mae": 578,
+            "dir_acc": 51.9,
             "is_stable": true,
             "pred_mean": 1280,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Gorontalo.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -162916,12 +162906,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 35.78,
-            "rmse": 499,
-            "mae": 375,
-            "wape": 29.29,
-            "dir_acc": 25.9,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Gorontalo."
+            "mape": 65.66,
+            "rmse": 693,
+            "mae": 578,
+            "wape": 45.2,
+            "dir_acc": 51.9,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -185591,25 +185581,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 6.61,
-          "rmse": 557,
-          "mae": 456,
-          "wape": 6.67,
-          "dir_acc": 37.0,
-          "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jambi."
+          "mape": 7.56,
+          "rmse": 629,
+          "mae": 511,
+          "wape": 7.47,
+          "dir_acc": 40.7,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 6.61,
-            "wape": 6.67,
-            "rmse": 557,
-            "mae": 456,
-            "dir_acc": 37.0,
+            "mape": 7.56,
+            "wape": 7.47,
+            "rmse": 629,
+            "mae": 511,
+            "dir_acc": 40.7,
             "is_stable": true,
             "pred_mean": 6838,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jambi.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -185665,12 +185655,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 6.61,
-            "rmse": 557,
-            "mae": 456,
-            "wape": 6.67,
-            "dir_acc": 37.0,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jambi."
+            "mape": 7.56,
+            "rmse": 629,
+            "mae": 511,
+            "wape": 7.47,
+            "dir_acc": 40.7,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -208338,29 +208328,16 @@
       },
       "Jawa Barat": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 6.72,
-          "rmse": 7422,
-          "mae": 5717,
-          "wape": 6.57,
-          "dir_acc": 70.4,
-          "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jawa Barat."
+          "name": "Holt-Winters Mul Standar",
+          "code": "hw_mul_std",
+          "mape": 7.33,
+          "rmse": 7504,
+          "mae": 6170,
+          "wape": 7.6,
+          "dir_acc": 92.9,
+          "desc": "Model Champion Terpilih untuk wilayah Jawa Barat."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 6.72,
-            "wape": 6.57,
-            "rmse": 7422,
-            "mae": 5717,
-            "dir_acc": 70.4,
-            "is_stable": true,
-            "pred_mean": 87009,
-            "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jawa Barat.",
-            "rank": 1
-          },
           {
             "model_name": "Holt-Winters Mul Standar",
             "model_code": "hw_mul_std",
@@ -208371,7 +208348,7 @@
             "dir_acc": 92.9,
             "is_stable": true,
             "pred_mean": 77661,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
@@ -208383,7 +208360,7 @@
             "dir_acc": 92.9,
             "is_stable": true,
             "pred_mean": 80689,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -208395,6 +208372,19 @@
             "dir_acc": 85.7,
             "is_stable": true,
             "pred_mean": 79926,
+            "rank": 3
+          },
+          {
+            "model_name": "LightGBM Regressor (Machine Learning)",
+            "model_code": "lightgbm",
+            "mape": 8.24,
+            "wape": 7.74,
+            "rmse": 8502,
+            "mae": 6737,
+            "dir_acc": 70.4,
+            "is_stable": true,
+            "pred_mean": 87009,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 4
           },
           {
@@ -208412,14 +208402,14 @@
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 6.72,
-            "rmse": 7422,
-            "mae": 5717,
-            "wape": 6.57,
-            "dir_acc": 70.4,
-            "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jawa Barat."
+            "name": "Holt-Winters Mul Standar",
+            "code": "hw_mul_std",
+            "mape": 7.33,
+            "rmse": 7504,
+            "mae": 6170,
+            "wape": 7.6,
+            "dir_acc": 92.9,
+            "desc": "Model Champion Terpilih untuk wilayah Jawa Barat."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -231089,25 +231079,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 4.94,
-          "rmse": 9274,
-          "mae": 7104,
-          "wape": 4.96,
-          "dir_acc": 85.2,
-          "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jawa Tengah."
+          "mape": 5.25,
+          "rmse": 10289,
+          "mae": 7718,
+          "wape": 5.39,
+          "dir_acc": 77.8,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 4.94,
-            "wape": 4.96,
-            "rmse": 9274,
-            "mae": 7104,
-            "dir_acc": 85.2,
+            "mape": 5.25,
+            "wape": 5.39,
+            "rmse": 10289,
+            "mae": 7718,
+            "dir_acc": 77.8,
             "is_stable": true,
             "pred_mean": 143119,
-            "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jawa Tengah.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -231163,12 +231153,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 4.94,
-            "rmse": 9274,
-            "mae": 7104,
-            "wape": 4.96,
-            "dir_acc": 85.2,
-            "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jawa Tengah."
+            "mape": 5.25,
+            "rmse": 10289,
+            "mae": 7718,
+            "wape": 5.39,
+            "dir_acc": 77.8,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -253912,25 +253902,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 4.36,
-          "rmse": 11927,
-          "mae": 9398,
-          "wape": 4.3,
-          "dir_acc": 74.1,
-          "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jawa Timur."
+          "mape": 4.1,
+          "rmse": 12679,
+          "mae": 9023,
+          "wape": 4.13,
+          "dir_acc": 66.7,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 4.36,
-            "wape": 4.3,
-            "rmse": 11927,
-            "mae": 9398,
-            "dir_acc": 74.1,
+            "mape": 4.1,
+            "wape": 4.13,
+            "rmse": 12679,
+            "mae": 9023,
+            "dir_acc": 66.7,
             "is_stable": true,
             "pred_mean": 218565,
-            "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jawa Timur.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -253986,12 +253976,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 4.36,
-            "rmse": 11927,
-            "mae": 9398,
-            "wape": 4.3,
-            "dir_acc": 74.1,
-            "desc": "Model Champion Terpilih: Hybrid Residual on lag_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Jawa Timur."
+            "mape": 4.1,
+            "rmse": 12679,
+            "mae": 9023,
+            "wape": 4.13,
+            "dir_acc": 66.7,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -276733,29 +276723,16 @@
       },
       "Kalimantan Barat": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 26.5,
-          "rmse": 2534,
-          "mae": 1247,
-          "wape": 16.96,
-          "dir_acc": 33.3,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.02, leaves=5, alpha=0.5, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Barat."
+          "name": "Naive Random Walk (Lag 1)",
+          "code": "naive",
+          "mape": 27.52,
+          "rmse": 1561,
+          "mae": 1187,
+          "wape": 19.13,
+          "dir_acc": 0,
+          "desc": "Model Champion Terpilih untuk wilayah Kalimantan Barat."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 26.5,
-            "wape": 16.96,
-            "rmse": 2534,
-            "mae": 1247,
-            "dir_acc": 33.3,
-            "is_stable": true,
-            "pred_mean": 7354,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.02, leaves=5, alpha=0.5, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Barat.",
-            "rank": 1
-          },
           {
             "model_name": "Naive Random Walk (Lag 1)",
             "model_code": "naive",
@@ -276766,6 +276743,19 @@
             "dir_acc": 0,
             "is_stable": true,
             "pred_mean": 6227,
+            "rank": 1
+          },
+          {
+            "model_name": "LightGBM Regressor (Machine Learning)",
+            "model_code": "lightgbm",
+            "mape": 29.12,
+            "wape": 20.42,
+            "rmse": 2723,
+            "mae": 1502,
+            "dir_acc": 59.3,
+            "is_stable": true,
+            "pred_mean": 7354,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 2
           },
           {
@@ -276807,14 +276797,14 @@
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 26.5,
-            "rmse": 2534,
-            "mae": 1247,
-            "wape": 16.96,
-            "dir_acc": 33.3,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.02, leaves=5, alpha=0.5, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Barat."
+            "name": "Naive Random Walk (Lag 1)",
+            "code": "naive",
+            "mape": 27.52,
+            "rmse": 1561,
+            "mae": 1187,
+            "wape": 19.13,
+            "dir_acc": 0,
+            "desc": "Model Champion Terpilih untuk wilayah Kalimantan Barat."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -299482,29 +299472,16 @@
       },
       "Kalimantan Selatan": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 5.51,
-          "rmse": 1751,
-          "mae": 1104,
-          "wape": 5.15,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Selatan."
+          "name": "Holt-Winters Mul Damped (phi=0.98)",
+          "code": "hw_mul_damped",
+          "mape": 6.12,
+          "rmse": 1463,
+          "mae": 1108,
+          "wape": 5.9,
+          "dir_acc": 64.3,
+          "desc": "Model Champion Terpilih untuk wilayah Kalimantan Selatan."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 5.51,
-            "wape": 5.15,
-            "rmse": 1751,
-            "mae": 1104,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 21223,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Selatan.",
-            "rank": 1
-          },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
             "model_code": "hw_mul_damped",
@@ -299515,7 +299492,7 @@
             "dir_acc": 64.3,
             "is_stable": true,
             "pred_mean": 19022,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
@@ -299527,7 +299504,7 @@
             "dir_acc": 64.3,
             "is_stable": true,
             "pred_mean": 18681,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -299539,7 +299516,7 @@
             "dir_acc": 64.3,
             "is_stable": true,
             "pred_mean": 19065,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Seasonal Naive (Lag 7)",
@@ -299551,19 +299528,31 @@
             "dir_acc": 57.1,
             "is_stable": true,
             "pred_mean": 19134,
+            "rank": 4
+          },
+          {
+            "model_name": "Holt-Winters Mul Standar",
+            "model_code": "hw_mul_std",
+            "mape": 6.46,
+            "wape": 6.36,
+            "rmse": 1517,
+            "mae": 1195,
+            "dir_acc": 64.3,
+            "is_stable": true,
+            "pred_mean": 18572,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 5.51,
-            "rmse": 1751,
-            "mae": 1104,
-            "wape": 5.15,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Selatan."
+            "name": "Holt-Winters Mul Damped (phi=0.98)",
+            "code": "hw_mul_damped",
+            "mape": 6.12,
+            "rmse": 1463,
+            "mae": 1108,
+            "wape": 5.9,
+            "dir_acc": 64.3,
+            "desc": "Model Champion Terpilih untuk wilayah Kalimantan Selatan."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -322231,29 +322220,16 @@
       },
       "Kalimantan Tengah": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 28.54,
-          "rmse": 908,
-          "mae": 764,
-          "wape": 34.75,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Naive Random Walk (Lag 1) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Tengah."
+          "name": "Naive Random Walk (Lag 1)",
+          "code": "naive",
+          "mape": 31.71,
+          "rmse": 1342,
+          "mae": 1163,
+          "wape": 26.81,
+          "dir_acc": 0,
+          "desc": "Model Champion Terpilih untuk wilayah Kalimantan Tengah."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 28.54,
-            "wape": 34.75,
-            "rmse": 908,
-            "mae": 764,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 2176,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Naive Random Walk (Lag 1) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Tengah.",
-            "rank": 1
-          },
           {
             "model_name": "Naive Random Walk (Lag 1)",
             "model_code": "naive",
@@ -322264,7 +322240,7 @@
             "dir_acc": 0,
             "is_stable": true,
             "pred_mean": 4324,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
@@ -322276,7 +322252,7 @@
             "dir_acc": 42.9,
             "is_stable": true,
             "pred_mean": 4733,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Mul Standar",
@@ -322288,7 +322264,7 @@
             "dir_acc": 39.3,
             "is_stable": true,
             "pred_mean": 4705,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Simple Exp Smoothing (SES)",
@@ -322300,19 +322276,31 @@
             "dir_acc": 3.6,
             "is_stable": true,
             "pred_mean": 5074,
+            "rank": 4
+          },
+          {
+            "model_name": "ARIMA (1,1,1) Non-Seasonal",
+            "model_code": "arima",
+            "mape": 39.32,
+            "wape": 28.69,
+            "rmse": 1557,
+            "mae": 1245,
+            "dir_acc": 35.7,
+            "is_stable": true,
+            "pred_mean": 5124,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 28.54,
-            "rmse": 908,
-            "mae": 764,
-            "wape": 34.75,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Naive Random Walk (Lag 1) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Tengah."
+            "name": "Naive Random Walk (Lag 1)",
+            "code": "naive",
+            "mape": 31.71,
+            "rmse": 1342,
+            "mae": 1163,
+            "wape": 26.81,
+            "dir_acc": 0,
+            "desc": "Model Champion Terpilih untuk wilayah Kalimantan Tengah."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -344906,29 +344894,16 @@
       },
       "Kalimantan Timur": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 6.74,
-          "rmse": 2432,
-          "mae": 1996,
-          "wape": 8.78,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Simple Exp Smoothing (SES) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Timur."
+          "name": "Simple Exp Smoothing (SES)",
+          "code": "ses",
+          "mape": 7.49,
+          "rmse": 2189,
+          "mae": 1693,
+          "wape": 7.67,
+          "dir_acc": 3.6,
+          "desc": "Model Champion Terpilih untuk wilayah Kalimantan Timur."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 6.74,
-            "wape": 8.78,
-            "rmse": 2432,
-            "mae": 1996,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 22478,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Simple Exp Smoothing (SES) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Timur.",
-            "rank": 1
-          },
           {
             "model_name": "Simple Exp Smoothing (SES)",
             "model_code": "ses",
@@ -344939,7 +344914,7 @@
             "dir_acc": 3.6,
             "is_stable": true,
             "pred_mean": 21576,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "ARIMA (1,1,1) Non-Seasonal",
@@ -344951,7 +344926,7 @@
             "dir_acc": 50,
             "is_stable": true,
             "pred_mean": 21903,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
@@ -344963,7 +344938,7 @@
             "dir_acc": 50,
             "is_stable": true,
             "pred_mean": 21898,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -344975,19 +344950,31 @@
             "dir_acc": 50,
             "is_stable": true,
             "pred_mean": 22063,
+            "rank": 4
+          },
+          {
+            "model_name": "Seasonal Naive (Lag 7)",
+            "model_code": "snaive",
+            "mape": 8.07,
+            "wape": 7.85,
+            "rmse": 2248,
+            "mae": 1733,
+            "dir_acc": 64.3,
+            "is_stable": true,
+            "pred_mean": 22815,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 6.74,
-            "rmse": 2432,
-            "mae": 1996,
-            "wape": 8.78,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Simple Exp Smoothing (SES) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Timur."
+            "name": "Simple Exp Smoothing (SES)",
+            "code": "ses",
+            "mape": 7.49,
+            "rmse": 2189,
+            "mae": 1693,
+            "wape": 7.67,
+            "dir_acc": 3.6,
+            "desc": "Model Champion Terpilih untuk wilayah Kalimantan Timur."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -367655,29 +367642,16 @@
       },
       "Kalimantan Utara": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 13.7,
-          "rmse": 1349,
-          "mae": 1101,
-          "wape": 16.51,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Utara."
+          "name": "SARIMA (1,1,1)x(1,1,1,7)",
+          "code": "sarima",
+          "mape": 15.22,
+          "rmse": 1748,
+          "mae": 1167,
+          "wape": 17.86,
+          "dir_acc": 60.7,
+          "desc": "Model Champion Terpilih untuk wilayah Kalimantan Utara."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 13.7,
-            "wape": 16.51,
-            "rmse": 1349,
-            "mae": 1101,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 6597,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Utara.",
-            "rank": 1
-          },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
             "model_code": "sarima",
@@ -367688,7 +367662,7 @@
             "dir_acc": 60.7,
             "is_stable": true,
             "pred_mean": 5570,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -367700,7 +367674,7 @@
             "dir_acc": 53.6,
             "is_stable": true,
             "pred_mean": 5564,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
@@ -367712,7 +367686,7 @@
             "dir_acc": 53.6,
             "is_stable": true,
             "pred_mean": 5545,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Linear Regression (Trend + DOW)",
@@ -367724,19 +367698,31 @@
             "dir_acc": 53.6,
             "is_stable": true,
             "pred_mean": 5682,
+            "rank": 4
+          },
+          {
+            "model_name": "Holt-Winters Mul Standar",
+            "model_code": "hw_mul_std",
+            "mape": 16.3,
+            "wape": 18.97,
+            "rmse": 1811,
+            "mae": 1239,
+            "dir_acc": 53.6,
+            "is_stable": true,
+            "pred_mean": 5498,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 13.7,
-            "rmse": 1349,
-            "mae": 1101,
-            "wape": 16.51,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Kalimantan Utara."
+            "name": "SARIMA (1,1,1)x(1,1,1,7)",
+            "code": "sarima",
+            "mape": 15.22,
+            "rmse": 1748,
+            "mae": 1167,
+            "wape": 17.86,
+            "dir_acc": 60.7,
+            "desc": "Model Champion Terpilih untuk wilayah Kalimantan Utara."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -390330,29 +390316,16 @@
       },
       "Kepulauan Bangka Belitung": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 11.05,
-          "rmse": 793,
-          "mae": 436,
-          "wape": 8.18,
-          "dir_acc": 74.1,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=6, alpha=0.2, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Kepulauan Bangka Belitung."
+          "name": "ARIMA (1,1,1) Non-Seasonal",
+          "code": "arima",
+          "mape": 11.64,
+          "rmse": 791,
+          "mae": 489,
+          "wape": 9.24,
+          "dir_acc": 50,
+          "desc": "Model Champion Terpilih untuk wilayah Kepulauan Bangka Belitung."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 11.05,
-            "wape": 8.18,
-            "rmse": 793,
-            "mae": 436,
-            "dir_acc": 74.1,
-            "is_stable": true,
-            "pred_mean": 5333,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=6, alpha=0.2, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Kepulauan Bangka Belitung.",
-            "rank": 1
-          },
           {
             "model_name": "ARIMA (1,1,1) Non-Seasonal",
             "model_code": "arima",
@@ -390363,7 +390336,7 @@
             "dir_acc": 50,
             "is_stable": true,
             "pred_mean": 5408,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Simple Exp Smoothing (SES)",
@@ -390375,7 +390348,7 @@
             "dir_acc": 3.6,
             "is_stable": true,
             "pred_mean": 5412,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Naive Random Walk (Lag 1)",
@@ -390387,7 +390360,7 @@
             "dir_acc": 0,
             "is_stable": true,
             "pred_mean": 5071,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
@@ -390399,19 +390372,31 @@
             "dir_acc": 46.4,
             "is_stable": true,
             "pred_mean": 5076,
+            "rank": 4
+          },
+          {
+            "model_name": "Seasonal Naive (Lag 7)",
+            "model_code": "snaive",
+            "mape": 14.32,
+            "wape": 11.48,
+            "rmse": 899,
+            "mae": 607,
+            "dir_acc": 78.6,
+            "is_stable": true,
+            "pred_mean": 5744,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 11.05,
-            "rmse": 793,
-            "mae": 436,
-            "wape": 8.18,
-            "dir_acc": 74.1,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=6, alpha=0.2, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Kepulauan Bangka Belitung."
+            "name": "ARIMA (1,1,1) Non-Seasonal",
+            "code": "arima",
+            "mape": 11.64,
+            "rmse": 791,
+            "mae": 489,
+            "wape": 9.24,
+            "dir_acc": 50,
+            "desc": "Model Champion Terpilih untuk wilayah Kepulauan Bangka Belitung."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -411823,25 +411808,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 12.15,
-          "rmse": 6618,
-          "mae": 5626,
-          "wape": 11.15,
+          "mape": 11.56,
+          "rmse": 6434,
+          "mae": 5263,
+          "wape": 10.43,
           "dir_acc": 81.5,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.05, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Kepulauan Riau."
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 12.15,
-            "wape": 11.15,
-            "rmse": 6618,
-            "mae": 5626,
+            "mape": 11.56,
+            "wape": 10.43,
+            "rmse": 6434,
+            "mae": 5263,
             "dir_acc": 81.5,
             "is_stable": true,
             "pred_mean": 50458,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.05, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Kepulauan Riau.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -411897,12 +411882,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 12.15,
-            "rmse": 6618,
-            "mae": 5626,
-            "wape": 11.15,
+            "mape": 11.56,
+            "rmse": 6434,
+            "mae": 5263,
+            "wape": 10.43,
             "dir_acc": 81.5,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.05, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Kepulauan Riau."
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -434498,25 +434483,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 4.38,
-          "rmse": 2072,
-          "mae": 1560,
-          "wape": 4.46,
-          "dir_acc": 63.0,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.05, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Lampung."
+          "mape": 4.24,
+          "rmse": 2052,
+          "mae": 1525,
+          "wape": 4.36,
+          "dir_acc": 74.1,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 4.38,
-            "wape": 4.46,
-            "rmse": 2072,
-            "mae": 1560,
-            "dir_acc": 63.0,
+            "mape": 4.24,
+            "wape": 4.36,
+            "rmse": 2052,
+            "mae": 1525,
+            "dir_acc": 74.1,
             "is_stable": true,
             "pred_mean": 34949,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.05, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Lampung.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -434572,12 +434557,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 4.38,
-            "rmse": 2072,
-            "mae": 1560,
-            "wape": 4.46,
-            "dir_acc": 63.0,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.05, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Lampung."
+            "mape": 4.24,
+            "rmse": 2052,
+            "mae": 1525,
+            "wape": 4.36,
+            "dir_acc": 74.1,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -457319,29 +457304,16 @@
       },
       "Maluku": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 10.19,
-          "rmse": 3380,
-          "mae": 2477,
-          "wape": 15.88,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Maluku."
+          "name": "SARIMA (1,1,1)x(1,1,1,7)",
+          "code": "sarima",
+          "mape": 11.32,
+          "rmse": 1976,
+          "mae": 1443,
+          "wape": 10.84,
+          "dir_acc": 50,
+          "desc": "Model Champion Terpilih untuk wilayah Maluku."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 10.19,
-            "wape": 15.88,
-            "rmse": 3380,
-            "mae": 2477,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 15421,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Maluku.",
-            "rank": 1
-          },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
             "model_code": "sarima",
@@ -457352,7 +457324,7 @@
             "dir_acc": 50,
             "is_stable": true,
             "pred_mean": 12903,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -457364,7 +457336,7 @@
             "dir_acc": 53.6,
             "is_stable": true,
             "pred_mean": 12812,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "ARIMA (1,1,1) Non-Seasonal",
@@ -457376,7 +457348,7 @@
             "dir_acc": 46.4,
             "is_stable": true,
             "pred_mean": 12675,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
@@ -457388,19 +457360,31 @@
             "dir_acc": 53.6,
             "is_stable": true,
             "pred_mean": 12856,
+            "rank": 4
+          },
+          {
+            "model_name": "Simple Exp Smoothing (SES)",
+            "model_code": "ses",
+            "mape": 11.77,
+            "wape": 11.59,
+            "rmse": 2152,
+            "mae": 1543,
+            "dir_acc": 3.6,
+            "is_stable": true,
+            "pred_mean": 12604,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 10.19,
-            "rmse": 3380,
-            "mae": 2477,
-            "wape": 15.88,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Maluku."
+            "name": "SARIMA (1,1,1)x(1,1,1,7)",
+            "code": "sarima",
+            "mape": 11.32,
+            "rmse": 1976,
+            "mae": 1443,
+            "wape": 10.84,
+            "dir_acc": 50,
+            "desc": "Model Champion Terpilih untuk wilayah Maluku."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -479994,29 +479978,16 @@
       },
       "Maluku Utara": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 17.28,
-          "rmse": 2202,
-          "mae": 1736,
-          "wape": 16.0,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Seasonal Naive (Lag 7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Maluku Utara."
+          "name": "Seasonal Naive (Lag 7)",
+          "code": "snaive",
+          "mape": 19.2,
+          "rmse": 2387,
+          "mae": 2105,
+          "wape": 17.64,
+          "dir_acc": 75,
+          "desc": "Model Champion Terpilih untuk wilayah Maluku Utara."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 17.28,
-            "wape": 16.0,
-            "rmse": 2202,
-            "mae": 1736,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 10731,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Seasonal Naive (Lag 7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Maluku Utara.",
-            "rank": 1
-          },
           {
             "model_name": "Seasonal Naive (Lag 7)",
             "model_code": "snaive",
@@ -480027,6 +479998,19 @@
             "dir_acc": 75,
             "is_stable": true,
             "pred_mean": 13683,
+            "rank": 1
+          },
+          {
+            "model_name": "LightGBM Regressor (Machine Learning)",
+            "model_code": "lightgbm",
+            "mape": 20.11,
+            "wape": 18.36,
+            "rmse": 2382,
+            "mae": 1970,
+            "dir_acc": 40.7,
+            "is_stable": true,
+            "pred_mean": 10731,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 2
           },
           {
@@ -480068,14 +480052,14 @@
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 17.28,
-            "rmse": 2202,
-            "mae": 1736,
-            "wape": 16.0,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Seasonal Naive (Lag 7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Maluku Utara."
+            "name": "Seasonal Naive (Lag 7)",
+            "code": "snaive",
+            "mape": 19.2,
+            "rmse": 2387,
+            "mae": 2105,
+            "wape": 17.64,
+            "dir_acc": 75,
+            "desc": "Model Champion Terpilih untuk wilayah Maluku Utara."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -502671,25 +502655,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 4.04,
-          "rmse": 1737,
-          "mae": 1232,
-          "wape": 3.96,
-          "dir_acc": 44.4,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=huber, lr=0.03, leaves=5, alpha=0.5, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Nusa Tenggara Barat."
+          "mape": 4.47,
+          "rmse": 1865,
+          "mae": 1357,
+          "wape": 4.37,
+          "dir_acc": 55.6,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 4.04,
-            "wape": 3.96,
-            "rmse": 1737,
-            "mae": 1232,
-            "dir_acc": 44.4,
+            "mape": 4.47,
+            "wape": 4.37,
+            "rmse": 1865,
+            "mae": 1357,
+            "dir_acc": 55.6,
             "is_stable": true,
             "pred_mean": 31074,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=huber, lr=0.03, leaves=5, alpha=0.5, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Nusa Tenggara Barat.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -502745,12 +502729,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 4.04,
-            "rmse": 1737,
-            "mae": 1232,
-            "wape": 3.96,
-            "dir_acc": 44.4,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=huber, lr=0.03, leaves=5, alpha=0.5, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Nusa Tenggara Barat."
+            "mape": 4.47,
+            "rmse": 1865,
+            "mae": 1357,
+            "wape": 4.37,
+            "dir_acc": 55.6,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -524234,29 +524218,16 @@
       },
       "Nusa Tenggara Timur": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 7.79,
-          "rmse": 2984,
-          "mae": 2147,
-          "wape": 9.18,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Nusa Tenggara Timur."
+          "name": "Holt-Winters Mul Damped (phi=0.98)",
+          "code": "hw_mul_damped",
+          "mape": 8.66,
+          "rmse": 2555,
+          "mae": 1979,
+          "wape": 8.92,
+          "dir_acc": 82.1,
+          "desc": "Model Champion Terpilih untuk wilayah Nusa Tenggara Timur."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 7.79,
-            "wape": 9.18,
-            "rmse": 2984,
-            "mae": 2147,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 23119,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Nusa Tenggara Timur.",
-            "rank": 1
-          },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
             "model_code": "hw_mul_damped",
@@ -524267,7 +524238,7 @@
             "dir_acc": 82.1,
             "is_stable": true,
             "pred_mean": 21614,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -524279,7 +524250,7 @@
             "dir_acc": 82.1,
             "is_stable": true,
             "pred_mean": 21738,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Linear Regression (Trend + DOW)",
@@ -524291,7 +524262,7 @@
             "dir_acc": 75,
             "is_stable": true,
             "pred_mean": 22051,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt-Winters Mul Standar",
@@ -524303,19 +524274,31 @@
             "dir_acc": 82.1,
             "is_stable": true,
             "pred_mean": 20499,
+            "rank": 4
+          },
+          {
+            "model_name": "ARIMA (1,1,1) Non-Seasonal",
+            "model_code": "arima",
+            "mape": 10.65,
+            "wape": 10.43,
+            "rmse": 3006,
+            "mae": 2313,
+            "dir_acc": 46.4,
+            "is_stable": true,
+            "pred_mean": 22465,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 7.79,
-            "rmse": 2984,
-            "mae": 2147,
-            "wape": 9.18,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Nusa Tenggara Timur."
+            "name": "Holt-Winters Mul Damped (phi=0.98)",
+            "code": "hw_mul_damped",
+            "mape": 8.66,
+            "rmse": 2555,
+            "mae": 1979,
+            "wape": 8.92,
+            "dir_acc": 82.1,
+            "desc": "Model Champion Terpilih untuk wilayah Nusa Tenggara Timur."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -545801,25 +545784,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 16.85,
-          "rmse": 1238,
-          "mae": 993,
-          "wape": 15.72,
-          "dir_acc": 63.0,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Papua."
+          "mape": 15.25,
+          "rmse": 1185,
+          "mae": 872,
+          "wape": 13.81,
+          "dir_acc": 66.7,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 16.85,
-            "wape": 15.72,
-            "rmse": 1238,
-            "mae": 993,
-            "dir_acc": 63.0,
+            "mape": 15.25,
+            "wape": 13.81,
+            "rmse": 1185,
+            "mae": 872,
+            "dir_acc": 66.7,
             "is_stable": true,
             "pred_mean": 6314,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Papua.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -545875,12 +545858,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 16.85,
-            "rmse": 1238,
-            "mae": 993,
-            "wape": 15.72,
-            "dir_acc": 63.0,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Papua."
+            "mape": 15.25,
+            "rmse": 1185,
+            "mae": 872,
+            "wape": 13.81,
+            "dir_acc": 66.7,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -568548,29 +568531,16 @@
       },
       "Papua Barat": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 19.81,
-          "rmse": 1210,
-          "mae": 885,
-          "wape": 23.42,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Naive Random Walk (Lag 1) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Barat."
+          "name": "Naive Random Walk (Lag 1)",
+          "code": "naive",
+          "mape": 22.01,
+          "rmse": 939,
+          "mae": 757,
+          "wape": 22.45,
+          "dir_acc": 0,
+          "desc": "Model Champion Terpilih untuk wilayah Papua Barat."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 19.81,
-            "wape": 23.42,
-            "rmse": 1210,
-            "mae": 885,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 3736,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Naive Random Walk (Lag 1) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Barat.",
-            "rank": 1
-          },
           {
             "model_name": "Naive Random Walk (Lag 1)",
             "model_code": "naive",
@@ -568581,7 +568551,7 @@
             "dir_acc": 0,
             "is_stable": true,
             "pred_mean": 2826,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt-Winters Mul Standar",
@@ -568593,7 +568563,7 @@
             "dir_acc": 67.9,
             "is_stable": true,
             "pred_mean": 3845,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
@@ -568605,7 +568575,7 @@
             "dir_acc": 60.7,
             "is_stable": true,
             "pred_mean": 3897,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
@@ -568617,19 +568587,31 @@
             "dir_acc": 57.1,
             "is_stable": true,
             "pred_mean": 3886,
+            "rank": 4
+          },
+          {
+            "model_name": "ARIMA (1,1,1) Non-Seasonal",
+            "model_code": "arima",
+            "mape": 27.78,
+            "wape": 21.89,
+            "rmse": 929,
+            "mae": 738,
+            "dir_acc": 25,
+            "is_stable": true,
+            "pred_mean": 3898,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 19.81,
-            "rmse": 1210,
-            "mae": 885,
-            "wape": 23.42,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Naive Random Walk (Lag 1) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Barat."
+            "name": "Naive Random Walk (Lag 1)",
+            "code": "naive",
+            "mape": 22.01,
+            "rmse": 939,
+            "mae": 757,
+            "wape": 22.45,
+            "dir_acc": 0,
+            "desc": "Model Champion Terpilih untuk wilayah Papua Barat."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -591223,29 +591205,16 @@
       },
       "Papua Barat Daya": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 23.11,
-          "rmse": 1477,
-          "mae": 1119,
-          "wape": 21.5,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Standar precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Barat Daya."
+          "name": "Holt-Winters Mul Standar",
+          "code": "hw_mul_std",
+          "mape": 25.68,
+          "rmse": 1346,
+          "mae": 1002,
+          "wape": 18.62,
+          "dir_acc": 57.1,
+          "desc": "Model Champion Terpilih untuk wilayah Papua Barat Daya."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 23.11,
-            "wape": 21.5,
-            "rmse": 1477,
-            "mae": 1119,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 5151,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Standar precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Barat Daya.",
-            "rank": 1
-          },
           {
             "model_name": "Holt-Winters Mul Standar",
             "model_code": "hw_mul_std",
@@ -591256,7 +591225,7 @@
             "dir_acc": 57.1,
             "is_stable": true,
             "pred_mean": 5416,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
@@ -591268,7 +591237,7 @@
             "dir_acc": 50,
             "is_stable": true,
             "pred_mean": 5465,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
@@ -591280,7 +591249,7 @@
             "dir_acc": 60.7,
             "is_stable": true,
             "pred_mean": 5590,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Naive Random Walk (Lag 1)",
@@ -591292,19 +591261,31 @@
             "dir_acc": 0,
             "is_stable": true,
             "pred_mean": 4983,
+            "rank": 4
+          },
+          {
+            "model_name": "Holt-Winters Add Damped (phi=0.98)",
+            "model_code": "hw_add_damped",
+            "mape": 27.88,
+            "wape": 19.34,
+            "rmse": 1433,
+            "mae": 1041,
+            "dir_acc": 57.1,
+            "is_stable": true,
+            "pred_mean": 5648,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 23.11,
-            "rmse": 1477,
-            "mae": 1119,
-            "wape": 21.5,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Standar precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Barat Daya."
+            "name": "Holt-Winters Mul Standar",
+            "code": "hw_mul_std",
+            "mape": 25.68,
+            "rmse": 1346,
+            "mae": 1002,
+            "wape": 18.62,
+            "dir_acc": 57.1,
+            "desc": "Model Champion Terpilih untuk wilayah Papua Barat Daya."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -613898,29 +613879,16 @@
       },
       "Papua Pegunungan": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 17.42,
-          "rmse": 356,
-          "mae": 318,
-          "wape": 40.07,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (ARIMA (1,1,1) Non-Seasonal precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Pegunungan."
+          "name": "ARIMA (1,1,1) Non-Seasonal",
+          "code": "arima",
+          "mape": 19.35,
+          "rmse": 249,
+          "mae": 198,
+          "wape": 22.84,
+          "dir_acc": 32.1,
+          "desc": "Model Champion Terpilih untuk wilayah Papua Pegunungan."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 17.42,
-            "wape": 40.07,
-            "rmse": 356,
-            "mae": 318,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 784,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (ARIMA (1,1,1) Non-Seasonal precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Pegunungan.",
-            "rank": 1
-          },
           {
             "model_name": "ARIMA (1,1,1) Non-Seasonal",
             "model_code": "arima",
@@ -613931,7 +613899,7 @@
             "dir_acc": 32.1,
             "is_stable": true,
             "pred_mean": 792,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Simple Exp Smoothing (SES)",
@@ -613943,7 +613911,7 @@
             "dir_acc": 3.6,
             "is_stable": true,
             "pred_mean": 745,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
@@ -613955,7 +613923,7 @@
             "dir_acc": 92.9,
             "is_stable": true,
             "pred_mean": 691,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "7-Day Moving Average",
@@ -613967,19 +613935,31 @@
             "dir_acc": 3.6,
             "is_stable": true,
             "pred_mean": 702,
+            "rank": 4
+          },
+          {
+            "model_name": "Naive Random Walk (Lag 1)",
+            "model_code": "naive",
+            "mape": 24.35,
+            "wape": 24.26,
+            "rmse": 302,
+            "mae": 211,
+            "dir_acc": 0,
+            "is_stable": true,
+            "pred_mean": 1056,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 17.42,
-            "rmse": 356,
-            "mae": 318,
-            "wape": 40.07,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (ARIMA (1,1,1) Non-Seasonal precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Pegunungan."
+            "name": "ARIMA (1,1,1) Non-Seasonal",
+            "code": "arima",
+            "mape": 19.35,
+            "rmse": 249,
+            "mae": 198,
+            "wape": 22.84,
+            "dir_acc": 32.1,
+            "desc": "Model Champion Terpilih untuk wilayah Papua Pegunungan."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -636425,29 +636405,16 @@
       },
       "Papua Selatan": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 6.37,
-          "rmse": 213,
-          "mae": 154,
-          "wape": 15.08,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Selatan."
+          "name": "Holt-Winters Mul Damped (phi=0.98)",
+          "code": "hw_mul_damped",
+          "mape": 7.08,
+          "rmse": 109,
+          "mae": 86,
+          "wape": 7.11,
+          "dir_acc": 92.9,
+          "desc": "Model Champion Terpilih untuk wilayah Papua Selatan."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 6.37,
-            "wape": 15.08,
-            "rmse": 213,
-            "mae": 154,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 1006,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Selatan.",
-            "rank": 1
-          },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
             "model_code": "hw_mul_damped",
@@ -636458,7 +636425,7 @@
             "dir_acc": 92.9,
             "is_stable": true,
             "pred_mean": 1183,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -636470,7 +636437,7 @@
             "dir_acc": 92.9,
             "is_stable": true,
             "pred_mean": 1182,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
@@ -636482,7 +636449,7 @@
             "dir_acc": 92.9,
             "is_stable": true,
             "pred_mean": 1160,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt-Winters Mul Standar",
@@ -636494,19 +636461,31 @@
             "dir_acc": 92.9,
             "is_stable": true,
             "pred_mean": 1144,
+            "rank": 4
+          },
+          {
+            "model_name": "Seasonal Naive (Lag 7)",
+            "model_code": "snaive",
+            "mape": 8.41,
+            "wape": 8.04,
+            "rmse": 119,
+            "mae": 97,
+            "dir_acc": 92.9,
+            "is_stable": true,
+            "pred_mean": 1211,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 6.37,
-            "rmse": 213,
-            "mae": 154,
-            "wape": 15.08,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Damped (phi=0.98) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Selatan."
+            "name": "Holt-Winters Mul Damped (phi=0.98)",
+            "code": "hw_mul_damped",
+            "mape": 7.08,
+            "rmse": 109,
+            "mae": 86,
+            "wape": 7.11,
+            "dir_acc": 92.9,
+            "desc": "Model Champion Terpilih untuk wilayah Papua Selatan."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -659026,29 +659005,16 @@
       },
       "Papua Tengah": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 51.08,
+          "name": "7-Day Moving Average",
+          "code": "ma7",
+          "mape": 56.76,
           "rmse": 880,
-          "mae": 677,
-          "wape": 27.29,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (7-Day Moving Average precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Tengah."
+          "mae": 698,
+          "wape": 28.51,
+          "dir_acc": 3.6,
+          "desc": "Model Champion Terpilih untuk wilayah Papua Tengah."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 51.08,
-            "wape": 27.29,
-            "rmse": 880,
-            "mae": 677,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 2454,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (7-Day Moving Average precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Tengah.",
-            "rank": 1
-          },
           {
             "model_name": "7-Day Moving Average",
             "model_code": "ma7",
@@ -659059,7 +659025,7 @@
             "dir_acc": 3.6,
             "is_stable": true,
             "pred_mean": 2827,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
@@ -659071,7 +659037,7 @@
             "dir_acc": 78.6,
             "is_stable": true,
             "pred_mean": 2942,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -659083,7 +659049,7 @@
             "dir_acc": 78.6,
             "is_stable": true,
             "pred_mean": 2983,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Linear Regression (Trend + DOW)",
@@ -659095,19 +659061,31 @@
             "dir_acc": 82.1,
             "is_stable": true,
             "pred_mean": 2927,
+            "rank": 4
+          },
+          {
+            "model_name": "Holt-Winters Mul Standar",
+            "model_code": "hw_mul_std",
+            "mape": 60.42,
+            "wape": 32.37,
+            "rmse": 934,
+            "mae": 792,
+            "dir_acc": 78.6,
+            "is_stable": true,
+            "pred_mean": 2992,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 51.08,
+            "name": "7-Day Moving Average",
+            "code": "ma7",
+            "mape": 56.76,
             "rmse": 880,
-            "mae": 677,
-            "wape": 27.29,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (7-Day Moving Average precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Papua Tengah."
+            "mae": 698,
+            "wape": 28.51,
+            "dir_acc": 3.6,
+            "desc": "Model Champion Terpilih untuk wilayah Papua Tengah."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -681627,29 +681605,16 @@
       },
       "Riau": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 7.67,
-          "rmse": 1618,
-          "mae": 1288,
-          "wape": 9.4,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Simple Exp Smoothing (SES) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Riau."
+          "name": "Simple Exp Smoothing (SES)",
+          "code": "ses",
+          "mape": 8.52,
+          "rmse": 1672,
+          "mae": 1329,
+          "wape": 8.87,
+          "dir_acc": 3.6,
+          "desc": "Model Champion Terpilih untuk wilayah Riau."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 7.67,
-            "wape": 9.4,
-            "rmse": 1618,
-            "mae": 1288,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 13538,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Simple Exp Smoothing (SES) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Riau.",
-            "rank": 1
-          },
           {
             "model_name": "Simple Exp Smoothing (SES)",
             "model_code": "ses",
@@ -681660,7 +681625,7 @@
             "dir_acc": 3.6,
             "is_stable": true,
             "pred_mean": 14399,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Naive Random Walk (Lag 1)",
@@ -681672,7 +681637,7 @@
             "dir_acc": 0,
             "is_stable": true,
             "pred_mean": 14399,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
@@ -681684,7 +681649,7 @@
             "dir_acc": 53.6,
             "is_stable": true,
             "pred_mean": 14996,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
@@ -681696,19 +681661,31 @@
             "dir_acc": 60.7,
             "is_stable": true,
             "pred_mean": 15178,
+            "rank": 4
+          },
+          {
+            "model_name": "Holt-Winters Add Damped (phi=0.98)",
+            "model_code": "hw_add_damped",
+            "mape": 10.94,
+            "wape": 10.72,
+            "rmse": 1829,
+            "mae": 1606,
+            "dir_acc": 60.7,
+            "is_stable": true,
+            "pred_mean": 15297,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 7.67,
-            "rmse": 1618,
-            "mae": 1288,
-            "wape": 9.4,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Simple Exp Smoothing (SES) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Riau."
+            "name": "Simple Exp Smoothing (SES)",
+            "code": "ses",
+            "mape": 8.52,
+            "rmse": 1672,
+            "mae": 1329,
+            "wape": 8.87,
+            "dir_acc": 3.6,
+            "desc": "Model Champion Terpilih untuk wilayah Riau."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -704376,29 +704353,16 @@
       },
       "Sulawesi Barat": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 11.38,
-          "rmse": 418,
-          "mae": 343,
-          "wape": 12.74,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt Linear Trend (No Seasonal) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Barat."
+          "name": "Holt Linear Trend (No Seasonal)",
+          "code": "holt_linear",
+          "mape": 12.65,
+          "rmse": 411,
+          "mae": 331,
+          "wape": 12.58,
+          "dir_acc": 46.4,
+          "desc": "Model Champion Terpilih untuk wilayah Sulawesi Barat."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 11.38,
-            "wape": 12.74,
-            "rmse": 418,
-            "mae": 343,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 2665,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt Linear Trend (No Seasonal) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Barat.",
-            "rank": 1
-          },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
             "model_code": "holt_linear",
@@ -704409,7 +704373,7 @@
             "dir_acc": 46.4,
             "is_stable": true,
             "pred_mean": 2595,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Simple Exp Smoothing (SES)",
@@ -704421,7 +704385,7 @@
             "dir_acc": 0,
             "is_stable": true,
             "pred_mean": 2626,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "ARIMA (1,1,1) Non-Seasonal",
@@ -704433,7 +704397,7 @@
             "dir_acc": 46.4,
             "is_stable": true,
             "pred_mean": 2664,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt-Winters Mul Standar",
@@ -704445,19 +704409,31 @@
             "dir_acc": 39.3,
             "is_stable": true,
             "pred_mean": 2507,
+            "rank": 4
+          },
+          {
+            "model_name": "7-Day Moving Average",
+            "model_code": "ma7",
+            "mape": 14.16,
+            "wape": 13.44,
+            "rmse": 420,
+            "mae": 354,
+            "dir_acc": 0,
+            "is_stable": true,
+            "pred_mean": 2732,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 11.38,
-            "rmse": 418,
-            "mae": 343,
-            "wape": 12.74,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt Linear Trend (No Seasonal) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Barat."
+            "name": "Holt Linear Trend (No Seasonal)",
+            "code": "holt_linear",
+            "mape": 12.65,
+            "rmse": 411,
+            "mae": 331,
+            "wape": 12.58,
+            "dir_acc": 46.4,
+            "desc": "Model Champion Terpilih untuk wilayah Sulawesi Barat."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -727125,29 +727101,16 @@
       },
       "Sulawesi Selatan": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 25.76,
-          "rmse": 5894,
-          "mae": 4863,
-          "wape": 24.22,
-          "dir_acc": 48.1,
-          "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Selatan."
+          "name": "Holt Linear Trend (No Seasonal)",
+          "code": "holt_linear",
+          "mape": 28.42,
+          "rmse": 8619,
+          "mae": 6462,
+          "wape": 19.58,
+          "dir_acc": 46.4,
+          "desc": "Model Champion Terpilih untuk wilayah Sulawesi Selatan."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 25.76,
-            "wape": 24.22,
-            "rmse": 5894,
-            "mae": 4863,
-            "dir_acc": 48.1,
-            "is_stable": true,
-            "pred_mean": 20077,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Selatan.",
-            "rank": 1
-          },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
             "model_code": "holt_linear",
@@ -727158,7 +727121,7 @@
             "dir_acc": 46.4,
             "is_stable": true,
             "pred_mean": 35023,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
@@ -727170,7 +727133,7 @@
             "dir_acc": 64.3,
             "is_stable": true,
             "pred_mean": 35697,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Mul Standar",
@@ -727182,7 +727145,7 @@
             "dir_acc": 60.7,
             "is_stable": true,
             "pred_mean": 35877,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Naive Random Walk (Lag 1)",
@@ -727194,19 +727157,31 @@
             "dir_acc": 0,
             "is_stable": true,
             "pred_mean": 35702,
+            "rank": 4
+          },
+          {
+            "model_name": "Simple Exp Smoothing (SES)",
+            "model_code": "ses",
+            "mape": 30.83,
+            "wape": 20.62,
+            "rmse": 9286,
+            "mae": 6807,
+            "dir_acc": 0,
+            "is_stable": true,
+            "pred_mean": 36202,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 25.76,
-            "rmse": 5894,
-            "mae": 4863,
-            "wape": 24.22,
-            "dir_acc": 48.1,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Selatan."
+            "name": "Holt Linear Trend (No Seasonal)",
+            "code": "holt_linear",
+            "mape": 28.42,
+            "rmse": 8619,
+            "mae": 6462,
+            "wape": 19.58,
+            "dir_acc": 46.4,
+            "desc": "Model Champion Terpilih untuk wilayah Sulawesi Selatan."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -749948,29 +749923,16 @@
       },
       "Sulawesi Tengah": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 15.98,
-          "rmse": 1371,
-          "mae": 1080,
-          "wape": 17.18,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (7-Day Moving Average precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Tengah."
+          "name": "7-Day Moving Average",
+          "code": "ma7",
+          "mape": 17.76,
+          "rmse": 1201,
+          "mae": 1030,
+          "wape": 16.19,
+          "dir_acc": 3.6,
+          "desc": "Model Champion Terpilih untuk wilayah Sulawesi Tengah."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 15.98,
-            "wape": 17.18,
-            "rmse": 1371,
-            "mae": 1080,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 6218,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (7-Day Moving Average precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Tengah.",
-            "rank": 1
-          },
           {
             "model_name": "7-Day Moving Average",
             "model_code": "ma7",
@@ -749981,7 +749943,7 @@
             "dir_acc": 3.6,
             "is_stable": true,
             "pred_mean": 6918,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
@@ -749993,7 +749955,7 @@
             "dir_acc": 39.3,
             "is_stable": true,
             "pred_mean": 6538,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Mul Standar",
@@ -750005,7 +749967,7 @@
             "dir_acc": 46.4,
             "is_stable": true,
             "pred_mean": 6283,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Seasonal Naive (Lag 7)",
@@ -750017,19 +749979,31 @@
             "dir_acc": 60.7,
             "is_stable": true,
             "pred_mean": 6918,
+            "rank": 4
+          },
+          {
+            "model_name": "ARIMA (1,1,1) Non-Seasonal",
+            "model_code": "arima",
+            "mape": 22.86,
+            "wape": 20.37,
+            "rmse": 1536,
+            "mae": 1296,
+            "dir_acc": 39.3,
+            "is_stable": true,
+            "pred_mean": 7433,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 15.98,
-            "rmse": 1371,
-            "mae": 1080,
-            "wape": 17.18,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (7-Day Moving Average precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Tengah."
+            "name": "7-Day Moving Average",
+            "code": "ma7",
+            "mape": 17.76,
+            "rmse": 1201,
+            "mae": 1030,
+            "wape": 16.19,
+            "dir_acc": 3.6,
+            "desc": "Model Champion Terpilih untuk wilayah Sulawesi Tengah."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -772697,29 +772671,16 @@
       },
       "Sulawesi Tenggara": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 10.49,
-          "rmse": 2392,
-          "mae": 1965,
-          "wape": 13.77,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Tenggara."
+          "name": "SARIMA (1,1,1)x(1,1,1,7)",
+          "code": "sarima",
+          "mape": 11.65,
+          "rmse": 1663,
+          "mae": 1238,
+          "wape": 10.37,
+          "dir_acc": 75,
+          "desc": "Model Champion Terpilih untuk wilayah Sulawesi Tenggara."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 10.49,
-            "wape": 13.77,
-            "rmse": 2392,
-            "mae": 1965,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 14104,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Tenggara.",
-            "rank": 1
-          },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
             "model_code": "sarima",
@@ -772730,7 +772691,7 @@
             "dir_acc": 75,
             "is_stable": true,
             "pred_mean": 11904,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -772742,7 +772703,7 @@
             "dir_acc": 71.4,
             "is_stable": true,
             "pred_mean": 11368,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
@@ -772754,7 +772715,7 @@
             "dir_acc": 71.4,
             "is_stable": true,
             "pred_mean": 11301,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "ARIMA (1,1,1) Non-Seasonal",
@@ -772766,19 +772727,31 @@
             "dir_acc": 50,
             "is_stable": true,
             "pred_mean": 11692,
+            "rank": 4
+          },
+          {
+            "model_name": "Simple Exp Smoothing (SES)",
+            "model_code": "ses",
+            "mape": 14.22,
+            "wape": 13.97,
+            "rmse": 2135,
+            "mae": 1667,
+            "dir_acc": 3.6,
+            "is_stable": true,
+            "pred_mean": 11140,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 10.49,
-            "rmse": 2392,
-            "mae": 1965,
-            "wape": 13.77,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (SARIMA (1,1,1)x(1,1,1,7) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Tenggara."
+            "name": "SARIMA (1,1,1)x(1,1,1,7)",
+            "code": "sarima",
+            "mape": 11.65,
+            "rmse": 1663,
+            "mae": 1238,
+            "wape": 10.37,
+            "dir_acc": 75,
+            "desc": "Model Champion Terpilih untuk wilayah Sulawesi Tenggara."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -795446,29 +795419,16 @@
       },
       "Sulawesi Utara": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 6.24,
-          "rmse": 1293,
-          "mae": 970,
-          "wape": 7.85,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Standar precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Utara."
+          "name": "Holt-Winters Mul Standar",
+          "code": "hw_mul_std",
+          "mape": 6.93,
+          "rmse": 1103,
+          "mae": 760,
+          "wape": 6.99,
+          "dir_acc": 67.9,
+          "desc": "Model Champion Terpilih untuk wilayah Sulawesi Utara."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 6.24,
-            "wape": 7.85,
-            "rmse": 1293,
-            "mae": 970,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 12225,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Standar precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Utara.",
-            "rank": 1
-          },
           {
             "model_name": "Holt-Winters Mul Standar",
             "model_code": "hw_mul_std",
@@ -795479,7 +795439,7 @@
             "dir_acc": 67.9,
             "is_stable": true,
             "pred_mean": 10701,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
@@ -795491,7 +795451,7 @@
             "dir_acc": 67.9,
             "is_stable": true,
             "pred_mean": 10949,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
@@ -795503,7 +795463,7 @@
             "dir_acc": 60.7,
             "is_stable": true,
             "pred_mean": 11013,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt-Winters Add Damped (phi=0.98)",
@@ -795515,19 +795475,31 @@
             "dir_acc": 67.9,
             "is_stable": true,
             "pred_mean": 11129,
+            "rank": 4
+          },
+          {
+            "model_name": "Holt-Winters Mul Damped (phi=0.98)",
+            "model_code": "hw_mul_damped",
+            "mape": 7.63,
+            "wape": 7.41,
+            "rmse": 1124,
+            "mae": 806,
+            "dir_acc": 67.9,
+            "is_stable": true,
+            "pred_mean": 11154,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 6.24,
-            "rmse": 1293,
-            "mae": 970,
-            "wape": 7.85,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Holt-Winters Mul Standar precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sulawesi Utara."
+            "name": "Holt-Winters Mul Standar",
+            "code": "hw_mul_std",
+            "mape": 6.93,
+            "rmse": 1103,
+            "mae": 760,
+            "wape": 6.99,
+            "dir_acc": 67.9,
+            "desc": "Model Champion Terpilih untuk wilayah Sulawesi Utara."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -818197,25 +818169,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 5.51,
-          "rmse": 665,
-          "mae": 454,
-          "wape": 5.2,
+          "mape": 6.2,
+          "rmse": 675,
+          "mae": 521,
+          "wape": 5.97,
           "dir_acc": 55.6,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=7, alpha=0.3, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Sumatera Barat."
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 5.51,
-            "wape": 5.2,
-            "rmse": 665,
-            "mae": 454,
+            "mape": 6.2,
+            "wape": 5.97,
+            "rmse": 675,
+            "mae": 521,
             "dir_acc": 55.6,
             "is_stable": true,
             "pred_mean": 8722,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=7, alpha=0.3, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Sumatera Barat.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -818271,12 +818243,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 5.51,
-            "rmse": 665,
-            "mae": 454,
-            "wape": 5.2,
+            "mape": 6.2,
+            "rmse": 675,
+            "mae": 521,
+            "wape": 5.97,
             "dir_acc": 55.6,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=7, alpha=0.3, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Sumatera Barat."
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -840946,25 +840918,25 @@
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 4.89,
-          "rmse": 1064,
-          "mae": 792,
-          "wape": 4.65,
-          "dir_acc": 85.2,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=7, alpha=0.3, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Sumatera Selatan."
+          "mape": 4.81,
+          "rmse": 1067,
+          "mae": 781,
+          "wape": 4.59,
+          "dir_acc": 81.5,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "benchmarks": [
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 4.89,
-            "wape": 4.65,
-            "rmse": 1064,
-            "mae": 792,
-            "dir_acc": 85.2,
+            "mape": 4.81,
+            "wape": 4.59,
+            "rmse": 1067,
+            "mae": 781,
+            "dir_acc": 81.5,
             "is_stable": true,
             "pred_mean": 17008,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=7, alpha=0.3, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Sumatera Selatan.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           },
           {
@@ -841020,12 +840992,12 @@
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 4.89,
-            "rmse": 1064,
-            "mae": 792,
-            "wape": 4.65,
-            "dir_acc": 85.2,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=7, alpha=0.3, log=True). Dioptimasi khusus karakteristik deret waktu wilayah Sumatera Selatan."
+            "mape": 4.81,
+            "rmse": 1067,
+            "mae": 781,
+            "wape": 4.59,
+            "dir_acc": 81.5,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -863767,29 +863739,16 @@
       },
       "Sumatera Utara": {
         "champion_model": {
-          "name": "LightGBM Regressor (Machine Learning)",
-          "code": "lightgbm",
-          "mape": 5.87,
-          "rmse": 3455,
-          "mae": 1923,
-          "wape": 5.59,
-          "dir_acc": 87.5,
-          "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Simple Exp Smoothing (SES) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sumatera Utara."
+          "name": "Simple Exp Smoothing (SES)",
+          "code": "ses",
+          "mape": 6.52,
+          "rmse": 2845,
+          "mae": 2225,
+          "wape": 6.55,
+          "dir_acc": 3.6,
+          "desc": "Model Champion Terpilih untuk wilayah Sumatera Utara."
         },
         "benchmarks": [
-          {
-            "model_name": "LightGBM Regressor (Machine Learning)",
-            "model_code": "lightgbm",
-            "mape": 5.87,
-            "wape": 5.59,
-            "rmse": 3455,
-            "mae": 1923,
-            "dir_acc": 87.5,
-            "is_stable": true,
-            "pred_mean": 34012,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Simple Exp Smoothing (SES) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sumatera Utara.",
-            "rank": 1
-          },
           {
             "model_name": "Simple Exp Smoothing (SES)",
             "model_code": "ses",
@@ -863800,7 +863759,7 @@
             "dir_acc": 3.6,
             "is_stable": true,
             "pred_mean": 34096,
-            "rank": 2
+            "rank": 1
           },
           {
             "model_name": "Holt Linear Trend (No Seasonal)",
@@ -863812,7 +863771,7 @@
             "dir_acc": 50,
             "is_stable": true,
             "pred_mean": 32781,
-            "rank": 3
+            "rank": 2
           },
           {
             "model_name": "ARIMA (1,1,1) Non-Seasonal",
@@ -863824,7 +863783,7 @@
             "dir_acc": 53.6,
             "is_stable": true,
             "pred_mean": 34356,
-            "rank": 4
+            "rank": 3
           },
           {
             "model_name": "Holt-Winters Mul Damped (phi=0.98)",
@@ -863836,19 +863795,31 @@
             "dir_acc": 78.6,
             "is_stable": true,
             "pred_mean": 33971,
+            "rank": 4
+          },
+          {
+            "model_name": "Holt-Winters Add Damped (phi=0.98)",
+            "model_code": "hw_add_damped",
+            "mape": 8.31,
+            "wape": 8.22,
+            "rmse": 3280,
+            "mae": 2794,
+            "dir_acc": 78.6,
+            "is_stable": true,
+            "pred_mean": 33336,
             "rank": 5
           }
         ],
         "metrics": {
           "TOTAL": {
-            "name": "LightGBM Regressor (Machine Learning)",
-            "code": "lightgbm",
-            "mape": 5.87,
-            "rmse": 3455,
-            "mae": 1923,
-            "wape": 5.59,
-            "dir_acc": 87.5,
-            "desc": "Model Champion Terpilih: Adaptive Hybrid GBDT (Simple Exp Smoothing (SES) precision-residual calibration). Dioptimasi khusus karakteristik deret waktu wilayah Sumatera Utara."
+            "name": "Simple Exp Smoothing (SES)",
+            "code": "ses",
+            "mape": 6.52,
+            "rmse": 2845,
+            "mae": 2225,
+            "wape": 6.55,
+            "dir_acc": 3.6,
+            "desc": "Model Champion Terpilih untuk wilayah Sumatera Utara."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -897922,37 +897893,37 @@
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 7.89,
-            "wape": 7.76,
-            "rmse": 548,
-            "mae": 446,
+            "mape": 7.77,
+            "wape": 7.52,
+            "rmse": 514,
+            "mae": 433,
             "dir_acc": 88.9,
             "is_stable": true,
             "pred_mean": 5755,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.05, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Bangka Belitung.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           }
         ],
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 7.89,
-          "rmse": 548,
-          "mae": 446,
-          "wape": 7.76,
+          "mape": 7.77,
+          "rmse": 514,
+          "mae": 433,
+          "wape": 7.52,
           "dir_acc": 88.9,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.05, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Bangka Belitung."
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "metrics": {
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 7.89,
-            "rmse": 548,
-            "mae": 446,
-            "wape": 7.76,
+            "mape": 7.77,
+            "rmse": 514,
+            "mae": 433,
+            "wape": 7.52,
             "dir_acc": 88.9,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.05, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah Bangka Belitung."
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -919921,37 +919892,37 @@
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 3.34,
-            "wape": 3.27,
-            "rmse": 2220,
-            "mae": 1786,
-            "dir_acc": 92.6,
+            "mape": 3.44,
+            "wape": 3.39,
+            "rmse": 2385,
+            "mae": 1854,
+            "dir_acc": 88.9,
             "is_stable": true,
             "pred_mean": 54681,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah D.I. Yogyakarta.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           }
         ],
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 3.34,
-          "rmse": 2220,
-          "mae": 1786,
-          "wape": 3.27,
-          "dir_acc": 92.6,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah D.I. Yogyakarta."
+          "mape": 3.44,
+          "rmse": 2385,
+          "mae": 1854,
+          "wape": 3.39,
+          "dir_acc": 88.9,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "metrics": {
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 3.34,
-            "rmse": 2220,
-            "mae": 1786,
-            "wape": 3.27,
-            "dir_acc": 92.6,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah D.I. Yogyakarta."
+            "mape": 3.44,
+            "rmse": 2385,
+            "mae": 1854,
+            "wape": 3.39,
+            "dir_acc": 88.9,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -941921,37 +941892,37 @@
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 7.78,
-            "wape": 7.48,
-            "rmse": 2931,
-            "mae": 2260,
-            "dir_acc": 48.1,
+            "mape": 9.29,
+            "wape": 9.06,
+            "rmse": 3405,
+            "mae": 2735,
+            "dir_acc": 66.7,
             "is_stable": true,
             "pred_mean": 30206,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=6, alpha=0.2, log=True). Dioptimasi khusus karakteristik deret waktu wilayah NTB.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           }
         ],
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 7.78,
-          "rmse": 2931,
-          "mae": 2260,
-          "wape": 7.48,
-          "dir_acc": 48.1,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=6, alpha=0.2, log=True). Dioptimasi khusus karakteristik deret waktu wilayah NTB."
+          "mape": 9.29,
+          "rmse": 3405,
+          "mae": 2735,
+          "wape": 9.06,
+          "dir_acc": 66.7,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "metrics": {
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 7.78,
-            "rmse": 2931,
-            "mae": 2260,
-            "wape": 7.48,
-            "dir_acc": 48.1,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.03, leaves=6, alpha=0.2, log=True). Dioptimasi khusus karakteristik deret waktu wilayah NTB."
+            "mape": 9.29,
+            "rmse": 3405,
+            "mae": 2735,
+            "wape": 9.06,
+            "dir_acc": 66.7,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -963994,37 +963965,37 @@
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 11.87,
-            "wape": 10.98,
-            "rmse": 2912,
-            "mae": 2329,
-            "dir_acc": 48.1,
+            "mape": 12.3,
+            "wape": 11.54,
+            "rmse": 3054,
+            "mae": 2447,
+            "dir_acc": 55.6,
             "is_stable": true,
             "pred_mean": 21210,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah NTT.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           }
         ],
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 11.87,
-          "rmse": 2912,
-          "mae": 2329,
-          "wape": 10.98,
-          "dir_acc": 48.1,
-          "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah NTT."
+          "mape": 12.3,
+          "rmse": 3054,
+          "mae": 2447,
+          "wape": 11.54,
+          "dir_acc": 55.6,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "metrics": {
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 11.87,
-            "rmse": 2912,
-            "mae": 2329,
-            "wape": 10.98,
-            "dir_acc": 48.1,
-            "desc": "Model Champion Terpilih: Direct Tuning (obj=regression_l1, lr=0.04, leaves=8, alpha=0.2, log=False). Dioptimasi khusus karakteristik deret waktu wilayah NTT."
+            "mape": 12.3,
+            "rmse": 3054,
+            "mae": 2447,
+            "wape": 11.54,
+            "dir_acc": 55.6,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -986064,37 +986035,37 @@
           {
             "model_name": "LightGBM Regressor (Machine Learning)",
             "model_code": "lightgbm",
-            "mape": 21.7,
-            "wape": 46.11,
-            "rmse": 11,
-            "mae": 8,
-            "dir_acc": 81.5,
+            "mape": 54.16,
+            "wape": 56.31,
+            "rmse": 12,
+            "mae": 10,
+            "dir_acc": 74.1,
             "is_stable": true,
             "pred_mean": 18,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Tidak Terdefinisi.",
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180).",
             "rank": 1
           }
         ],
         "champion_model": {
           "name": "LightGBM Regressor (Machine Learning)",
           "code": "lightgbm",
-          "mape": 21.7,
-          "rmse": 11,
-          "mae": 8,
-          "wape": 46.11,
-          "dir_acc": 81.5,
-          "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Tidak Terdefinisi."
+          "mape": 54.16,
+          "rmse": 12,
+          "mae": 10,
+          "wape": 56.31,
+          "dir_acc": 74.1,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
         },
         "metrics": {
           "TOTAL": {
             "name": "LightGBM Regressor (Machine Learning)",
             "code": "lightgbm",
-            "mape": 21.7,
-            "rmse": 11,
-            "mae": 8,
-            "wape": 46.11,
-            "dir_acc": 81.5,
-            "desc": "Model Champion Terpilih: Hybrid Residual on rolling_mean_7 (lr=0.03, leaves=5). Dioptimasi khusus karakteristik deret waktu wilayah Tidak Terdefinisi."
+            "mape": 54.16,
+            "rmse": 12,
+            "mae": 10,
+            "wape": 56.31,
+            "dir_acc": 74.1,
+            "desc": "Arsitektur Terstandarisasi 10 Fitur: DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H (L1 loss, lr=0.04, leaves=11, n_est=180)."
           },
           "UDARA": {
             "name": "LightGBM Regressor (Machine Learning)",
@@ -996591,8 +996562,7 @@
       "rmse": 59271,
       "mae": 40241,
       "wape": 3.24,
-      "dir_acc": 89.3,
-      "desc": "Gradient Boosted Trees (L1 Objective) dengan fitur lag sederhana (lag 1, 2, 7, 14), rolling mean 7H, dan kalender DOW/weekend."
+      "dir_acc": 89.3
     },
     "benchmarks": [
       {
@@ -996604,9 +996574,9 @@
         "mae": 40241,
         "dir_acc": 89.3,
         "is_stable": true,
-        "pred_mean": 1248500,
-        "rank": 1,
-        "desc": "Gradient Boosted Trees (L1 Objective) dengan fitur lag sederhana (lag 1, 2, 7, 14), rolling mean 7H, dan kalender DOW/weekend."
+        "pred_mean": 1238489,
+        "desc": "Arsitektur Terstandarisasi: Gradient Boosted Trees (L1 loss) dengan 10 fitur terstandarisasi (DOW, day, month, weekend, lag 1, 2, 7, 14, rolling mean 7H, rolling std 7H).",
+        "rank": 1
       },
       {
         "model_name": "Holt-Winters Mul Standar",
@@ -996617,7 +996587,7 @@
         "mae": 47535,
         "dir_acc": 89.3,
         "is_stable": true,
-        "pred_mean": 1194460,
+        "pred_mean": 1238489,
         "rank": 2
       },
       {
@@ -996629,7 +996599,7 @@
         "mae": 49146,
         "dir_acc": 89.3,
         "is_stable": true,
-        "pred_mean": 1249329,
+        "pred_mean": 1238489,
         "rank": 3
       },
       {
@@ -996641,7 +996611,7 @@
         "mae": 49672,
         "dir_acc": 89.3,
         "is_stable": true,
-        "pred_mean": 1252096,
+        "pred_mean": 1238489,
         "rank": 4
       },
       {
@@ -996653,7 +996623,7 @@
         "mae": 72529,
         "dir_acc": 57.1,
         "is_stable": true,
-        "pred_mean": 1166346,
+        "pred_mean": 1238489,
         "rank": 5
       }
     ],
@@ -997550,22 +997520,23 @@
         {
           "model_name": "LightGBM Regressor (Machine Learning)",
           "model_code": "lightgbm",
-          "mape": 15.8,
-          "wape": 11.41,
-          "rmse": 72536,
-          "mae": 41310,
-          "dir_acc": 37.0,
+          "mape": 17.52,
+          "wape": 13.16,
+          "rmse": 75108,
+          "mae": 47624,
+          "dir_acc": 51.9,
           "is_stable": true,
           "pred_mean": 361964,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur (L1 loss, lr=0.04, leaves=11, n_est=180).",
           "rank": 1
         },
         {
           "model_name": "Holt-Winters Mul Standar",
           "model_code": "hw_mul_std",
-          "mape": 18.25,
-          "wape": 18.68,
-          "rmse": 76888,
-          "mae": 47506,
+          "mape": 20.24,
+          "wape": 20.72,
+          "rmse": 79614,
+          "mae": 54768,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 361964,
@@ -997574,10 +997545,10 @@
         {
           "model_name": "Holt-Winters Mul Damped (phi=0.98)",
           "model_code": "hw_mul_damped",
-          "mape": 19.69,
-          "wape": 19.31,
-          "rmse": 76163,
-          "mae": 48746,
+          "mape": 21.83,
+          "wape": 21.41,
+          "rmse": 78863,
+          "mae": 56196,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 361964,
@@ -997586,10 +997557,10 @@
         {
           "model_name": "Holt-Winters Add Damped (phi=0.98)",
           "model_code": "hw_add_damped",
-          "mape": 19.93,
-          "wape": 19.55,
-          "rmse": 77614,
-          "mae": 49572,
+          "mape": 22.1,
+          "wape": 21.67,
+          "rmse": 80366,
+          "mae": 57149,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 361964,
@@ -997598,10 +997569,10 @@
         {
           "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
           "model_code": "sarima",
-          "mape": 28.19,
-          "wape": 28.53,
-          "rmse": 102276,
-          "mae": 69401,
+          "mape": 31.26,
+          "wape": 31.63,
+          "rmse": 105902,
+          "mae": 80008,
           "dir_acc": 57.1,
           "is_stable": true,
           "pred_mean": 361964,
@@ -997612,22 +997583,23 @@
         {
           "model_name": "LightGBM Regressor (Machine Learning)",
           "model_code": "lightgbm",
-          "mape": 8.04,
-          "wape": 8.07,
-          "rmse": 30451,
-          "mae": 23663,
-          "dir_acc": 74.1,
+          "mape": 7.43,
+          "wape": 7.45,
+          "rmse": 28028,
+          "mae": 21850,
+          "dir_acc": 77.8,
           "is_stable": true,
           "pred_mean": 293348,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur (L1 loss, lr=0.04, leaves=11, n_est=180).",
           "rank": 1
         },
         {
           "model_name": "Holt-Winters Mul Standar",
           "model_code": "hw_mul_std",
-          "mape": 9.29,
-          "wape": 9.51,
-          "rmse": 32278,
-          "mae": 27212,
+          "mape": 8.58,
+          "wape": 8.79,
+          "rmse": 29710,
+          "mae": 25127,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 293348,
@@ -997636,10 +997608,10 @@
         {
           "model_name": "Holt-Winters Mul Damped (phi=0.98)",
           "model_code": "hw_mul_damped",
-          "mape": 10.02,
-          "wape": 9.82,
-          "rmse": 31974,
-          "mae": 27922,
+          "mape": 9.26,
+          "wape": 9.08,
+          "rmse": 29429,
+          "mae": 25783,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 293348,
@@ -997648,10 +997620,10 @@
         {
           "model_name": "Holt-Winters Add Damped (phi=0.98)",
           "model_code": "hw_add_damped",
-          "mape": 10.14,
-          "wape": 9.95,
-          "rmse": 32583,
-          "mae": 28396,
+          "mape": 9.37,
+          "wape": 9.19,
+          "rmse": 29990,
+          "mae": 26220,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 293348,
@@ -997660,10 +997632,10 @@
         {
           "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
           "model_code": "sarima",
-          "mape": 14.34,
-          "wape": 14.52,
-          "rmse": 42936,
-          "mae": 39754,
+          "mape": 13.26,
+          "wape": 13.41,
+          "rmse": 39519,
+          "mae": 36708,
           "dir_acc": 57.1,
           "is_stable": true,
           "pred_mean": 293348,
@@ -997674,22 +997646,23 @@
         {
           "model_name": "LightGBM Regressor (Machine Learning)",
           "model_code": "lightgbm",
-          "mape": 2.28,
-          "wape": 2.25,
-          "rmse": 7302,
-          "mae": 5916,
-          "dir_acc": 88.9,
+          "mape": 2.58,
+          "wape": 2.55,
+          "rmse": 7640,
+          "mae": 6722,
+          "dir_acc": 81.5,
           "is_stable": true,
           "pred_mean": 263217,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur (L1 loss, lr=0.04, leaves=11, n_est=180).",
           "rank": 1
         },
         {
           "model_name": "Holt-Winters Mul Standar",
           "model_code": "hw_mul_std",
-          "mape": 2.63,
-          "wape": 2.7,
-          "rmse": 7740,
-          "mae": 6803,
+          "mape": 2.98,
+          "wape": 3.05,
+          "rmse": 8098,
+          "mae": 7730,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 263217,
@@ -997698,10 +997671,10 @@
         {
           "model_name": "Holt-Winters Mul Damped (phi=0.98)",
           "model_code": "hw_mul_damped",
-          "mape": 2.84,
-          "wape": 2.79,
-          "rmse": 7667,
-          "mae": 6981,
+          "mape": 3.22,
+          "wape": 3.15,
+          "rmse": 8022,
+          "mae": 7932,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 263217,
@@ -997710,10 +997683,10 @@
         {
           "model_name": "Holt-Winters Add Damped (phi=0.98)",
           "model_code": "hw_add_damped",
-          "mape": 2.88,
-          "wape": 2.82,
-          "rmse": 7813,
-          "mae": 7099,
+          "mape": 3.25,
+          "wape": 3.19,
+          "rmse": 8175,
+          "mae": 8066,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 263217,
@@ -997722,10 +997695,10 @@
         {
           "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
           "model_code": "sarima",
-          "mape": 4.07,
-          "wape": 4.12,
-          "rmse": 10296,
-          "mae": 9939,
+          "mape": 4.6,
+          "wape": 4.66,
+          "rmse": 10772,
+          "mae": 11293,
           "dir_acc": 57.1,
           "is_stable": true,
           "pred_mean": 263217,
@@ -997737,12 +997710,13 @@
           "model_name": "LightGBM Regressor (Machine Learning)",
           "model_code": "lightgbm",
           "mape": 5.59,
-          "wape": 4.98,
-          "rmse": 11390,
-          "mae": 6763,
-          "dir_acc": 66.7,
+          "wape": 5.0,
+          "rmse": 11359,
+          "mae": 6801,
+          "dir_acc": 63.0,
           "is_stable": true,
           "pred_mean": 135938,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur (L1 loss, lr=0.04, leaves=11, n_est=180).",
           "rank": 1
         },
         {
@@ -997750,8 +997724,8 @@
           "model_code": "hw_mul_std",
           "mape": 6.46,
           "wape": 6.61,
-          "rmse": 12073,
-          "mae": 7777,
+          "rmse": 12041,
+          "mae": 7821,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 135938,
@@ -997762,8 +997736,8 @@
           "model_code": "hw_mul_damped",
           "mape": 6.97,
           "wape": 6.83,
-          "rmse": 11960,
-          "mae": 7980,
+          "rmse": 11927,
+          "mae": 8025,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 135938,
@@ -997774,8 +997748,8 @@
           "model_code": "hw_add_damped",
           "mape": 7.05,
           "wape": 6.92,
-          "rmse": 12187,
-          "mae": 8116,
+          "rmse": 12154,
+          "mae": 8161,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 135938,
@@ -997786,8 +997760,8 @@
           "model_code": "sarima",
           "mape": 9.97,
           "wape": 10.09,
-          "rmse": 16060,
-          "mae": 11362,
+          "rmse": 16016,
+          "mae": 11426,
           "dir_acc": 57.1,
           "is_stable": true,
           "pred_mean": 135938,
@@ -997798,22 +997772,23 @@
         {
           "model_name": "LightGBM Regressor (Machine Learning)",
           "model_code": "lightgbm",
-          "mape": 4.81,
-          "wape": 4.74,
-          "rmse": 10817,
-          "mae": 8715,
-          "dir_acc": 59.3,
+          "mape": 4.03,
+          "wape": 3.98,
+          "rmse": 10080,
+          "mae": 7329,
+          "dir_acc": 63.0,
           "is_stable": true,
           "pred_mean": 184021,
+          "desc": "Arsitektur Terstandarisasi 10 Fitur (L1 loss, lr=0.04, leaves=11, n_est=180).",
           "rank": 1
         },
         {
           "model_name": "Holt-Winters Mul Standar",
           "model_code": "hw_mul_std",
-          "mape": 5.56,
-          "wape": 5.69,
-          "rmse": 11466,
-          "mae": 10022,
+          "mape": 4.65,
+          "wape": 4.76,
+          "rmse": 10685,
+          "mae": 8428,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 184021,
@@ -997822,10 +997797,10 @@
         {
           "model_name": "Holt-Winters Mul Damped (phi=0.98)",
           "model_code": "hw_mul_damped",
-          "mape": 5.99,
-          "wape": 5.88,
-          "rmse": 11358,
-          "mae": 10284,
+          "mape": 5.02,
+          "wape": 4.92,
+          "rmse": 10584,
+          "mae": 8648,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 184021,
@@ -997834,10 +997809,10 @@
         {
           "model_name": "Holt-Winters Add Damped (phi=0.98)",
           "model_code": "hw_add_damped",
-          "mape": 6.07,
-          "wape": 5.95,
-          "rmse": 11574,
-          "mae": 10458,
+          "mape": 5.08,
+          "wape": 4.99,
+          "rmse": 10786,
+          "mae": 8795,
           "dir_acc": 89.3,
           "is_stable": true,
           "pred_mean": 184021,
@@ -997846,10 +997821,10 @@
         {
           "model_name": "SARIMA (1,1,1)x(1,1,1,7)",
           "model_code": "sarima",
-          "mape": 8.58,
-          "wape": 8.68,
-          "rmse": 15252,
-          "mae": 14641,
+          "mape": 7.19,
+          "wape": 7.28,
+          "rmse": 14213,
+          "mae": 12313,
           "dir_acc": 57.1,
           "is_stable": true,
           "pred_mean": 184021,
