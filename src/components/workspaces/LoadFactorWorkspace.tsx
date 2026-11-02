@@ -43,9 +43,54 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
     const modes: Array<'UDARA' | 'KA' | 'BUS' | 'ASDP' | 'LAUT'> = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'];
     const res: Record<string, any> = {};
 
-    const provLfs = selectedProvince === 'ALL' ? null : (loadFactorStats.by_province || {})[selectedProvince];
+    const provRaw = selectedProvince === 'ALL' ? null : (loadFactorStats.by_province || {})[selectedProvince];
+    const provLfs = provRaw ? (provRaw[globalDirection] || provRaw['brg'] || provRaw) : null;
 
     modes.forEach((m) => {
+      // If a specific province is selected, use its exact verified operational numbers
+      if (provLfs) {
+        const mData = provLfs[m];
+        if (!mData || !mData.is_operating) {
+          res[m] = {
+            isOperating: false,
+            baseline: 0,
+            mudik: 0,
+            balik: 0,
+            peak: 0,
+            surge: 0,
+            surgeMudik: 0,
+            surgeBalik: 0,
+          };
+          return;
+        }
+
+        if (isPnp) {
+          res[m] = {
+            isOperating: true,
+            baseline: mData.baseline_lf,
+            mudik: mData.mudik_lf,
+            balik: mData.balik_lf,
+            peak: mData.peak_lf,
+            surge: mData.surge_lf_pct,
+            surgeMudik: mData.surge_lf_pct,
+            surgeBalik: mData.surge_lf_pct,
+          };
+        } else {
+          res[m] = {
+            isOperating: true,
+            baseline: mData.baseline_arm,
+            mudik: mData.mudik_arm,
+            balik: mData.balik_arm,
+            peak: mData.peak_arm,
+            surge: mData.surge_arm_pct,
+            surgeMudik: mData.surge_arm_pct,
+            surgeBalik: mData.surge_arm_pct,
+          };
+        }
+        return;
+      }
+
+      // Default: Nasional (Seluruh Provinsi)
       if (isPnp) {
         // LOAD FACTOR: PENUMPANG PER TRIP ARMADA
         let baseLF = 0;
@@ -96,20 +141,13 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
           balikLF = loadFactorStats[m]?.balik_lf || 0;
         }
 
-        // Apply regional province adjustment if a province is selected
-        if (provLfs && provLfs[m] && provLfs[m].baseline_lf > 0) {
-          const ratio = provLfs[m].baseline_lf / (loadFactorStats[m]?.baseline_lf || 1);
-          baseLF = baseLF * ratio;
-          mudikLF = mudikLF * ratio;
-          balikLF = balikLF * ratio;
-        }
-
         const peakLF = Math.max(mudikLF, balikLF);
         const surge = baseLF > 0 ? ((peakLF - baseLF) / baseLF) * 100 : 0;
         const surgeMudik = baseLF > 0 ? ((mudikLF - baseLF) / baseLF) * 100 : 0;
         const surgeBalik = baseLF > 0 ? ((balikLF - baseLF) / baseLF) * 100 : 0;
 
         res[m] = {
+          isOperating: true,
           baseline: baseLF,
           mudik: mudikLF,
           balik: balikLF,
@@ -140,20 +178,13 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
           }
         }
 
-        // Apply regional province adjustment
-        if (provLfs && provLfs[m] && provLfs[m].baseline_lf > 0) {
-          const ratio = provLfs[m].baseline_lf / (loadFactorStats[m]?.baseline_lf || 1);
-          baseArm = Math.round(baseArm * Math.min(1.5, Math.max(0.1, ratio)));
-          mudikArm = Math.round(mudikArm * Math.min(1.5, Math.max(0.1, ratio)));
-          balikArm = Math.round(balikArm * Math.min(1.5, Math.max(0.1, ratio)));
-        }
-
         const peakArm = Math.max(mudikArm, balikArm);
         const surge = baseArm > 0 ? ((peakArm - baseArm) / baseArm) * 100 : 0;
         const surgeMudik = baseArm > 0 ? ((mudikArm - baseArm) / baseArm) * 100 : 0;
         const surgeBalik = baseArm > 0 ? ((balikArm - baseArm) / baseArm) * 100 : 0;
 
         res[m] = {
+          isOperating: true,
           baseline: baseArm,
           mudik: mudikArm,
           balik: balikArm,
@@ -296,7 +327,9 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLOR[m] }} />
                 </div>
                 <div className="text-base font-bold font-mono text-slate-900 dark:text-white mt-1">
-                  {isPnp ? (
+                  {stat.isOperating === false ? (
+                    <span className="text-xs font-normal text-slate-400 italic">Tidak Beroperasi</span>
+                  ) : isPnp ? (
                     <>
                       {formatDecimal(stat.peak || stat.baseline || 0)}{' '}
                       <span className="text-[10px] font-normal text-slate-400">pnp/trip</span>
@@ -310,15 +343,22 @@ export const LoadFactorWorkspace: React.FC<LoadFactorWorkspaceProps> = ({
                 </div>
                 <div className="text-[10px] font-mono mt-1 flex items-center justify-between">
                   <span className="text-slate-400">
-                    Base: {isPnp ? formatDecimal(stat.baseline || 0) : formatNumber(stat.baseline || 0)}
+                    Base:{' '}
+                    {stat.isOperating === false
+                      ? '-'
+                      : isPnp
+                      ? formatDecimal(stat.baseline || 0)
+                      : formatNumber(stat.baseline || 0)}
                   </span>
-                  <span
-                    className={`font-bold ${
-                      isHighSurge ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
-                    }`}
-                  >
-                    +{formatPercent(stat.surge || 0)}
-                  </span>
+                  {stat.isOperating !== false && (
+                    <span
+                      className={`font-bold ${
+                        isHighSurge ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                      }`}
+                    >
+                      {formatPercent(stat.surge || 0)}
+                    </span>
+                  )}
                 </div>
               </div>
             );
