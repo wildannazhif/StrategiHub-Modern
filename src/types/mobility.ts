@@ -246,6 +246,7 @@ export interface MobilityDataBundle {
   spatial_nodes: SpatialNode[];
   metrics_summary: Record<string, any>;
   forecast_nataru: ForecastNataruData;
+  timeline_2024?: any[];
   timeline_2025: any[];
   simpul_recommendations: SimpulRecommendation[];
   province_monthly_data: Record<string, any>;

@@ -226,6 +226,7 @@ export default function Home() {
               <ForecastingWorkspace
                 forecastData={data.forecast_nataru}
                 benchmarkResults={benchmarkResults}
+                timeline2024={(data as any).timeline_2024 || []}
                 timeline2025={data.timeline_2025}
                 timeline={data.daily_timeline}
                 isDarkMode={isDarkMode}

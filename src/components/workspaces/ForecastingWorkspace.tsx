@@ -8,6 +8,7 @@ import { TrendingUp, Award, MapPin, BarChart3, Calendar } from 'lucide-react';
 interface ForecastingWorkspaceProps {
   forecastData: any;
   benchmarkResults?: Record<string, any>;
+  timeline2024?: any[];
   timeline2025?: any[];
   timeline?: any[];
   isDarkMode: boolean;
@@ -26,6 +27,7 @@ const ALL_PROVINCES = [
 
 export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
   forecastData,
+  timeline2024 = [],
   timeline2025 = [],
   timeline = [],
   isDarkMode,
@@ -34,7 +36,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
   const [selectedProv, setSelectedProv] = useState<string>('ALL');
   const [selectedModa, setSelectedModa] = useState<string>('TOTAL');
   const [selectedMetric, setSelectedMetric] = useState<'pnp' | 'arm'>('pnp');
-  const [horizonView, setHorizonView] = useState<'train_plus_forecast' | 'forecast_only'>('train_plus_forecast');
+  const [horizonView, setHorizonView] = useState<'all_train_plus_forecast' | 'train_2026_plus_forecast' | 'forecast_only'>('all_train_plus_forecast');
   const [tableRange, setTableRange] = useState<'nataru' | 'q4' | 'all'>('nataru');
   const [showBenchmarkModal, setShowBenchmarkModal] = useState<boolean>(false);
 
@@ -73,24 +75,58 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     return provData?.benchmarks || forecastData?.benchmarks || [];
   }, [isAllProv, provData, forecastData]);
 
-  // 1. Train Series (272 Days: 2026-01-01 to 2026-09-29)
-  const { trainDates, trainValues } = useMemo(() => {
+  // Peak values for 2024 and 2025 Nataru
+  const val24_peak = useMemo(() => {
+    const row = (timeline2024 || []).find((r: any) => r.date === '2024-12-24');
+    if (!row) return 0;
+    return selectedMetric === 'pnp' ? (Number(row[selectedModa]) || 0) : (Number(row[`arm_${selectedModa}`]) || 0);
+  }, [timeline2024, selectedModa, selectedMetric]);
+
+  const val25_peak = useMemo(() => {
+    const row = (timeline2025 || []).find((r: any) => r.date === '2025-12-28');
+    if (!row) return 0;
+    return selectedMetric === 'pnp' ? (Number(row[selectedModa]) || 0) : (Number(row[`arm_${selectedModa}`]) || 0);
+  }, [timeline2025, selectedModa, selectedMetric]);
+
+  // 1. Train Series (Dynamically supports 2024–2026 for Nasional, or 2026 for Province)
+  const { trainDates, trainValues, trainLabel } = useMemo(() => {
     if (isAllProv) {
-      const histPoints = (timeline || []).filter((d: any) => d.date <= '2026-09-29');
-      const dates = histPoints.map((d: any) => d.date);
-      const values = histPoints.map((d: any) => {
+      if (horizonView === 'train_2026_plus_forecast') {
+        const histPoints26 = (timeline || []).filter((d: any) => d.date <= '2026-09-29');
+        const dates = histPoints26.map((d: any) => d.date);
+        const values = histPoints26.map((d: any) => {
+          if (!isOperating) return 0;
+          return selectedMetric === 'pnp' ? (Number(d[selectedModa]) || 0) : (Number(d[`arm_${selectedModa}`]) || 0);
+        });
+        return {
+          trainDates: dates,
+          trainValues: values,
+          trainLabel: 'Data Latih 2026 (1 Jan – 29 Sep 2026 • 272H)',
+        };
+      }
+
+      // Default: Full continuous 2024–2026 (1.003 days)
+      const allTrainPoints: any[] = [];
+      (timeline2024 || []).forEach((d: any) => allTrainPoints.push(d));
+      (timeline2025 || []).forEach((d: any) => allTrainPoints.push(d));
+      (timeline || []).filter((d: any) => d.date <= '2026-09-29').forEach((d: any) => allTrainPoints.push(d));
+
+      const dates = allTrainPoints.map((d: any) => d.date);
+      const values = allTrainPoints.map((d: any) => {
         if (!isOperating) return 0;
-        if (selectedMetric === 'pnp') {
-          return Number(d[selectedModa]) || 0;
-        } else {
-          return Number(d[`arm_${selectedModa}`]) || 0;
-        }
+        return selectedMetric === 'pnp' ? (Number(d[selectedModa]) || 0) : (Number(d[`arm_${selectedModa}`]) || 0);
       });
-      return { trainDates: dates, trainValues: values };
+
+      return {
+        trainDates: dates,
+        trainValues: values,
+        trainLabel: 'Data Latih Kontinu 2024–2026 (1 Jan 2024 – 29 Sep 2026 • 1.003H)',
+      };
     }
 
+    // Per-province (2024 not available, show available 2026 data)
     const h = provData?.history_2026;
-    if (!h) return { trainDates: [], trainValues: [] };
+    if (!h) return { trainDates: [], trainValues: [], trainLabel: 'Data Latih 2026' };
 
     const dates = h.dates || [];
     let values: number[] = [];
@@ -101,8 +137,12 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     } else {
       values = (h[`arm_${selectedModa}`] || []).map((v: any) => Number(v) || 0);
     }
-    return { trainDates: dates, trainValues: values };
-  }, [isAllProv, provData, timeline, selectedMetric, selectedModa, isOperating]);
+    return {
+      trainDates: dates,
+      trainValues: values,
+      trainLabel: `Data Latih 2026 (${selectedProv} • 272H)`,
+    };
+  }, [isAllProv, provData, timeline2024, timeline2025, timeline, selectedMetric, selectedModa, isOperating, horizonView, selectedProv]);
 
   // 2. Future 100-Day Forecast Points (from official PUSDATIN precomputed model)
   const futurePoints: any[] = useMemo(() => {
@@ -230,7 +270,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     let xAxisData: string[] = [];
     let series: any[] = [];
 
-    if (horizonView === 'train_plus_forecast') {
+    if (horizonView !== 'forecast_only') {
       xAxisData = [...trainDates, ...futureDates];
       const lastTrainVal = trainValues.length > 0 ? trainValues[trainValues.length - 1] : 0;
 
@@ -244,18 +284,30 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         ...futureValues,
       ];
 
+      const markPointsList: any[] = [];
+      if (isAllProv && horizonView === 'all_train_plus_forecast') {
+        if (val24_peak > 0) {
+          markPointsList.push({ name: 'Puncak Natal 2024', coord: ['2024-12-24', val24_peak], value: 'Natal 24' });
+        }
+        if (val25_peak > 0) {
+          markPointsList.push({ name: 'Puncak Nataru 2025', coord: ['2025-12-28', val25_peak], value: 'Nataru 25' });
+        }
+      }
+      markPointsList.push({ name: 'Puncak Mudik Natal', coord: ['2026-12-24', kpis.xmasVal], value: 'Natal 26' });
+      markPointsList.push({ name: 'Puncak Balik', coord: ['2027-01-03', kpis.nyVal], value: 'Balik 27' });
+
       series = [
         {
-          name: 'Data Latih (Train 2026: 1 Jan – 29 Sep)',
+          name: trainLabel,
           type: 'line',
           smooth: 0.15,
           showSymbol: false,
           data: trainSeriesData,
           color: trainColor,
-          lineStyle: { width: 4, color: trainColor },
+          lineStyle: { width: 3.5, color: trainColor },
           itemStyle: { color: trainColor },
           areaStyle: {
-            color: isDark ? 'rgba(56, 189, 248, 0.22)' : 'rgba(37, 99, 235, 0.15)',
+            color: isDark ? 'rgba(56, 189, 248, 0.18)' : 'rgba(37, 99, 235, 0.12)',
           },
         },
         {
@@ -268,17 +320,14 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           lineStyle: { width: 3.8, color: forecastColor, type: 'dashed' },
           itemStyle: { color: forecastColor },
           areaStyle: {
-            color: isDark ? 'rgba(245, 158, 11, 0.22)' : 'rgba(245, 158, 11, 0.12)',
+            color: isDark ? 'rgba(245, 158, 11, 0.20)' : 'rgba(245, 158, 11, 0.12)',
           },
           markPoint: {
             symbol: 'pin',
-            symbolSize: 44,
+            symbolSize: 42,
             itemStyle: { color: '#ef4444' },
-            label: { fontSize: 9, color: '#ffffff', fontWeight: 'bold' },
-            data: [
-              { name: 'Puncak Mudik Natal', coord: ['2026-12-24', kpis.xmasVal], value: 'Natal' },
-              { name: 'Puncak Balik', coord: ['2027-01-03', kpis.nyVal], value: 'Balik' },
-            ],
+            label: { fontSize: 8.5, color: '#ffffff', fontWeight: 'bold' },
+            data: markPointsList,
           },
         },
       ];
@@ -323,8 +372,10 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           if (!params || !params.length) return '';
           const dateStr = params[0].axisValue;
           let shockTag = '';
-          if (dateStr === '2026-12-24') shockTag = ' 🔥 Puncak Mudik Natal (H-1)';
-          else if (dateStr === '2027-01-03') shockTag = ' 🚀 Puncak Balik Tahun Baru';
+          if (dateStr === '2024-12-24') shockTag = ' 🎄 Puncak Natal 2024';
+          else if (dateStr === '2025-12-28') shockTag = ' 🌟 Puncak Nataru 2025';
+          else if (dateStr === '2026-12-24') shockTag = ' 🔥 Puncak Mudik Natal 2026 (H-1)';
+          else if (dateStr === '2027-01-03') shockTag = ' 🚀 Puncak Balik Tahun Baru 2027';
 
           let html = `<div class="font-bold text-xs pb-1 mb-1 border-b border-slate-200 dark:border-slate-700">${dateStr}${shockTag}</div>`;
           params.forEach((p) => {
@@ -339,16 +390,17 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         },
       },
       legend: {
-        bottom: 0,
-        textStyle: { color: textColor, fontSize: 11 },
+        top: 0,
+        right: 10,
+        textStyle: { color: textColor, fontSize: 10 },
         icon: 'circle',
-        itemGap: 16,
+        itemGap: 14,
       },
       grid: {
-        top: 28,
+        top: 32,
         left: '2%',
         right: '2%',
-        bottom: 50,
+        bottom: xAxisData.length > 150 ? 60 : 45,
         containLabel: true,
       },
       xAxis: {
@@ -357,11 +409,17 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         axisLabel: {
           color: isDarkMode ? '#cbd5e1' : '#475569',
           fontSize: 10,
-          rotate: xAxisData.length > 50 ? 40 : 0,
-          interval: xAxisData.length > 150 ? 14 : xAxisData.length > 50 ? 7 : 2,
+          rotate: xAxisData.length > 500 ? 0 : xAxisData.length > 50 ? 40 : 0,
+          interval: xAxisData.length > 500 ? 60 : xAxisData.length > 150 ? 14 : xAxisData.length > 50 ? 7 : 2,
           showMaxLabel: true,
           showMinLabel: true,
-          formatter: (val: string) => (val && val.length >= 10 ? val.slice(5) : val),
+          formatter: (val: string) => {
+            if (!val) return '';
+            if (xAxisData.length > 500) {
+              return val.slice(0, 7);
+            }
+            return val.length >= 10 ? val.slice(5) : val;
+          },
         },
         axisLine: { lineStyle: { color: isDarkMode ? '#334155' : '#cbd5e1' } },
         axisTick: { show: true },
@@ -375,9 +433,22 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           formatter: (v: number) => (v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : `${Math.round(v / 1000)}k`),
         },
       },
+      dataZoom: [
+        { type: 'inside', start: 0, end: 100 },
+        {
+          type: 'slider',
+          show: xAxisData.length > 150,
+          bottom: 2,
+          height: 18,
+          borderColor: isDarkMode ? '#334155' : '#cbd5e1',
+          fillerColor: isDarkMode ? 'rgba(99, 102, 241, 0.22)' : 'rgba(99, 102, 241, 0.15)',
+          handleStyle: { color: isDarkMode ? '#818cf8' : '#4f46e5' },
+          textStyle: { color: textColor, fontSize: 9 },
+        },
+      ],
       series,
     };
-  }, [horizonView, trainDates, trainValues, futureDates, futureValues, selectedModa, selectedMetric, isDarkMode, kpis]);
+  }, [horizonView, trainDates, trainValues, trainLabel, futureDates, futureValues, selectedModa, selectedMetric, isDarkMode, kpis, isAllProv, val24_peak, val25_peak]);
 
   // 6. Multimodal Comparison Rows (18 Days Nataru)
   const comparisonRows = useMemo(() => {
@@ -568,7 +639,11 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
           <div className="flex items-center gap-2 text-xs font-mono">
             <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded border border-emerald-200 dark:border-emerald-800">
-              Data Latih (Train): 272H (1 Jan – 29 Sep 2026)
+              {isAllProv
+                ? (horizonView === 'all_train_plus_forecast'
+                  ? 'Data Latih (Train): 1.003H (1 Jan 2024 – 29 Sep 2026)'
+                  : 'Data Latih (Train): 272H (1 Jan – 29 Sep 2026)')
+                : `Data Latih (Train): 272H (1 Jan – 29 Sep 2026 • ${selectedProv})`}
             </span>
             <span className="px-2.5 py-1 bg-indigo-50 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 rounded border border-indigo-200 dark:border-indigo-800">
               Data Forecasting: 100H (30 Sep 2026 – 7 Jan 2027)
@@ -642,26 +717,51 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           </div>
 
           {/* FILTER HORIZON: TRAIN + FORECASTING VS FORECASTING SAJA */}
-          <div className="flex items-center rounded-lg p-0.5 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800">
-            <button
-              onClick={() => setHorizonView('train_plus_forecast')}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
-                horizonView === 'train_plus_forecast'
-                  ? 'bg-indigo-600 text-white shadow-2xs'
-                  : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950'
-              }`}
-            >
-              📊 Data Train + Forecasting (272H + 100H)
-            </button>
+          <div className="flex flex-wrap items-center rounded-lg p-0.5 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800">
+            {isAllProv ? (
+              <>
+                <button
+                  onClick={() => setHorizonView('all_train_plus_forecast')}
+                  className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
+                    horizonView === 'all_train_plus_forecast'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
+                  }`}
+                >
+                  📊 Data Latih 2024–2026 + Proyeksi (1.003H + 100H)
+                </button>
+                <button
+                  onClick={() => setHorizonView('train_2026_plus_forecast')}
+                  className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
+                    horizonView === 'train_2026_plus_forecast'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
+                  }`}
+                >
+                  📊 2026 + Proyeksi (272H + 100H)
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setHorizonView('train_2026_plus_forecast')}
+                className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
+                  horizonView !== 'forecast_only'
+                    ? 'bg-indigo-600 text-white shadow-2xs'
+                    : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
+                }`}
+              >
+                📊 Data Latih 2026 + Proyeksi ({selectedProv} • 272H + 100H)
+              </button>
+            )}
             <button
               onClick={() => setHorizonView('forecast_only')}
               className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
                 horizonView === 'forecast_only'
                   ? 'bg-indigo-600 text-white shadow-2xs'
-                  : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950'
+                  : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
               }`}
             >
-              📈 Data Forecasting Saja (100H)
+              📈 Proyeksi Saja (100H)
             </button>
           </div>
         </div>
@@ -742,14 +842,18 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-              {horizonView === 'train_plus_forecast'
-                ? `Tren Berkelanjutan: Data Latih 2026 Tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]})`
-                : `Horizon Proyeksi Nataru 2026/2027 (100 Hari: 30 Sep 2026 – 7 Jan 2027) (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]})`}
+              {horizonView === 'forecast_only'
+                ? `Horizon Proyeksi Nataru 2026/2027 (100 Hari: 30 Sep 2026 – 7 Jan 2027) (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]})`
+                : isAllProv && horizonView === 'all_train_plus_forecast'
+                ? `Tren Berkelanjutan: Data Latih 2024–2026 (1.003 Hari) Tersambung ke Garis Proyeksi Nataru 2026/2027 (Nasional • ${MODA_DISPLAY_NAME[selectedModa]})`
+                : `Tren Berkelanjutan: Data Latih 2026 (272 Hari) Tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]})`}
             </h4>
             <p className="text-xs text-slate-500">
-              {horizonView === 'train_plus_forecast'
-                ? 'Garis solid berwarna mewakili Data Latih (1 Jan – 29 Sep 2026), tersambung mulus ke garis putus-putus ungu Data Hasil Forecasting (30 Sep 2026 – 7 Jan 2027).'
-                : 'Menampilkan kurva prediksi harian model champion dengan penyesuaian event shock liburan Natal dan Tahun Baru.'}
+              {horizonView === 'forecast_only'
+                ? 'Menampilkan kurva prediksi harian model champion dengan penyesuaian event shock liburan Natal dan Tahun Baru.'
+                : isAllProv && horizonView === 'all_train_plus_forecast'
+                ? 'Garis solid berwarna mewakili Data Latih Kontinu 2024–2026 (1 Jan 2024 – 29 Sep 2026 • 1.003 hari), tersambung mulus ke garis putus-putus emas Data Hasil Forecasting (30 Sep 2026 – 7 Jan 2027).'
+                : `Garis solid berwarna mewakili Data Latih 2026 (1 Jan – 29 Sep 2026 • 272 hari), tersambung mulus ke garis putus-putus emas Data Hasil Forecasting (${isAllProv ? 'Nasional' : selectedProv}).`}
               {!isOperating && ' ⚠️ Catatan: Moda ini tidak beroperasi di wilayah terpilih (nilai 0).'}
             </p>
           </div>
