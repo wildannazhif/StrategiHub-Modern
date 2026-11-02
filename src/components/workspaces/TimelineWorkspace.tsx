@@ -312,7 +312,6 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Menampilkan {filteredTimeline.length} observasi harian ({selectedMetric === 'pnp' ? 'Penumpang' : 'Armada'} •{' '}
               {selectedDirection === 'tot' ? 'Total Dua Arah' : selectedDirection === 'dat' ? 'Kedatangan' : 'Keberangkatan'})
-              {chartViewMode === 'modes' && ' — Skala Y-axis optimal untuk melihat dinamika masing-masing moda tanpa tertutup angka total.'}
             </p>
           </div>
           <div className="text-xs font-mono text-slate-500 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">

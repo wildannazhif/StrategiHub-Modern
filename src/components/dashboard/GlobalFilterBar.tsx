@@ -48,10 +48,6 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({
             <CheckCircle2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
             <span>{getActiveLabel()}</span>
           </div>
-
-          <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
-            • Sinkron otomatis ke seluruh grafik dashboard
-          </span>
         </div>
 
         {/* RIGHT: RESET BUTTON */}

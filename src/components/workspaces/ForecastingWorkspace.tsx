@@ -672,9 +672,6 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
                 Proyeksi Mobilitas Multimoda Q4 & Libur Nataru 2026/2027
               </h3>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Fokus Arus: <strong>Penumpang Berangkat (pbrg)</strong> & <strong>Armada Berangkat (abrg)</strong> — Simulasi peramalan horizon 100 hari (1 Nov 2026 – 8 Feb 2027) mengantisipasi lonjakan keberangkatan Natal 2026 & Tahun Baru 2027.
-            </p>
           </div>
         </div>
 
@@ -889,14 +886,11 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
             <h4 className="font-bold text-slate-900 dark:text-white text-sm">
               Forecasting 2026
             </h4>
-            <p className="text-xs text-slate-500">
-              {horizonView === 'forecast_only'
-                ? `Kurva peramalan horizon 100 hari (1 Nov 2026 – 8 Feb 2027) model champion (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]}).`
-                : isAllProv && horizonView === 'all_train_plus_forecast'
-                ? `Data Latih Kontinu 2024–2026 (1 Jan 2024 – 31 Okt 2026 • 1.035 hari) tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]}).`
-                : `Data Latih 2026 (1 Jan – 31 Okt 2026 • 304 hari) tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]}).`}
-              {!isOperating && ' ⚠️ Catatan: Moda ini tidak beroperasi di wilayah terpilih (nilai 0).'}
-            </p>
+            {!isOperating && (
+              <p className="text-xs text-amber-500 mt-0.5">
+                ⚠️ Catatan: Moda ini tidak beroperasi di wilayah terpilih (nilai 0).
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono">
@@ -925,9 +919,6 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-2.5 py-1 rounded border border-indigo-200 dark:border-indigo-800">
-              {isAllProv ? 'Nasional (3 Tahun: 2024, 2025, 2026)' : `${selectedProv} (2 Tahun: 2025, 2026)`} • {selectedMetric === 'pnp' ? 'Penumpang' : 'Armada'}
-            </span>
             <button
               onClick={() => setIsNataruBarMinimized(!isNataruBarMinimized)}
               className="text-xs px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium transition-colors"
@@ -1080,11 +1071,6 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
                 Spesifikasi Model & Evaluasi Akurasi Pengujian (Top 5 Model Terbaik)
               </h4>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {isAllProv
-                ? 'Model champion terpilih berbasis evaluasi MAPE terendah pada Data Uji 18 Hari Libur Nataru (18 Des 2025 – 4 Jan 2026) setelah dilatih 717 hari (2024–2025), lalu di-retrain 1.035 hari (2024–2026).'
-                : `Model champion wilayah ${selectedProv} terpilih berbasis evaluasi MAPE terendah pada Data Uji 28 Hari Temporal Holdout (2 – 29 Sep 2026) dari 304 hari data manifest riil 2026 (bebas bias sirkular rekonstruksi).`}
-            </p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -1117,11 +1103,6 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
             <div className="text-2xl font-black font-mono text-emerald-700 dark:text-emerald-400 mt-1">
               {formatDecimal(championModel.mape, 2)}%
             </div>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
-              {isAllProv
-                ? 'Diuji pada 18 Hari Masa Posko Nataru 2025/2026 (18 Des – 4 Jan). Model juara menangkap shock puncak liburan dengan deviasi minimal.'
-                : `Diuji pada 28 Hari Holdout September 2026 (2 – 29 Sep) di wilayah ${selectedProv} murni dari data observasi nyata.`}
-            </p>
           </div>
 
           <div className="p-3 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
@@ -1129,11 +1110,8 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               RMSE (Root Mean Squared Error)
             </span>
             <div className="text-2xl font-black font-mono text-indigo-700 dark:text-indigo-400 mt-1">
-              {formatNumber(championModel.rmse)} <span className="text-xs font-normal text-slate-500">pnp/hari</span>
+              {formatNumber(championModel.rmse)} <span className="text-xs font-normal text-slate-500">{selectedMetric === 'pnp' ? 'pnp/hari' : 'trip/hari'}</span>
             </div>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
-              Standar deviasi galat proyeksi dalam satuan riil {selectedMetric === 'pnp' ? 'orang' : 'trip'}/hari. WAPE terbobot: {formatDecimal(championModel.wape || 3.24, 2)}%.
-            </p>
           </div>
 
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
@@ -1141,13 +1119,8 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               MAE & Directional Accuracy
             </span>
             <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1">
-              {formatNumber(championModel.mae)} <span className="text-xs font-normal text-slate-500">pnp ({formatDecimal(championModel.dir_acc || 89.3, 1)}%)</span>
+              {formatNumber(championModel.mae)} <span className="text-xs font-normal text-slate-500">{selectedMetric === 'pnp' ? 'pnp' : 'trip'} ({formatDecimal(championModel.dir_acc || 89.3, 1)}%)</span>
             </div>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
-              {isAllProv
-                ? 'Akurasi arah 89,3% pada fase fluktuasi libur akhir tahun. Data latih awal: 1 Jan 2024 – 17 Des 2025.'
-                : `Akurasi arah ${formatDecimal(championModel.dir_acc || 75.0, 1)}% memprediksi pola mingguan. Data latih awal: 1 Jan – 1 Sep 2026.`}
-            </p>
           </div>
         </div>
 

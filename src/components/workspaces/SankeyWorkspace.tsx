@@ -327,15 +327,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800 flex items-center gap-1">
-                SIASATI OD Udara Kemenhub
-              </span>
-              <span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                Verified Domestic 100%
-              </span>
-            </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base mt-2">
+            <h3 className="font-bold text-slate-900 dark:text-white text-base">
               Diagram Alir Sankey: Arus Koridor Mobilitas Udara Nasional
             </h3>
             <p className="text-xs text-slate-500 mt-1">
