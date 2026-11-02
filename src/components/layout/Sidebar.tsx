@@ -52,7 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen
     {
       groupName: 'KRONOLOGI & OPERASIONAL',
       items: [
-        { id: 'timeline', label: 'Kronologi Harian (286H)', icon: <Calendar className="w-4 h-4" /> },
+        { id: 'timeline', label: 'Kronologi Harian (304H)', icon: <Calendar className="w-4 h-4" /> },
         { id: 'lebaran', label: 'Puncak Lebaran 2026', badge: '17H', icon: <Flame className="w-4 h-4 text-rose-500" /> },
         { id: 'loadfactor', label: 'Beban Armada (Load Factor)', icon: <Activity className="w-4 h-4 text-emerald-500" /> },
         { id: 'tophubs', label: 'Registri Simpul (Top 30)', icon: <Anchor className="w-4 h-4 text-blue-500" /> },

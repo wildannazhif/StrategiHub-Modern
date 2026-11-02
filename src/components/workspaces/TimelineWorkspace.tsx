@@ -260,7 +260,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
             <span className="text-slate-400 dark:text-slate-500 mr-1 hidden sm:inline">Rentang:</span>
             {[
-              { id: 'all', label: 'All (286H)' },
+              { id: 'all', label: 'All (304H)' },
               { id: 't1', label: 'T1' },
               { id: 't2', label: 'T2' },
               { id: 't3', label: 'T3' },

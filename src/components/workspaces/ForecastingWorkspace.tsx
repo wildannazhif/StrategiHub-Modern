@@ -115,15 +115,15 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         return {
           trainDates: dates,
           trainValues: values,
-          trainLabel: 'Data Latih 2026 (1 Jan – 29 Sep 2026 • 272H)',
+          trainLabel: 'Data Latih 2026 (1 Jan – 31 Okt 2026 • 304H)',
         };
       }
 
-      // Default: Full continuous 2024–2026 (1.003 days)
+      // Default: Full continuous 2024–2026 (1.035 days)
       const allTrainPoints: any[] = [];
       (timeline2024 || []).forEach((d: any) => allTrainPoints.push(d));
       (timeline2025 || []).forEach((d: any) => allTrainPoints.push(d));
-      (timeline || []).filter((d: any) => d.date <= '2026-09-29').forEach((d: any) => allTrainPoints.push(d));
+      (timeline || []).filter((d: any) => d.date <= '2026-10-31').forEach((d: any) => allTrainPoints.push(d));
 
       const dates = allTrainPoints.map((d: any) => d.date);
       const values = allTrainPoints.map((d: any) => {
@@ -134,7 +134,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       return {
         trainDates: dates,
         trainValues: values,
-        trainLabel: 'Data Latih Kontinu 2024–2026 (1 Jan 2024 – 29 Sep 2026 • 1.003H)',
+        trainLabel: 'Data Latih Kontinu 2024–2026 (1 Jan 2024 – 31 Okt 2026 • 1.035H)',
       };
     }
 
@@ -154,7 +154,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     return {
       trainDates: dates,
       trainValues: values,
-      trainLabel: `Data Latih 2026 (${selectedProv} • 272H)`,
+      trainLabel: `Data Latih 2026 (${selectedProv} • 304H)`,
     };
   }, [isAllProv, provData, timeline2024, timeline2025, timeline, selectedMetric, selectedModa, isOperating, horizonView, selectedProv]);
 
@@ -325,7 +325,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           },
         },
         {
-          name: 'Data Hasil Forecasting (30 Sep 2026 – 7 Jan 2027)',
+          name: 'Data Hasil Forecasting (1 Nov 2026 – 8 Feb 2027)',
           type: 'line',
           smooth: 0.2,
           showSymbol: false,
@@ -351,7 +351,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
       series = [
         {
-          name: 'Data Hasil Forecasting (30 Sep 2026 – 7 Jan 2027)',
+          name: 'Data Hasil Forecasting (1 Nov 2026 – 8 Feb 2027)',
           type: 'line',
           smooth: 0.2,
           showSymbol: false,
@@ -647,159 +647,156 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Simulasi peramalan horizon 100 hari (30 Sep 2026 – 7 Jan 2027) mengantisipasi lonjakan kapasitas angkutan Natal 2026 & Tahun Baru 2027.
+              Simulasi peramalan horizon 100 hari (1 Nov 2026 – 8 Feb 2027) mengantisipasi lonjakan kapasitas angkutan Natal 2026 & Tahun Baru 2027.
             </p>
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded border border-emerald-200 dark:border-emerald-800">
-              {isAllProv
-                ? (horizonView === 'all_train_plus_forecast'
-                  ? 'Data Latih (Train): 1.003H (1 Jan 2024 – 29 Sep 2026)'
-                  : 'Data Latih (Train): 272H (1 Jan – 29 Sep 2026)')
-                : `Data Latih (Train): 272H (1 Jan – 29 Sep 2026 • ${selectedProv})`}
-            </span>
-            <span className="px-2.5 py-1 bg-indigo-50 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 rounded border border-indigo-200 dark:border-indigo-800">
-              Data Forecasting: 100H (30 Sep 2026 – 7 Jan 2027)
-            </span>
+          <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded border border-emerald-200 dark:border-emerald-800">
+          {isAllProv
+            ? (horizonView === 'all_train_plus_forecast'
+              ? 'Data Latih (Train): 1.035H (1 Jan 2024 – 31 Okt 2026)'
+              : 'Data Latih (Train): 304H (1 Jan – 31 Okt 2026)')
+            : `Data Latih (Train): 304H (1 Jan – 31 Okt 2026 • ${selectedProv})`}
+          </span>
+          <span className="px-2.5 py-1 bg-indigo-50 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 rounded border border-indigo-200 dark:border-indigo-800">
+          Data Forecasting: 100H (1 Nov 2026 – 8 Feb 2027)
+          </span>
           </div>
-        </div>
+          </div>
 
-        {/* CONTROLS: PROVINCE, MODA, METRIC, HORIZON VIEW */}
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+          {/* CONTROLS: PROVINCE, MODA, METRIC, HORIZON VIEW */}
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-3">
-            {/* DROPDOWN PROVINSI (38 PROVINSI LENGKAP) */}
-            <div className="flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              <span className="text-slate-500 font-semibold uppercase text-[10px]">Provinsi:</span>
-              <select
-                value={selectedProv}
-                onChange={(e) => {
-                  setSelectedProv(e.target.value);
-                  setSelectedModa('TOTAL');
-                }}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-indigo-500"
-              >
-                <option value="ALL">Seluruh Provinsi (Nasional)</option>
-                {ALL_PROVINCES.map((prov) => (
-                  <option key={prov} value={prov}>
-                    {prov}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* DROPDOWN PROVINSI (38 PROVINSI LENGKAP) */}
+          <div className="flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-slate-400" />
+          <span className="text-slate-500 font-semibold uppercase text-[10px]">Provinsi:</span>
+          <select
+            value={selectedProv}
+            onChange={(e) => setSelectedProv(e.target.value)}
+            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2.5 py-1.5 font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-2xs"
+          >
+            {ALL_PROVINCES.map((p) => (
+              <option key={p} value={p}>
+                {p === 'ALL' ? '🇮🇩 Seluruh Provinsi (Nasional)' : p}
+              </option>
+            ))}
+          </select>
+          </div>
 
-            {/* DROPDOWN MODA TRANSPORTASI */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500 font-semibold uppercase text-[10px]">Moda:</span>
-              <select
-                value={selectedModa}
-                onChange={(e) => setSelectedModa(e.target.value)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-indigo-500"
-              >
-                <option value="TOTAL">Total Multimoda (Semua Moda)</option>
-                {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => {
-                  const operating = activeModes.includes(m);
-                  return (
-                    <option key={m} value={m} disabled={!operating}>
-                      {MODA_DISPLAY_NAME[m]} {!operating ? '(Tidak Beroperasi)' : ''}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
+          {/* DROPDOWN MODA (5 MODA) */}
+          <div className="flex items-center gap-1.5">
+          <span className="text-slate-500 font-semibold uppercase text-[10px]">Moda:</span>
+          <select
+            value={selectedModa}
+            onChange={(e) => setSelectedModa(e.target.value as any)}
+            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2.5 py-1.5 font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-2xs"
+          >
+            <option value="TOTAL">Semua Moda (Total Multimoda)</option>
+            {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => (
+              <option key={m} value={m}>
+                {MODA_DISPLAY_NAME[m]}
+              </option>
+            ))}
+          </select>
+          </div>
 
-            {/* METRIC TOGGLE */}
-            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <button
-                onClick={() => setSelectedMetric('pnp')}
-                className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                  selectedMetric === 'pnp' ? 'bg-white dark:bg-slate-900 font-bold shadow-2xs' : 'text-slate-500'
-                }`}
-              >
-                Penumpang
-              </button>
-              <button
-                onClick={() => setSelectedMetric('arm')}
-                className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                  selectedMetric === 'arm' ? 'bg-white dark:bg-slate-900 font-bold shadow-2xs' : 'text-slate-500'
-                }`}
-              >
-                Armada
-              </button>
-            </div>
+          {/* METRIC TOGGLE */}
+          <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+          <button
+            onClick={() => setSelectedMetric('pnp')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+              selectedMetric === 'pnp'
+                ? 'bg-indigo-600 text-white shadow-2xs font-semibold'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+            }`}
+          >
+            Penumpang
+          </button>
+          <button
+            onClick={() => setSelectedMetric('arm')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+              selectedMetric === 'arm'
+                ? 'bg-indigo-600 text-white shadow-2xs font-semibold'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+            }`}
+          >
+            Armada
+          </button>
+          </div>
           </div>
 
           {/* FILTER HORIZON: TRAIN + FORECASTING VS FORECASTING SAJA */}
-          <div className="flex flex-wrap items-center rounded-lg p-0.5 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800">
-            {isAllProv ? (
-              <>
-                <button
-                  onClick={() => setHorizonView('all_train_plus_forecast')}
-                  className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
-                    horizonView === 'all_train_plus_forecast'
-                      ? 'bg-indigo-600 text-white shadow-2xs'
-                      : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
-                  }`}
-                >
-                  📊 Data Latih 2024–2026 + Proyeksi (1.003H + 100H)
-                </button>
-                <button
-                  onClick={() => setHorizonView('train_2026_plus_forecast')}
-                  className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
-                    horizonView === 'train_2026_plus_forecast'
-                      ? 'bg-indigo-600 text-white shadow-2xs'
-                      : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
-                  }`}
-                >
-                  📊 2026 + Proyeksi (272H + 100H)
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setHorizonView('train_2026_plus_forecast')}
-                className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
-                  horizonView !== 'forecast_only'
-                    ? 'bg-indigo-600 text-white shadow-2xs'
-                    : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
-                }`}
-              >
-                📊 Data Latih 2026 + Proyeksi ({selectedProv} • 272H + 100H)
-              </button>
-            )}
+          <div className="flex flex-wrap items-center rounded-lg p-0.5 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 text-xs">
+          {isAllProv ? (
+          <>
             <button
-              onClick={() => setHorizonView('forecast_only')}
+              onClick={() => setHorizonView('all_train_plus_forecast')}
               className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
-                horizonView === 'forecast_only'
+                horizonView === 'all_train_plus_forecast'
                   ? 'bg-indigo-600 text-white shadow-2xs'
                   : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
               }`}
             >
-              📈 Proyeksi Saja (100H)
+              📊 Data Latih 2024–2026 + Proyeksi (1.035H + 100H)
             </button>
+            <button
+              onClick={() => setHorizonView('train_2026_plus_forecast')}
+              className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
+                horizonView === 'train_2026_plus_forecast'
+                  ? 'bg-indigo-600 text-white shadow-2xs'
+                  : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
+              }`}
+            >
+              📊 2026 + Proyeksi (304H + 100H)
+            </button>
+          </>
+          ) : (
+          <button
+            onClick={() => setHorizonView('train_2026_plus_forecast')}
+            className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
+              horizonView !== 'forecast_only'
+                ? 'bg-indigo-600 text-white shadow-2xs'
+                : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
+            }`}
+          >
+            📊 Data Latih 2026 + Proyeksi ({selectedProv} • 304H + 100H)
+          </button>
+          )}
+          <button
+          onClick={() => setHorizonView('forecast_only')}
+          className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
+            horizonView === 'forecast_only'
+              ? 'bg-indigo-600 text-white shadow-2xs'
+              : 'text-indigo-800 dark:text-indigo-300 hover:text-indigo-950 dark:hover:text-white'
+          }`}
+          >
+          📈 Proyeksi Saja (100H)
+          </button>
           </div>
-        </div>
+          </div>
 
-        {/* COMPACT TRAIN - TEST - FORECASTING RANGE INFO */}
-        <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono text-slate-500">
+          {/* COMPACT TRAIN - TEST - FORECASTING RANGE INFO */}
+          <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono text-slate-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-            <strong className="text-slate-700 dark:text-slate-300 font-sans">Data Latih:</strong>{' '}
-            {isAllProv ? '1 Jan 2024 – 17 Des 2025 (Retrain s.d. 29 Sep 2026 • 1.003H)' : '1 Jan – 1 Sep 2026 (Retrain s.d. 29 Sep 2026 • 272H)'}
+          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+          <strong className="text-slate-700 dark:text-slate-300 font-sans">Data Latih:</strong>{' '}
+          {isAllProv ? '1 Jan 2024 – 17 Des 2025 (Retrain s.d. 31 Okt 2026 • 1.035H)' : '1 Jan – 1 Sep 2026 (Retrain s.d. 31 Okt 2026 • 304H)'}
           </span>
           <span className="text-slate-300 dark:text-slate-700 hidden md:inline">•</span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-            <strong className="text-slate-700 dark:text-slate-300 font-sans">Data Uji:</strong>{' '}
-            {isAllProv ? '18 Des 2025 – 4 Jan 2026 (18H Nataru)' : '2 Sep – 29 Sep 2026 (28H Holdout)'}
+          <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+          <strong className="text-slate-700 dark:text-slate-300 font-sans">Data Uji:</strong>{' '}
+          {isAllProv ? '18 Des 2025 – 4 Jan 2026 (18H Nataru)' : '2 Sep – 29 Sep 2026 (28H Holdout)'}
           </span>
           <span className="text-slate-300 dark:text-slate-700 hidden md:inline">•</span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block" />
-            <strong className="text-slate-700 dark:text-slate-300 font-sans">Proyeksi:</strong> 30 Sep 2026 – 7 Jan 2027 (100H)
+          <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block" />
+          <strong className="text-slate-700 dark:text-slate-300 font-sans">Proyeksi:</strong> 1 Nov 2026 – 8 Feb 2027 (100H)
           </span>
-        </div>
-      </div>
+          </div>
+          </div>
 
       {/* 2. EXECUTIVE PROJECTIONS SUMMARY (4 CARDS) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -880,10 +877,10 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
             </h4>
             <p className="text-xs text-slate-500">
               {horizonView === 'forecast_only'
-                ? `Kurva peramalan horizon 100 hari (30 Sep 2026 – 7 Jan 2027) model champion (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]}).`
+                ? `Kurva peramalan horizon 100 hari (1 Nov 2026 – 8 Feb 2027) model champion (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]}).`
                 : isAllProv && horizonView === 'all_train_plus_forecast'
-                ? `Data Latih Kontinu 2024–2026 (1 Jan 2024 – 29 Sep 2026 • 1.003 hari) tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]}).`
-                : `Data Latih 2026 (1 Jan – 29 Sep 2026 • 272 hari) tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]}).`}
+                ? `Data Latih Kontinu 2024–2026 (1 Jan 2024 – 31 Okt 2026 • 1.035 hari) tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]}).`
+                : `Data Latih 2026 (1 Jan – 31 Okt 2026 • 304 hari) tersambung ke Garis Proyeksi Nataru 2026/2027 (${isAllProv ? 'Nasional' : selectedProv} • ${MODA_DISPLAY_NAME[selectedModa]}).`}
               {!isOperating && ' ⚠️ Catatan: Moda ini tidak beroperasi di wilayah terpilih (nilai 0).'}
             </p>
           </div>
@@ -1060,8 +1057,8 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               {isAllProv
-                ? 'Model champion terpilih berbasis evaluasi MAPE terendah pada Data Uji 18 Hari Libur Nataru (18 Des 2025 – 4 Jan 2026) setelah dilatih 717 hari (2024–2025), lalu di-retrain 1.003 hari (2024–2026).'
-                : `Model champion wilayah ${selectedProv} terpilih berbasis evaluasi MAPE terendah pada Data Uji 28 Hari Temporal Holdout (2 – 29 Sep 2026) dari 272 hari data manifest riil 2026 (bebas bias sirkular rekonstruksi).`}
+                ? 'Model champion terpilih berbasis evaluasi MAPE terendah pada Data Uji 18 Hari Libur Nataru (18 Des 2025 – 4 Jan 2026) setelah dilatih 717 hari (2024–2025), lalu di-retrain 1.035 hari (2024–2026).'
+                : `Model champion wilayah ${selectedProv} terpilih berbasis evaluasi MAPE terendah pada Data Uji 28 Hari Temporal Holdout (2 – 29 Sep 2026) dari 304 hari data manifest riil 2026 (bebas bias sirkular rekonstruksi).`}
             </p>
           </div>
 
@@ -1082,8 +1079,8 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         <p className="text-[11px] text-slate-500 font-mono leading-relaxed pt-1">
           <strong className="text-indigo-600 dark:text-indigo-400 font-sans">Partisi Evaluasi Akurasi:</strong>{' '}
           {isAllProv
-            ? 'Data Latih: 1 Jan 2024 – 17 Des 2025 • Data Uji: 18 Des 2025 – 4 Jan 2026 (18H Posko Nataru) • Retrain Penuh: 1.003H s.d. 29 Sep 2026.'
-            : `Data Latih: 1 Jan – 1 Sep 2026 (244H) • Data Uji: 2 – 29 Sep 2026 (28H Holdout ${selectedProv}) • Retrain Penuh: 272H.`}
+            ? 'Data Latih: 1 Jan 2024 – 17 Des 2025 • Data Uji: 18 Des 2025 – 4 Jan 2026 (18H Posko Nataru) • Retrain Penuh: 1.035H s.d. 31 Okt 2026.'
+            : `Data Latih: 1 Jan – 1 Sep 2026 (244H) • Data Uji: 2 – 29 Sep 2026 (28H Holdout ${selectedProv}) • Retrain Penuh: 304H.`}
         </p>
 
         {/* 3 Metric Cards: MAPE, RMSE, MAE */}

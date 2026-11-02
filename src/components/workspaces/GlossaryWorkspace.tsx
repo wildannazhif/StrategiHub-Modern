@@ -413,13 +413,13 @@ export const GlossaryWorkspace: React.FC = () => {
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-1">
                 <span className="font-bold text-slate-900 dark:text-white block">Tingkat Nasional (Murni 2024–2026):</span>
                 <p>
-                  Menggunakan <strong>Skema 4: Middle-Holdout Nataru 2025/2026 (18 Hari: 18 Des 2025 – 4 Jan 2026)</strong>. Model dilatih data kontinu 717 hari (2024–2025) untuk diuji kemampuannya menebak masa posko Nataru tahun sebelumnya. Setelah model terbukti juara, seluruh data digabungkan (<strong>Retrain 1.003 Hari</strong> s.d. 29 Sep 2026) untuk meramal 100 hari ke depan.
+                  Menggunakan <strong>Skema 4: Middle-Holdout Nataru 2025/2026 (18 Hari: 18 Des 2025 – 4 Jan 2026)</strong>. Model dilatih data kontinu 717 hari (2024–2025) untuk diuji kemampuannya menebak masa posko Nataru tahun sebelumnya. Setelah model terbukti juara, seluruh data digabungkan (<strong>Retrain 1.035 Hari</strong> s.d. 31 Okt 2026) untuk meramal 100 hari ke depan.
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-1">
                 <span className="font-bold text-slate-900 dark:text-white block">Tingkat Provinsi (38 Provinsi):</span>
                 <p>
-                  Karena data mentah lapangan 2024 dan 2025 dari API Hubnet tidak memiliki rincian daerah, evaluasi akurasi provinsi menggunakan <strong>Temporal Holdout 28 Hari (2 – 29 Sep 2026)</strong> dari 272 hari data manifest riil 2026. Ini menjamin RMSE dan MAPE dihitung 100% dari fakta observasi nyata tanpa bias sirkular rekonstruksi top-down.
+                  Karena data mentah lapangan 2024 dan 2025 dari API Hubnet tidak memiliki rincian daerah, evaluasi akurasi provinsi menggunakan <strong>Temporal Holdout 28 Hari (2 – 29 Sep 2026)</strong> dari 304 hari data manifest riil 2026. Ini menjamin RMSE dan MAPE dihitung 100% dari fakta observasi nyata tanpa bias sirkular rekonstruksi top-down.
                 </p>
               </div>
             </div>

@@ -192,7 +192,7 @@ export const MatrixWorkspace: React.FC<MatrixWorkspaceProps> = ({ meta, monthly 
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Tabel komparasi matriks analitik lintas 5 moda transportasi dan agregat nasional (Periode: 1 Jan – 13 Okt 2026 • 286 Hari).
+              Tabel komparasi matriks analitik lintas 5 moda transportasi dan agregat nasional (Periode: 1 Jan – 31 Okt 2026 • 304 Hari).
             </p>
           </div>
 
