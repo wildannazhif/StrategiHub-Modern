@@ -95,33 +95,44 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     return (list || []).slice(0, 5);
   }, [isAllProv, provData, forecastData, selectedModa]);
 
-  // Peak values for 2024 and 2025 Nataru
+  // Peak values for 2024 and 2025 Nataru (Strictly Penumpang Berangkat & Armada Berangkat)
   const val24_peak = useMemo(() => {
     const row = (timeline2024 || []).find((r: any) => r.date === '2024-12-24');
     if (!row) return 0;
-    return selectedMetric === 'pnp' ? (Number(row[selectedModa]) || 0) : (Number(row[`arm_${selectedModa}`]) || 0);
+    return selectedMetric === 'pnp'
+      ? (Number(row[`pbrg_${selectedModa}`]) || Number(row[selectedModa]) || 0)
+      : (Number(row[`abrg_${selectedModa}`]) || Number(row[`arm_${selectedModa}`]) || 0);
   }, [timeline2024, selectedModa, selectedMetric]);
 
   const val25_peak = useMemo(() => {
-    const row = (timeline2025 || []).find((r: any) => r.date === '2025-12-28');
+    const row = (timeline2025 || []).find((r: any) => r.date === '2025-12-24');
     if (!row) return 0;
-    return selectedMetric === 'pnp' ? (Number(row[selectedModa]) || 0) : (Number(row[`arm_${selectedModa}`]) || 0);
+    return selectedMetric === 'pnp'
+      ? (Number(row[`pbrg_${selectedModa}`]) || Number(row[selectedModa]) || 0)
+      : (Number(row[`abrg_${selectedModa}`]) || Number(row[`arm_${selectedModa}`]) || 0);
   }, [timeline2025, selectedModa, selectedMetric]);
 
-  // 1. Train Series (Dynamically supports 2024–2026 for Nasional, or 2026 for Province)
+  // 1. Train Series (Strictly focused on Penumpang Berangkat & Armada Berangkat)
   const { trainDates, trainValues, trainLabel } = useMemo(() => {
+    const pKey = `pbrg_${selectedModa}`;
+    const aKey = `abrg_${selectedModa}`;
+
     if (isAllProv) {
       if (horizonView === 'train_2026_plus_forecast') {
-        const histPoints26 = (timeline || []).filter((d: any) => d.date <= '2026-09-29');
+        const histPoints26 = (timeline || []).filter((d: any) => d.date <= '2026-10-31');
         const dates = histPoints26.map((d: any) => d.date);
         const values = histPoints26.map((d: any) => {
           if (!isOperating) return 0;
-          return selectedMetric === 'pnp' ? (Number(d[selectedModa]) || 0) : (Number(d[`arm_${selectedModa}`]) || 0);
+          return selectedMetric === 'pnp'
+            ? (Number(d[pKey]) || Number(d[selectedModa]) || 0)
+            : (Number(d[aKey]) || Number(d[`arm_${selectedModa}`]) || 0);
         });
         return {
           trainDates: dates,
           trainValues: values,
-          trainLabel: 'Data Latih 2026 (1 Jan – 31 Okt 2026 • 304H)',
+          trainLabel: selectedMetric === 'pnp'
+            ? 'Data Latih Penumpang Berangkat 2026 (1 Jan – 31 Okt 2026 • 304H)'
+            : 'Data Latih Armada Berangkat 2026 (1 Jan – 31 Okt 2026 • 304H)',
         };
       }
 
@@ -134,17 +145,21 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       const dates = allTrainPoints.map((d: any) => d.date);
       const values = allTrainPoints.map((d: any) => {
         if (!isOperating) return 0;
-        return selectedMetric === 'pnp' ? (Number(d[selectedModa]) || 0) : (Number(d[`arm_${selectedModa}`]) || 0);
+        return selectedMetric === 'pnp'
+          ? (Number(d[pKey]) || Number(d[selectedModa]) || 0)
+          : (Number(d[aKey]) || Number(d[`arm_${selectedModa}`]) || 0);
       });
 
       return {
         trainDates: dates,
         trainValues: values,
-        trainLabel: 'Data Latih Kontinu 2024–2026 (1 Jan 2024 – 31 Okt 2026 • 1.035H)',
+        trainLabel: selectedMetric === 'pnp'
+          ? 'Data Latih Penumpang Berangkat (1 Jan 2024 – 31 Okt 2026 • 1.035H)'
+          : 'Data Latih Armada Berangkat (1 Jan 2024 – 31 Okt 2026 • 1.035H)',
       };
     }
 
-    // Per-province (2024 not available, show available 2026 data)
+    // Per-province (Strictly Penumpang Berangkat & Armada Berangkat)
     const h = provData?.history_2026;
     if (!h) return { trainDates: [], trainValues: [], trainLabel: 'Data Latih 2026' };
 
@@ -153,18 +168,20 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     if (!isOperating) {
       values = dates.map(() => 0);
     } else if (selectedMetric === 'pnp') {
-      values = (h[selectedModa] || []).map((v: any) => Number(v) || 0);
+      values = (h[pKey] || h[selectedModa] || []).map((v: any) => Number(v) || 0);
     } else {
-      values = (h[`arm_${selectedModa}`] || []).map((v: any) => Number(v) || 0);
+      values = (h[aKey] || h[`arm_${selectedModa}`] || []).map((v: any) => Number(v) || 0);
     }
     return {
       trainDates: dates,
       trainValues: values,
-      trainLabel: `Data Latih 2026 (${selectedProv} • 304H)`,
+      trainLabel: selectedMetric === 'pnp'
+        ? `Data Latih Penumpang Berangkat 2026 (${selectedProv} • 304H)`
+        : `Data Latih Armada Berangkat 2026 (${selectedProv} • 304H)`,
     };
   }, [isAllProv, provData, timeline2024, timeline2025, timeline, selectedMetric, selectedModa, isOperating, horizonView, selectedProv]);
 
-  // 2. Future 100-Day Forecast Points (from official PUSDATIN precomputed model)
+  // 2. Future 100-Day Forecast Points (Strictly Penumpang Berangkat & Armada Berangkat)
   const futurePoints: any[] = useMemo(() => {
     if (isAllProv) {
       return forecastData?.scenarios?.moderat || [];
@@ -178,35 +195,38 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
   const futureValues: number[] = useMemo(() => {
     if (!isOperating) return futureDates.map(() => 0);
+    const pKey = `pbrg_${selectedModa}`;
+    const aKey = `abrg_${selectedModa}`;
     return futurePoints.map((p: any) => {
       if (selectedMetric === 'pnp') {
-        return Number(p[selectedModa]) || 0;
+        return Number(p[pKey]) || Number(p[selectedModa]) || 0;
       } else {
-        return Number(p[`arm_${selectedModa}`]) || 0;
+        return Number(p[aKey]) || Number(p[`arm_${selectedModa}`]) || 0;
       }
     });
   }, [futurePoints, futureDates, selectedMetric, selectedModa, isOperating]);
 
-  // 3. 2025 Baseline Map
+  // 3. 2025 Baseline Map (Strictly Penumpang Berangkat & Armada Berangkat)
   const map2025 = useMemo(() => {
     const map: Record<string, number> = {};
+    const pKey = `pbrg_${selectedModa}`;
+    const aKey = `abrg_${selectedModa}`;
     if (isAllProv) {
       (timeline2025 || []).forEach((r: any) => {
         const md = r.date.slice(5);
         if (selectedMetric === 'pnp') {
-          map[md] = Number(r[selectedModa]) || Number(r[`pbrg_${selectedModa}`]) || 0;
+          map[md] = Number(r[pKey]) || Number(r[selectedModa]) || 0;
         } else {
-          map[md] = Number(r[`arm_${selectedModa}`]) || Number(r[`abrg_${selectedModa}`]) || 0;
+          map[md] = Number(r[aKey]) || Number(r[`arm_${selectedModa}`]) || 0;
         }
       });
     } else {
-      // Province-level 2025 baseline
       futurePoints.forEach((p: any) => {
         const md = p.date.slice(5);
         if (selectedMetric === 'pnp') {
-          map[md] = Number(p.TOTAL_2025) || 0;
+          map[md] = Number(p.pbrg_TOTAL_2025) || Number(p.TOTAL_2025) || 0;
         } else {
-          map[md] = Number(p.arm_2025) || 0;
+          map[md] = Number(p.abrg_TOTAL_2025) || Number(p.arm_2025) || 0;
         }
       });
     }
@@ -653,7 +673,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Simulasi peramalan horizon 100 hari (1 Nov 2026 – 8 Feb 2027) mengantisipasi lonjakan kapasitas angkutan Natal 2026 & Tahun Baru 2027.
+              Fokus Arus: <strong>Penumpang Berangkat (pbrg)</strong> & <strong>Armada Berangkat (abrg)</strong> — Simulasi peramalan horizon 100 hari (1 Nov 2026 – 8 Feb 2027) mengantisipasi lonjakan keberangkatan Natal 2026 & Tahun Baru 2027.
             </p>
           </div>
         </div>
@@ -696,27 +716,27 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           </select>
           </div>
 
-          {/* METRIC TOGGLE */}
+          {/* METRIC TOGGLE: PENUMPANG BERANGKAT VS ARMADA BERANGKAT */}
           <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
           <button
             onClick={() => setSelectedMetric('pnp')}
-            className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-md font-medium transition-colors flex items-center gap-1.5 ${
               selectedMetric === 'pnp'
                 ? 'bg-indigo-600 text-white shadow-2xs font-semibold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
-            Penumpang
+            <span>↗</span> Penumpang Berangkat (pbrg)
           </button>
           <button
             onClick={() => setSelectedMetric('arm')}
-            className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-md font-medium transition-colors flex items-center gap-1.5 ${
               selectedMetric === 'arm'
                 ? 'bg-indigo-600 text-white shadow-2xs font-semibold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
-            Armada
+            <span>🚌</span> Armada Berangkat (abrg)
           </button>
           </div>
           </div>
@@ -920,28 +940,28 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
         {!isNataruBarMinimized && (
           <>
-            {/* NATARU SUMMARY CALLOUT CARDS */}
+            {/* NATARU SUMMARY CALLOUT CARDS (Strictly Penumpang Berangkat & Armada Berangkat) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
                 <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2024 (18H):</span>
                 <div className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">
-                  {isAllProv ? (selectedMetric === 'pnp' ? '22.522.872' : '765.410') : '-'}
+                  {isAllProv ? (selectedMetric === 'pnp' ? '12.506.108' : '369.609') : '-'}
                 </div>
-                <span className="text-[10px] text-slate-400 font-sans">{isAllProv ? 'Realisasi Penuh' : 'Khusus Nasional'}</span>
+                <span className="text-[10px] text-slate-400 font-sans">{isAllProv ? 'Keberangkatan Penuh' : 'Khusus Nasional'}</span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
                 <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2025 (18H):</span>
                 <div className="font-bold text-amber-600 dark:text-amber-400 text-sm mt-0.5">
-                  {isAllProv ? (selectedMetric === 'pnp' ? '31.718.505' : '823.140') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.base2025 || 0)}
+                  {isAllProv ? (selectedMetric === 'pnp' ? '13.911.680' : '305.060') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.base2025 || 0)}
                 </div>
-                <span className="text-[10px] text-amber-600/80 font-sans">Ground Truth Pembanding</span>
+                <span className="text-[10px] text-amber-600/80 font-sans">Realisasi Keberangkatan</span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900 font-mono text-xs">
                 <span className="text-indigo-600 dark:text-indigo-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 2026 (18H):</span>
                 <div className="font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-0.5">
-                  {isAllProv ? (selectedMetric === 'pnp' ? '30.716.688' : '812.590') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0)}
+                  {isAllProv ? (selectedMetric === 'pnp' ? '17.415.758' : '401.029') : formatNumber(comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0)}
                 </div>
                 <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-sans font-semibold">Model Champion</span>
               </div>
@@ -949,7 +969,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
                 <span className="text-slate-400 font-sans text-[11px] block">Puncak Mudik Natal (H-1):</span>
                 <div className="font-bold text-rose-600 dark:text-rose-400 text-sm mt-0.5">
-                  24 Des • {isAllProv ? (selectedMetric === 'pnp' ? '1.933.690' : '46.942') : formatNumber(Math.round((comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0) / 15.5))}
+                  24 Des • {isAllProv ? (selectedMetric === 'pnp' ? '1.106.591' : '24.318') : formatNumber(Math.round((comparisonRows.find(r => r.moda === selectedModa)?.fc2026 || 0) / 15.5))}
                 </div>
                 <span className="text-[10px] text-rose-600/80 font-sans">Puncak Arus Berangkat</span>
               </div>
