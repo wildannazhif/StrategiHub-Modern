@@ -687,10 +687,6 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
               </div>
             )}
           </div>
-
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
-            Sumber: SIASATI PUSDATIN Kemenhub
-          </div>
         </div>
       </div>
     </div>
