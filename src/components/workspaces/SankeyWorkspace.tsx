@@ -35,6 +35,7 @@ function cleanAirportName(name: string): string {
   if (['Jawa', 'Sumatera', 'Bali & Nusra', 'Kalimantan', 'Sulawesi', 'Maluku & Papua', 'Lainnya'].includes(name)) {
     return name;
   }
+  if (name.startsWith('Lainnya')) return name;
 
   const map: Record<string, string> = {
     CGK: 'CGK (Jakarta)',
@@ -75,7 +76,7 @@ function cleanAirportName(name: string): string {
   const code = name.split(' ')[0].trim();
   if (map[code]) return map[code];
 
-  const match = name.match(/^([A-Z]{3})\s*\((.*?)\)/);
+  const match = name.match(/^([A-Z0-9]{3})\s*\((.*?)\)/);
   if (match) {
     const cleanCity = match[2].split('-')[0].split(',')[0].trim();
     return `${match[1]} (${cleanCity})`;
@@ -83,10 +84,23 @@ function cleanAirportName(name: string): string {
   return name;
 }
 
+function getNodeColor(name: string): string {
+  if (SANKEY_COLOR_MAP[name]) return SANKEY_COLOR_MAP[name];
+  if (name === 'Lainnya') return '#94a3b8';
+  const palette = [
+    '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6',
+    '#06b6d4', '#14b8a6', '#f97316', '#6366f1', '#84cc16',
+    '#0ea5e9', '#d946ef', '#e11d48', '#22c55e', '#a855f7'
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return palette[Math.abs(hash) % palette.length];
+}
+
 export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = false }) => {
   const [viewMode, setViewMode] = useState<'hub' | 'island'>('hub');
   const [selectedOrigin, setSelectedOrigin] = useState<string>('ALL');
-  const [minPaxThreshold, setMinPaxThreshold] = useState<number>(10000);
+  const [minPaxThreshold, setMinPaxThreshold] = useState<number>(0);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [hoveredLink, setHoveredLink] = useState<SankeyFlow | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -103,19 +117,19 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
 
   const isIsland = viewMode === 'island';
 
-  // Filtered dataset
+  // Filtered dataset (Supports "Semua" threshold = 0)
   const currentDataset = useMemo(() => {
     if (isIsland) {
       return ISLAND_FLOWS;
     }
     return HUB_FLOWS.filter((flow) => {
       const matchOrigin = selectedOrigin === 'ALL' || flow.source.startsWith(selectedOrigin);
-      const matchPax = flow.value >= minPaxThreshold;
+      const matchPax = minPaxThreshold === 0 ? true : flow.value >= minPaxThreshold;
       return matchOrigin && matchPax;
     });
   }, [isIsland, selectedOrigin, minPaxThreshold]);
 
-  // Aggregate KPI stats
+  // Aggregate KPI stats (Calculated on full filtered flows)
   const kpiStats = useMemo(() => {
     let totalPax = 0;
     let totalFlights = 0;
@@ -140,24 +154,82 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
     };
   }, [currentDataset, isIsland]);
 
-  // Bipartite Sankey Layout Calculations (Self-contained, 100% visible on Mobile & Desktop, Zero Cut-off)
+  // Bipartite Sankey Layout Calculations (Max 25 Destinations + 'Lainnya' Consolidation)
   const layout = useMemo(() => {
     if (!currentDataset || currentDataset.length === 0) {
-      return { nodes: [], links: [], width: 520, height: 600, totalValue: 0, padX: 105 };
+      return {
+        nodes: [],
+        links: [],
+        width: 620,
+        height: 600,
+        totalValue: 0,
+        padX: 135,
+        totalDestinationsCount: 0,
+        displayedTargetsCount: 0,
+        otherDestinationsCount: 0,
+      };
+    }
+
+    // 1. Group targets to find top destinations (Max 25 total targets with 'Lainnya')
+    const rawTargetTotals: Record<string, number> = {};
+    currentDataset.forEach((l) => {
+      rawTargetTotals[l.target] = (rawTargetTotals[l.target] || 0) + l.value;
+    });
+
+    const allSortedTargets = Object.keys(rawTargetTotals).sort((a, b) => rawTargetTotals[b] - rawTargetTotals[a]);
+    const totalDestinationsCount = allSortedTargets.length;
+    const MAX_TARGETS = 25;
+
+    let effectiveDataset: SankeyFlow[] = [];
+    let otherDestinationsCount = 0;
+
+    if (!isIsland && totalDestinationsCount > MAX_TARGETS) {
+      // Pick top 24 targets, remaining destinations become 'Lainnya' (giving exactly 25 targets)
+      const top24Targets = allSortedTargets.slice(0, 24);
+      const topTargetsSet = new Set(top24Targets);
+      otherDestinationsCount = totalDestinationsCount - 24;
+
+      const consolidatedMap = new Map<string, SankeyFlow>();
+      currentDataset.forEach((flow) => {
+        const target = topTargetsSet.has(flow.target) ? flow.target : 'Lainnya';
+        const key = `${flow.source}__${target}`;
+        if (!consolidatedMap.has(key)) {
+          consolidatedMap.set(key, {
+            source: flow.source,
+            target,
+            value: flow.value,
+            flights: flow.flights || 0,
+          });
+        } else {
+          const existing = consolidatedMap.get(key)!;
+          existing.value += flow.value;
+          existing.flights = (existing.flights || 0) + (flow.flights || 0);
+        }
+      });
+      effectiveDataset = Array.from(consolidatedMap.values());
+    } else {
+      effectiveDataset = currentDataset;
     }
 
     const sourceMap: Record<string, number> = {};
     const targetMap: Record<string, number> = {};
     let totalValue = 0;
 
-    currentDataset.forEach((l) => {
+    effectiveDataset.forEach((l) => {
       sourceMap[l.source] = (sourceMap[l.source] || 0) + l.value;
       targetMap[l.target] = (targetMap[l.target] || 0) + l.value;
       totalValue += l.value;
     });
 
     const sources = Object.keys(sourceMap).sort((a, b) => sourceMap[b] - sourceMap[a]);
-    const targets = Object.keys(targetMap).sort((a, b) => targetMap[b] - targetMap[a]);
+    // Ensure 'Lainnya' sits gracefully at the bottom of destination nodes
+    const targets = Object.keys(targetMap).sort((a, b) => {
+      if (a === 'Lainnya') return 1;
+      if (b === 'Lainnya') return -1;
+      return targetMap[b] - targetMap[a];
+    });
+
+    const displayedTargetsCount = targets.length;
 
     const minNodeH = isIsland ? 28 : 18;
     const nodeWidth = 14;
@@ -175,7 +247,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
     let currYS = padY;
     sources.forEach((s) => {
       const h = Math.max(sourceMap[s] * scaleS, minNodeH);
-      const color = SANKEY_COLOR_MAP[s] || '#2563eb';
+      const color = getNodeColor(s);
       sourceNodes[s] = { name: s, x: padX, y: currYS, height: h, value: sourceMap[s], isSource: true, color };
       currYS += h + gap;
     });
@@ -184,7 +256,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
     let currYT = padY;
     targets.forEach((t) => {
       const h = Math.max(targetMap[t] * scaleT, minNodeH);
-      const color = SANKEY_COLOR_MAP[t] || '#10b981';
+      const color = getNodeColor(t);
       targetNodes[t] = { name: t, x: width - padX - nodeWidth, y: currYT, height: h, value: targetMap[t], isSource: false, color };
       currYT += h + gap;
     });
@@ -197,8 +269,12 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
     sources.forEach((s) => (sOffsets[s] = 0));
     targets.forEach((t) => (tOffsets[t] = 0));
 
-    // Sort links descending so larger ribbons render cleanly
-    const sortedLinks = [...currentDataset].sort((a, b) => b.value - a.value);
+    // Sort links descending so larger ribbons render cleanly, with 'Lainnya' ribbons at bottom
+    const sortedLinks = [...effectiveDataset].sort((a, b) => {
+      if (a.target === 'Lainnya') return 1;
+      if (b.target === 'Lainnya') return -1;
+      return b.value - a.value;
+    });
 
     const renderedLinks = sortedLinks
       .map((l, idx) => {
@@ -223,8 +299,8 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
         const gradId = `sankey-grad-${idx}`;
         const pathD = `M ${x1} ${y1} C ${cx1} ${y1}, ${cx2} ${y2}, ${x2} ${y2} L ${x2} ${y2 + linkHT} C ${cx2} ${y2 + linkHT}, ${cx1} ${y1 + linkHS}, ${x1} ${y1 + linkHS} Z`;
 
-        const cSource = SANKEY_COLOR_MAP[l.source] || '#3b82f6';
-        const cTarget = SANKEY_COLOR_MAP[l.target] || '#10b981';
+        const cSource = getNodeColor(l.source);
+        const cTarget = getNodeColor(l.target);
 
         return {
           id: gradId,
@@ -248,6 +324,9 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
       height,
       totalValue,
       padX,
+      totalDestinationsCount,
+      displayedTargetsCount,
+      otherDestinationsCount,
     };
   }, [currentDataset, isIsland]);
 
@@ -271,12 +350,15 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
   const handleLinkMouseEnter = (e: React.MouseEvent, item: any) => {
     setHoveredLink(item.flow);
     handleMouseMove(e);
+    const isOther = item.flow.target === 'Lainnya';
     setTooltip({
       visible: true,
       x: 0,
       y: 0,
-      title: `${cleanAirportName(item.flow.source)} ➔ ${cleanAirportName(item.flow.target)}`,
-      badge: 'Rute Langsung',
+      title: `${cleanAirportName(item.flow.source)} ➔ ${
+        isOther ? `Lainnya (${layout.otherDestinationsCount} Destinasi)` : cleanAirportName(item.flow.target)
+      }`,
+      badge: isOther ? 'Rute Gabungan' : 'Rute Langsung',
       pax: item.flow.value,
       flights: item.flow.flights,
       density: item.flow.flights > 0 ? (item.flow.value / item.flow.flights).toFixed(1) : '0',
@@ -288,12 +370,17 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
     setHoveredNode(node.name);
     handleMouseMove(e);
     const pct = ((node.value / (layout.totalValue || 1)) * 100).toFixed(1);
+    const isOther = node.name === 'Lainnya';
     setTooltip({
       visible: true,
       x: 0,
       y: 0,
-      title: cleanAirportName(node.name),
-      badge: node.isSource ? 'Hub Asal (Origin)' : 'Tujuan (Destination)',
+      title: isOther ? `Lainnya (${layout.otherDestinationsCount} Destinasi Gabungan)` : cleanAirportName(node.name),
+      badge: isOther
+        ? 'Destinasi Gabungan'
+        : node.isSource
+        ? 'Hub Asal (Origin)'
+        : 'Tujuan (Destination)',
       pax: node.value,
       share: Number(pct),
     });
@@ -315,7 +402,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
 
   const resetAll = () => {
     setSelectedOrigin('ALL');
-    setMinPaxThreshold(10000);
+    setMinPaxThreshold(0);
     setSelectedNode(null);
     setHoveredLink(null);
     setHoveredNode(null);
@@ -449,10 +536,11 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
               </div>
 
               {/* Threshold Pill Buttons */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-slate-400 mr-1 hidden sm:inline">Min. Pax:</span>
                 {[
-                  { val: 10000, label: 'Semua (≥ 10k)' },
+                  { val: 0, label: 'Semua' },
+                  { val: 10000, label: '≥ 10k' },
                   { val: 20000, label: '≥ 20k' },
                   { val: 40000, label: '≥ 40k' },
                   { val: 60000, label: '≥ 60k (Koridor Utama)' },
@@ -463,12 +551,26 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
                     className={`px-2.5 py-1 rounded-md font-medium border transition-colors ${
                       minPaxThreshold === th.val
                         ? 'bg-sky-600 text-white border-sky-600 font-semibold shadow-2xs'
-                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                     }`}
                   >
                     {th.label}
                   </button>
                 ))}
+              </div>
+
+              {/* Destination Count Indicator */}
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/80 text-[11px] font-medium text-emerald-800 dark:text-emerald-300">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>
+                  Tujuan: <strong>{layout.displayedTargetsCount}</strong> ditampilkan dari total{' '}
+                  <strong>{layout.totalDestinationsCount}</strong> destinasi
+                  {layout.otherDestinationsCount > 0 && (
+                    <span className="text-emerald-700 dark:text-emerald-400 ml-1">
+                      (Top 24 + {layout.otherDestinationsCount} di 'Lainnya')
+                    </span>
+                  )}
+                </span>
               </div>
             </div>
 
@@ -546,7 +648,9 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
               fill={isDarkMode ? '#34d399' : '#059669'}
               className="font-sans"
             >
-              {isIsland ? '🛬 TUJUAN' : '🛬 TUJUAN (DEST)'}
+              {isIsland
+                ? '🛬 TUJUAN'
+                : `🛬 TUJUAN (${layout.displayedTargetsCount} dari ${layout.totalDestinationsCount} Destinasi)`}
             </text>
 
             {/* FLOW RIBBONS */}

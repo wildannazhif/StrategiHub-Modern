@@ -354,9 +354,9 @@
         };
       });
 
-      // Airports scatter data
+      // Airports scatter data (clean static markers, zero animation)
       const scatterData = [];
-      const effectScatterData = [];
+      const topHubsScatterData = [];
 
       Object.values(mapData.airports).forEach(apt => {
         const isTop = topHubs.includes(apt.code);
@@ -373,7 +373,7 @@
         };
 
         if (isTop || isPinned) {
-          effectScatterData.push(pt);
+          topHubsScatterData.push(pt);
         } else {
           scatterData.push(pt);
         }
@@ -431,30 +431,14 @@
           }
         },
         series: [
-          // 1. Static lines
+          // 1. Static route lines (clean, zero moving particles)
           {
             type: 'lines',
             coordinateSystem: 'geo',
             zlevel: 1,
             data: linesData
           },
-          // 2. Animated flight trails (comets)
-          {
-            type: 'lines',
-            coordinateSystem: 'geo',
-            zlevel: 2,
-            effect: {
-              show: true,
-              period: 5,
-              trailLength: 0.6,
-              symbol: 'circle',
-              symbolSize: 3.5,
-              color: isDark ? '#ffffff' : '#2563eb'
-            },
-            lineStyle: { opacity: 0, curveness: 0.2 },
-            data: linesData.slice(0, 300) // animate top 300 busy routes
-          },
-          // 3. Regular Airports
+          // 2. Regular Airports (Static dots)
           {
             type: 'scatter',
             coordinateSystem: 'geo',
@@ -462,16 +446,15 @@
             symbolSize: 6,
             data: scatterData
           },
-          // 4. Top Hubs Pulsing Markers
+          // 3. Top Hubs & Pinned Markers (Static dots, zero pulsing ripples)
           {
-            type: 'effectScatter',
+            type: 'scatter',
             coordinateSystem: 'geo',
             zlevel: 4,
             symbolSize: function(val) {
               return pinnedAirport === val[2] ? 14 : 10;
             },
-            rippleEffect: { brushType: 'stroke', scale: 3 },
-            data: effectScatterData
+            data: topHubsScatterData
           }
         ]
       };
