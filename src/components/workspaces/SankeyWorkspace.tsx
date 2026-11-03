@@ -563,8 +563,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/80 text-[11px] font-medium text-emerald-800 dark:text-emerald-300">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>
-                  Tujuan: <strong>{layout.displayedTargetsCount}</strong> ditampilkan dari total{' '}
-                  <strong>{layout.totalDestinationsCount}</strong> destinasi
+                  Tujuan: <strong>{layout.totalDestinationsCount} Destinasi</strong>
                   {layout.otherDestinationsCount > 0 && (
                     <span className="text-emerald-700 dark:text-emerald-400 ml-1">
                       (Top 24 + {layout.otherDestinationsCount} di 'Lainnya')
@@ -650,7 +649,7 @@ export const SankeyWorkspace: React.FC<SankeyWorkspaceProps> = ({ isDarkMode = f
             >
               {isIsland
                 ? '🛬 TUJUAN'
-                : `🛬 TUJUAN (${layout.displayedTargetsCount} dari ${layout.totalDestinationsCount} Destinasi)`}
+                : `🛬 TUJUAN (${layout.totalDestinationsCount} Destinasi)`}
             </text>
 
             {/* FLOW RIBBONS */}
