@@ -98,7 +98,7 @@ export const GlossaryWorkspace: React.FC = () => {
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Dokumentasi komprehensif seluruh indikator, formulasi matematis, arsitektur 12 model peramalan (+LightGBM), metodologi train-test holdout, dan audit kualitas data operasional SIASATI PUSDATIN Kemenhub.
+              Dokumentasi komprehensif seluruh indikator, formulasi matematis, arsitektur 12 model peramalan (+LightGBM), metodologi train-test holdout, dan audit kualitas data operasional PUSDATIN Kemenhub.
             </p>
           </div>
 
@@ -493,7 +493,7 @@ export const GlossaryWorkspace: React.FC = () => {
           <div className="flex items-center gap-2 border-l-4 border-emerald-600 pl-3">
             <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
-              8. Audit Integritas Data SIASATI & Glosarium Singkatan Resmi Kemenhub
+              8. Audit Integritas Data & Glosarium Singkatan Resmi PUSDATIN Kemenhub
             </h3>
           </div>
 
@@ -531,11 +531,6 @@ export const GlossaryWorkspace: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300 font-sans">
-                    <tr>
-                      <td className="py-2 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">SIASATI</td>
-                      <td className="py-2 px-3 font-semibold">Sistem Informasi Angkutan dan Sarana Transportasi Indonesia</td>
-                      <td className="py-2 px-3">Sistem basis data terpadu resmi Kementerian Perhubungan RI untuk pencatatan manifest harian 5 moda transportasi.</td>
-                    </tr>
                     <tr>
                       <td className="py-2 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">PUSDATIN</td>
                       <td className="py-2 px-3 font-semibold">Pusat Data dan Informasi</td>

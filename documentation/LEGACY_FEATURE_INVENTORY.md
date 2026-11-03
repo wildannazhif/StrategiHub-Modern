@@ -88,7 +88,7 @@
        - Rumus Lebaran Surge Rate ($SR = \frac{P_{peak} - P_{base}}{P_{base}} \times 100\%$)
        - Rumus Holt-Winters Damped ($L_t, B_t, S_t, \hat{y}_{t+h}$)
        - Rumus Simulasi Penambahan Armada ($\Delta A = A_{puncak} \times (\frac{LF_{puncak}}{LF_{biasa}} - 1)$)
-     * Glosarium terminologi, sumber data SIASATI PUSDATIN, dan catatan audit kualitas data.
+     * Glosarium terminologi, sumber data PUSDATIN Kemenhub, dan catatan audit kualitas data.
 
 10. **Tab 10: Peta Rute OD Interaktif (Origin-Destination)**
     * ID: `tab-od-map`

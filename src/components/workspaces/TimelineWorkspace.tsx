@@ -315,7 +315,7 @@ export const TimelineWorkspace: React.FC<TimelineWorkspaceProps> = ({
             </p>
           </div>
           <div className="text-xs font-mono text-slate-500 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
-            Sumber: SIASATI PUSDATIN
+            Sumber: PUSDATIN Kemenhub
           </div>
         </div>
 

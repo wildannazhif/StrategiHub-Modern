@@ -11,7 +11,7 @@ Aplikasi terdeploy secara otomatis ke GitHub Pages:
 ---
 
 ## 📊 Ringkasan Dataset Resmi 2026 (Hingga 31 Oktober 2026)
-Dashboard ditenagai oleh agregasi 15 endpoint API resmi SIASATI Hubnet Kemenhub (Triwulan 1, 2, dan 3):
+Dashboard ditenagai oleh agregasi 15 endpoint API resmi PUSDATIN Kemenhub (Triwulan 1, 2, dan 3):
 * **Cakupan Waktu:** **304 Hari Kalender Penuh** (1 Januari – 31 Oktober 2026 • 10 Bulan).
 * **Total Baris Data Bersih:** **235.219 baris** tervalidasi setelah deduplikasi dan rekonsiliasi.
 * **Akumulasi Mobilitas Penumpang YTD:** **413.000.942 orang** (Keberangkatan: 232,73M | Kedatangan: 180,27M).

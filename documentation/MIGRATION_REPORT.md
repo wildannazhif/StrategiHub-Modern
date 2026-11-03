@@ -30,7 +30,7 @@ Seluruh 11 modul operasional, model peramalan deret waktu Nataru 100 hari, kalku
 ---
 
 ## 3. Komponen yang Dipertahankan Tanpa Perubahan (Strict Parity)
-1. **Dataset Otoritatif:** Seluruh 221.999 baris data bersih SIASATI 2026 dan 365 hari baseline 2025 tetap menjadi acuan tunggal data.
+1. **Dataset Otoritatif:** Seluruh 221.999 baris data bersih PUSDATIN Kemenhub 2026 dan 365 hari baseline 2025 tetap menjadi acuan tunggal data.
 2. **Model Peramalan Waktu Runtut:** Algoritma Holt-Winters Multiplicative Damped Trend ($\phi=0,98$) dengan musiman mingguan ($s=7$) dan penyesuaian kalender shock Nataru dipertahankan secara matematis.
 3. **Aturan Deduplikasi & Kebijakan Koordinat:** 196 simpul dengan koordinat kosong tetap dilestarikan tanpa imputasi fiktif.
 4. **Simulator Kapasitas:** Formula penambahan armada $\Delta A = A_{puncak} \times (\frac{LF_{puncak}}{LF_{biasa}} - 1)$ menghasilkan angka integer yang sama persis.

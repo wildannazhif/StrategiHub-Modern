@@ -5,7 +5,7 @@
 
 ## 1. Arsitektur Pipeline Pengolahan Data V1
 
-Pipeline pengolahan data V1 berjalan di sisi server/lokal menggunakan Python untuk memproses file mentah CSV dari SIASATI Kemenhub, melakukan deduplikasi, standardisasi, imputasi spasial, komputasi metrik Lebaran, permodelan time series, dan membundel seluruh dataset ke dalam format JSON/HTML:
+Pipeline pengolahan data V1 berjalan di sisi server/lokal menggunakan Python untuk memproses file mentah CSV dari PUSDATIN Kemenhub, melakukan deduplikasi, standardisasi, imputasi spasial, komputasi metrik Lebaran, permodelan time series, dan membundel seluruh dataset ke dalam format JSON/HTML:
 
 ```text
 [Raw Datasets Kemenhub]
