@@ -15,7 +15,9 @@ import {
   Award,
   Calendar,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Users,
+  Mail,
 } from 'lucide-react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -83,6 +85,7 @@ export const GlossaryWorkspace: React.FC = () => {
     { id: 'sec-simulator', label: '6. Simulator Armada' },
     { id: 'sec-gis-od', label: '7. Geospasial, OD & Sankey' },
     { id: 'sec-audit', label: '8. Kualitas Data & Glosarium' },
+    { id: 'sec-credits', label: '9. Credit Pembuat Dashboard' },
   ];
 
   return (
@@ -101,14 +104,10 @@ export const GlossaryWorkspace: React.FC = () => {
               Dokumentasi komprehensif seluruh indikator, formulasi matematis, arsitektur 12 model peramalan (+LightGBM), metodologi train-test holdout, dan audit kualitas data operasional PUSDATIN Kemenhub.
             </p>
           </div>
-
-          <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 self-start sm:self-auto">
-            Dokumen Resmi Versi 2.0 (2026)
-          </span>
         </div>
 
         {/* QUICK NAV PILLS */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+        <div className="flex items-center gap-1.5 flex-wrap pt-1 text-xs">
           <span className="text-slate-400 mr-1 flex-shrink-0 font-semibold text-[11px]">Navigasi Cepat:</span>
           {SECTIONS.map((sec) => (
             <button
@@ -573,6 +572,76 @@ export const GlossaryWorkspace: React.FC = () => {
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 9: CREDIT PEMBUAT DASHBOARD */}
+      {(activeSection === 'all' || activeSection === 'sec-credits') && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 border-l-4 border-indigo-600 pl-3">
+            <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
+              9. Credit Pembuat Dashboard
+            </h3>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-4">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Dashboard analitik intelijen transportasi <strong>StrategiHub Analytics</strong> dikembangkan oleh:
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-xs">
+                    WN
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-slate-900 dark:text-white text-sm">
+                      Wildan Nazhif Irsyadi
+                    </h5>
+                    <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
+                      Pengembang Dashboard
+                    </span>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700/80 text-xs font-mono">
+                  <a
+                    href="mailto:wildannnazhifirsyadi@gmail.com"
+                    className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1.5 transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>wildannnazhifirsyadi@gmail.com</span>
+                  </a>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm shadow-xs">
+                    ND
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-slate-900 dark:text-white text-sm">
+                      Novianda Dwi Tanti Ramdani
+                    </h5>
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      Pengembang Dashboard
+                    </span>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700/80 text-xs font-mono">
+                  <a
+                    href="mailto:noviandadwitantiramdani@gmail.com"
+                    className="text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1.5 transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>noviandadwitantiramdani@gmail.com</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
