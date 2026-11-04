@@ -80,7 +80,7 @@ export const GlossaryWorkspace: React.FC = () => {
     { id: 'sec-metrik', label: '1. Metrik Dasar & Filter' },
     { id: 'sec-load-factor', label: '2. Load Factor & Okupansi' },
     { id: 'sec-lebaran', label: '3. Arus Lebaran & Surge' },
-    { id: 'sec-forecasting-models', label: '4. 12 Model Peramalan (+LightGBM)' },
+    { id: 'sec-forecasting-models', label: '4. 12 Model Peramalan' },
     { id: 'sec-akurasi', label: '5. Metrik Akurasi & Validasi' },
     { id: 'sec-simulator', label: '6. Simulator Armada' },
     { id: 'sec-gis-od', label: '7. Geospasial, OD & Sankey' },
@@ -101,7 +101,7 @@ export const GlossaryWorkspace: React.FC = () => {
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Dokumentasi komprehensif seluruh indikator, formulasi matematis, arsitektur 12 model peramalan (+LightGBM), metodologi train-test holdout, dan audit kualitas data operasional PUSDATIN Kemenhub.
+              Dokumentasi komprehensif seluruh indikator, formulasi matematis, arsitektur 12 model peramalan, metodologi train-test holdout, dan audit kualitas data operasional PUSDATIN Kemenhub.
             </p>
           </div>
         </div>
@@ -238,7 +238,7 @@ export const GlossaryWorkspace: React.FC = () => {
             <div className="flex items-center gap-2">
               <Cpu className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
-                4. Dokumentasi Lengkap 12 Model Peramalan (+LightGBM Juara 1)
+                4. Dokumentasi Lengkap 12 Model Peramalan
               </h3>
             </div>
             <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">

@@ -109,7 +109,7 @@ export default function Home() {
     spatial: 'Peta Spasial',
     od_map: 'Peta Rute OD',
     sankey: 'Diagram Sankey',
-    forecasting: 'Proyeksi Nataru',
+    forecasting: 'Proyeksi Nataru 26/27',
     simulator: 'Simulator Armada',
     glossary: 'Data & Rumus',
   };
