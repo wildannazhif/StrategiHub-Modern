@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal } from '@/lib/constants';
-import { MapPin, Search, Layers, Flame, Info, Filter } from 'lucide-react';
+import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal, BPS_PROVINCE_POPULATION } from '@/lib/constants';
+import { MapPin, Search, Layers, Flame, Info, Filter, Users } from 'lucide-react';
 import { SpatialNode } from '@/types/mobility';
 import provincesGeoJson from '@/data/indonesia_38_provinces.json';
 
@@ -74,6 +74,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     const [selectedNode, setSelectedNode] = useState<any | null>(null);
 
     const [showHeatmap, setShowHeatmap] = useState<boolean>(true);
+    const [heatmapIndicator, setHeatmapIndicator] = useState<'volume' | 'per_capita'>('volume');
     const [showNodes, setShowNodes] = useState<boolean>(true);
     const [mapReady, setMapReady] = useState<boolean>(false);
     const geoJsonData = provincesGeoJson;
@@ -144,10 +145,21 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     return { filteredNodes: finalNodes, totalPoolVol: poolVol };
   }, [nodes, selectedModa, selectedMetric, selectedDirection, selectedScale, searchTerm]);
 
-  // Aggregate Province Statistics for Choropleth Heatmap
-  const { provStats, maxProvVol, nationalVol } = useMemo(() => {
-    const stats: Record<string, { vol: number; count: number; modas: Record<string, number> }> = {};
+  // Aggregate Province Statistics for Choropleth Heatmap (Volume & Rasio per Kapita BPS)
+  const { provStats, maxProvVol, nationalVol, maxProvRatio } = useMemo(() => {
+    const stats: Record<
+      string,
+      {
+        vol: number;
+        pbrg: number;
+        pop: number;
+        ratio: number;
+        count: number;
+        modas: Record<string, number>;
+      }
+    > = {};
     let maxVol = 0;
+    let maxRatio = 0;
     let natVol = 0;
 
     nodes.forEach((n) => {
@@ -157,10 +169,13 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
       if (!pNorm) return;
 
       if (!stats[pNorm]) {
-        stats[pNorm] = { vol: 0, count: 0, modas: {} };
+        const pop = BPS_PROVINCE_POPULATION[pNorm] || 0;
+        stats[pNorm] = { vol: 0, pbrg: 0, pop, ratio: 0, count: 0, modas: {} };
       }
       const val = Number(getNodeVol(n)) || 0;
+      const pbrgVal = Number(n.p_brg ?? n.pnp ?? 0) || 0;
       stats[pNorm].vol += val;
+      stats[pNorm].pbrg += pbrgVal;
       stats[pNorm].count += 1;
       stats[pNorm].modas[moda] = (stats[pNorm].modas[moda] || 0) + val;
       natVol += val;
@@ -168,9 +183,13 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
 
     Object.values(stats).forEach((s) => {
       if (s.vol > maxVol) maxVol = s.vol;
+      if (s.pop > 0) {
+        s.ratio = s.pbrg / s.pop;
+        if (s.ratio > maxRatio) maxRatio = s.ratio;
+      }
     });
 
-    return { provStats: stats, maxProvVol: maxVol, nationalVol: natVol };
+    return { provStats: stats, maxProvVol: maxVol, nationalVol: natVol, maxProvRatio: maxRatio };
   }, [nodes, selectedModa, selectedMetric, selectedDirection]);
 
   // Leaflet Map Initialization and Layer Management
@@ -255,7 +274,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     };
   }, []);
 
-  // 2. CHOROPLETH HEATMAP LAYER (Permanently maintained, updates only on data/metric/theme change)
+  // 2. CHOROPLETH HEATMAP LAYER (Permanently maintained, updates only on data/metric/theme/indicator change)
   useEffect(() => {
     if (!mapReady || typeof window === 'undefined' || !mapInstanceRef.current || !choroplethGroupRef.current) return;
 
@@ -275,8 +294,12 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
         const geoLayer = L.geoJSON(provincesGeoJson, {
           style: (feature: any) => {
             const provName = normalizeProvinceName(feature.properties?.PROVINSI);
-            const stat = provStats[provName] || { vol: 0 };
-            const c = getHeatmapColor(stat.vol, maxProvVol, isDarkMode);
+            const stat = provStats[provName] || { vol: 0, ratio: 0 };
+            const c =
+              heatmapIndicator === 'per_capita'
+                ? getHeatmapColor(stat.ratio, maxProvRatio, isDarkMode)
+                : getHeatmapColor(stat.vol, maxProvVol, isDarkMode);
+
             return {
               fillColor: c.color,
               fillOpacity: c.fillOpacity,
@@ -288,7 +311,14 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           },
           onEachFeature: (feature: any, layer: any) => {
             const provName = normalizeProvinceName(feature.properties?.PROVINSI);
-            const stat = provStats[provName] || { vol: 0, count: 0, modas: {} };
+            const stat = provStats[provName] || {
+              vol: 0,
+              pbrg: 0,
+              pop: BPS_PROVINCE_POPULATION[provName] || 0,
+              ratio: 0,
+              count: 0,
+              modas: {},
+            };
             const sharePct = nationalVol > 0 ? ((stat.vol / nationalVol) * 100).toFixed(1) : '0';
 
             let domModa = '-';
@@ -314,7 +344,32 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
               geoLayer.resetStyle(this);
             });
 
-            const tooltipHtml = `
+            const tooltipHtml =
+              heatmapIndicator === 'per_capita'
+                ? `
+              <div class="p-1.5 text-xs font-sans space-y-1 min-w-[210px]">
+                <div class="font-bold text-slate-900 border-b border-slate-200 pb-1 flex justify-between items-center">
+                  <span>${feature.properties?.PROVINSI}</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">BPS</span>
+                </div>
+                <div class="text-[11px] text-slate-800">
+                  Rasio Mobilitas: <strong class="text-indigo-600 font-mono font-bold">${formatDecimal(stat.ratio, 3)}</strong> trip/jiwa
+                </div>
+                <div class="text-[10.5px] text-slate-600 flex justify-between">
+                  <span>Penumpang Berangkat:</span>
+                  <strong class="font-mono text-slate-800">${formatNumber(stat.pbrg)}</strong>
+                </div>
+                <div class="text-[10.5px] text-slate-600 flex justify-between">
+                  <span>Jumlah Penduduk (BPS):</span>
+                  <strong class="font-mono text-slate-800">${formatNumber(stat.pop)}</strong>
+                </div>
+                <div class="text-[10px] text-slate-400 pt-1 border-t border-slate-100 flex justify-between">
+                  <span>Simpul Operasional:</span>
+                  <span><strong>${stat.count} titik</strong> • ${MODA_DISPLAY_NAME[domModa] || domModa}</span>
+                </div>
+              </div>
+            `
+                : `
               <div class="p-1 text-xs font-sans space-y-1">
                 <div class="font-bold text-slate-900 border-b border-slate-200 pb-0.5">${feature.properties?.PROVINSI}</div>
                 <div class="text-[11px] text-slate-700">
@@ -347,7 +402,17 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     return () => {
       isCancelled = true;
     };
-  }, [mapReady, provStats, maxProvVol, nationalVol, selectedMetric, isDarkMode, showHeatmap]);
+  }, [
+    mapReady,
+    provStats,
+    maxProvVol,
+    maxProvRatio,
+    nationalVol,
+    selectedMetric,
+    isDarkMode,
+    showHeatmap,
+    heatmapIndicator,
+  ]);
 
   // 3. SIMPUL MARKERS LAYER (Updates on filtered nodes / scale / search)
   useEffect(() => {
@@ -483,7 +548,9 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
               ✓ {filteredNodes.length} Simpul Terpetakan
             </span>
             <span className="px-2.5 py-1 bg-indigo-50 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 rounded border border-indigo-200 dark:border-indigo-800 font-semibold">
-              🔥 Heatmap 38 Provinsi
+              {heatmapIndicator === 'per_capita'
+                ? '👥 Rasio Pnp / Penduduk BPS (38 Prov)'
+                : '🔥 Heatmap 38 Provinsi'}
             </span>
           </div>
         </div>
@@ -507,32 +574,63 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
             ))}
           </div>
 
-          {/* Controls: Heatmap Toggle, Nodes Toggle, Scale, Metric, Search */}
+          {/* Controls: Heatmap Toggle, Heatmap Indicator Mode, Nodes Toggle, Scale, Metric, Search */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* LAYER TOGGLES (V1 Feature) */}
-            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <button
-                onClick={() => setShowHeatmap(!showHeatmap)}
-                className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
-                  showHeatmap
-                    ? 'bg-orange-600 text-white shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <Flame className="w-3.5 h-3.5" />
-                <span>Heatmap Wilayah</span>
-              </button>
-              <button
-                onClick={() => setShowNodes(!showNodes)}
-                className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
-                  showNodes
-                    ? 'bg-sky-700 text-white shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <MapPin className="w-3.5 h-3.5" />
-                <span>Titik Simpul</span>
-              </button>
+            {/* LAYER TOGGLES & HEATMAP INDICATOR FILTER */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => setShowHeatmap(!showHeatmap)}
+                  className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
+                    showHeatmap
+                      ? 'bg-orange-600 text-white shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Flame className="w-3.5 h-3.5" />
+                  <span>Heatmap Wilayah</span>
+                </button>
+                <button
+                  onClick={() => setShowNodes(!showNodes)}
+                  className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
+                    showNodes
+                      ? 'bg-sky-700 text-white shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>Titik Simpul</span>
+                </button>
+              </div>
+
+              {/* HEATMAP INDICATOR (Volume vs Pnp Berangkat / Penduduk BPS) */}
+              {showHeatmap && (
+                <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                  <button
+                    onClick={() => setHeatmapIndicator('volume')}
+                    className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
+                      heatmapIndicator === 'volume'
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                    title="Heatmap berdasarkan volume total"
+                  >
+                    <span>Volume Total</span>
+                  </button>
+                  <button
+                    onClick={() => setHeatmapIndicator('per_capita')}
+                    className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
+                      heatmapIndicator === 'per_capita'
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                    title="Heatmap rasio penumpang berangkat terhadap jumlah penduduk provinsi (BPS)"
+                  >
+                    <Users className="w-3.5 h-3.5" />
+                    <span>Pnp Berangkat / Penduduk</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Scale Filter Dropdown (V1 Feature) */}
@@ -571,24 +669,39 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           <div ref={mapContainerRef} style={{ height: '580px', width: '100%' }} />
 
           {/* V1 EXACT INTERACTIVE MAP LEGEND (HEATMAP BAR + SIMPUL DOTS) */}
-          <div className="absolute bottom-3 left-3 z-[500] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-lg space-y-2.5 max-w-[230px]">
+          <div className="absolute bottom-3 left-3 z-[500] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-lg space-y-2.5 max-w-[240px]">
             {/* Heatmap Gradient Bar (Always visible) */}
             <div>
               <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-1 text-[11px]">
                 <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-sky-400 via-emerald-400 to-rose-500" />
-                <span>Heatmap Wilayah:</span>
+                <span>
+                  {heatmapIndicator === 'per_capita' ? 'Heatmap per Kapita:' : 'Heatmap Wilayah:'}
+                </span>
               </div>
               <div className="space-y-1 text-[10px]">
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                  <span>Intensitas:</span>
+                  <span>
+                    {heatmapIndicator === 'per_capita' ? 'Pnp Berangkat / Penduduk' : 'Intensitas:'}
+                  </span>
                   <span className="font-semibold text-slate-700 dark:text-slate-300">Rendah ➔ Puncak</span>
                 </div>
                 <div className="h-2 w-full rounded-sm bg-gradient-to-r from-sky-400 via-cyan-400 via-emerald-400 via-amber-400 to-rose-600" />
                 <div className="flex justify-between text-[9px] text-slate-400 font-mono">
-                  <span>&lt;5%</span>
-                  <span>15%</span>
-                  <span>35%</span>
-                  <span>65%+</span>
+                  {heatmapIndicator === 'per_capita' ? (
+                    <>
+                      <span>&lt;0,3</span>
+                      <span>0,6</span>
+                      <span>1,2</span>
+                      <span>2,5+</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>&lt;5%</span>
+                      <span>15%</span>
+                      <span>35%</span>
+                      <span>65%+</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

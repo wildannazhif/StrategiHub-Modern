@@ -85,3 +85,54 @@ export function formatDateIndo(dateStr: string): string {
   const year = parts[0];
   return `${day} ${monthNames[m]} ${year}`;
 }
+
+/**
+ * Data Jumlah Penduduk 38 Provinsi Indonesia Terbaru
+ * Sumber Resmi: Badan Pusat Statistik (BPS / Statistics Indonesia), Proyeksi Penduduk Interim 2025/2026
+ * Total Nasional: 284,4 Juta Jiwa
+ */
+export const BPS_PROVINCE_POPULATION: Record<string, number> = {
+  'Aceh': 5626000,
+  'Sumatera Utara': 15785800,
+  'Sumatera Barat': 5914300,
+  'Riau': 6811200,
+  'Jambi': 3768500,
+  'Sumatera Selatan': 8928500,
+  'Bengkulu': 2138000,
+  'Lampung': 9522900,
+  'Kepulauan Bangka Belitung': 1550800,
+  'Bangka Belitung': 1550800,
+  'Kepulauan Riau': 2213500,
+  'DKI Jakarta': 10678000,
+  'Jawa Barat': 50759000,
+  'Jawa Tengah': 38233900,
+  'D.I. Yogyakarta': 3781500,
+  'Daerah Istimewa Yogyakarta': 3781500,
+  'Jawa Timur': 42089300,
+  'Banten': 12537400,
+  'Bali': 4461300,
+  'Nusa Tenggara Barat': 5731100,
+  'NTB': 5731100,
+  'Nusa Tenggara Timur': 5742600,
+  'NTT': 5742600,
+  'Kalimantan Barat': 5766000,
+  'Kalimantan Tengah': 2845000,
+  'Kalimantan Selatan': 4323300,
+  'Kalimantan Timur': 4267600,
+  'Kalimantan Utara': 749400,
+  'Sulawesi Utara': 2721400,
+  'Sulawesi Tengah': 3156100,
+  'Sulawesi Selatan': 9563100,
+  'Sulawesi Tenggara': 2836700,
+  'Gorontalo': 1242200,
+  'Sulawesi Barat': 1525300,
+  'Maluku': 1970600,
+  'Maluku Utara': 1373800,
+  'Papua': 1073600,
+  'Papua Barat': 587600,
+  'Papua Selatan': 549700,
+  'Papua Tengah': 1492300,
+  'Papua Pegunungan': 1484900,
+  'Papua Barat Daya': 636400,
+};
+
