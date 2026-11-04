@@ -13,7 +13,7 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
   const [selectedModa, setSelectedModa] = useState<TransportModa>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'pctTambah' | 'pnpPuncak' | 'addArm' | 'loadRatio'>('pctTambah');
+  const [sortBy, setSortBy] = useState<'pctTambah' | 'pnpPuncak' | 'addArm' | 'loadRatio'>('pnpPuncak');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 15;
 
@@ -111,8 +111,8 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
               onChange={(e) => setSortBy(e.target.value as any)}
               className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
             >
-              <option value="pctTambah">Urut: % Tambah Armada (Tertinggi)</option>
               <option value="pnpPuncak">Urut: Volume Puncak (Tertinggi)</option>
+              <option value="pctTambah">Urut: % Tambah Armada (Tertinggi)</option>
               <option value="addArm">Urut: Jumlah Trip Tambahan</option>
               <option value="loadRatio">Urut: Rasio Kenaikan Beban</option>
             </select>
