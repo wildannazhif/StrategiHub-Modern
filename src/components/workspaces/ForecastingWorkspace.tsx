@@ -624,7 +624,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         itemStyle: { color: isDarkMode ? '#f59e0b' : '#d97706', borderRadius: [3, 3, 0, 0] },
       },
       {
-        name: 'Proyeksi Nataru 2026 (Model Terbaik)',
+        name: 'Proyeksi Nataru 26/27 (Model Terbaik)',
         type: 'bar',
         data: val26,
         itemStyle: { color: isDarkMode ? '#818cf8' : '#4f46e5', borderRadius: [3, 3, 0, 0] },
@@ -722,7 +722,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                Proyeksi Mobilitas Multimoda Q4 & Libur Nataru 2026/2027
+                Proyeksi Mobilitas Multimoda Q4 & Libur Nataru 26/27
               </h3>
             </div>
           </div>
@@ -867,7 +867,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         {/* Card 1: Total Volume Nataru */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs">
           <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-            <span>Proyeksi Nataru (18 Hari) {isAllProv ? '(Nasional)' : `(${selectedProv})`}</span>
+            <span>Proyeksi Nataru 26/27 (18 Hari) {isAllProv ? '(Nasional)' : `(${selectedProv})`}</span>
             <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
               18 Des – 4 Jan
             </span>
@@ -1003,7 +1003,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               </div>
 
               <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900 font-mono text-xs">
-                <span className="text-indigo-600 dark:text-indigo-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 2026 (18H):</span>
+                <span className="text-indigo-600 dark:text-indigo-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 26/27 (18H):</span>
                 <div className="font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-0.5">
                   {formatNumber(nataru18Totals.tot26)}
                 </div>
