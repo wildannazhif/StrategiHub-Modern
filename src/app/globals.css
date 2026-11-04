@@ -21,6 +21,20 @@ body {
 }
 
 /* Custom Leaflet Tooltip */
+.leaflet-pane img {
+  max-width: none !important;
+}
+
+.leaflet-custom-node-icon {
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.15s ease-out;
+}
+
+.leaflet-custom-node-icon.top10 {
+  filter: drop-shadow(0 0 3px #f59e0b) drop-shadow(0 0 6px #f59e0b);
+}
+
 .leaflet-custom-tooltip {
   background-color: #0f172a !important;
   color: #ffffff !important;

@@ -1,7 +1,14 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { COLOR, MODA_DISPLAY_NAME, formatNumber, formatDecimal, BPS_PROVINCE_POPULATION } from '@/lib/constants';
+import {
+  COLOR,
+  MODA_DISPLAY_NAME,
+  formatNumber,
+  formatDecimal,
+  BPS_PROVINCE_POPULATION,
+  MODA_CUSTOM_ICONS,
+} from '@/lib/constants';
 import { MapPin, Search, Layers, Flame, Info, Filter, Users } from 'lucide-react';
 import { SpatialNode } from '@/types/mobility';
 import provincesGeoJson from '@/data/indonesia_38_provinces.json';
@@ -452,28 +459,6 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           const maxR = 7.5;
           const radius = nodeVal > 0 ? minR + Math.pow(ratio, 0.45) * (maxR - minR) : 2.5;
 
-          const circle = L.circleMarker([lat, lon], {
-            radius: radius,
-            fillColor: color,
-            color: isTop10 ? '#f59e0b' : '#ffffff',
-            weight: isTop10 ? 1.5 : 0.8,
-            opacity: 1.0,
-            fillOpacity: 0.92,
-          });
-
-          // Interactive hover (grows subtly by 2px, does not blow up)
-          circle.on('mouseover', function (this: any) {
-            this.setStyle({ weight: 2.2, fillOpacity: 1.0, radius: radius + 2.0 });
-            this.bringToFront();
-          });
-          circle.on('mouseout', function (this: any) {
-            this.setStyle({ weight: isTop10 ? 1.5 : 0.8, fillOpacity: 0.92, radius: radius });
-          });
-
-          circle.on('click', () => {
-            setSelectedNode({ ...node, rank: rankIdx + 1 });
-          });
-
           const rankBadge = isTop10
             ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Top #${
                 rankIdx + 1
@@ -483,10 +468,16 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           const shareOfTotal =
             totalPoolVol > 0 ? `${((nodeVal / totalPoolVol) * 100).toFixed(2)}%` : '0%';
 
+          const customIconUrl = (MODA_CUSTOM_ICONS as any)[modaKey];
+
+          const popupHeaderIcon = customIconUrl
+            ? `<img src="${customIconUrl}" class="w-4 h-4 rounded-xs shrink-0" alt="${modaKey}" />`
+            : `<span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></span>`;
+
           const popupHtml = `
             <div class="p-1 space-y-1.5 max-w-[220px]">
               <div class="flex items-center gap-1.5 border-b border-slate-200 pb-1">
-                <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></span>
+                ${popupHeaderIcon}
                 <strong class="text-slate-900 font-sans text-xs">${nodeName}</strong>
               </div>
               <div class="flex justify-between items-center text-[10px] text-slate-500 font-mono">
@@ -510,8 +501,74 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
             </div>
           `;
 
-          circle.bindPopup(popupHtml);
-          markerGroup.addLayer(circle);
+          // Mode penyebrangan (ASDP): TETAP TITIK
+          if (modaKey === 'ASDP' || !customIconUrl) {
+            const circle = L.circleMarker([lat, lon], {
+              radius: radius,
+              fillColor: color,
+              color: isTop10 ? '#f59e0b' : '#ffffff',
+              weight: isTop10 ? 1.8 : 0.8,
+              opacity: 1.0,
+              fillOpacity: 0.92,
+            });
+
+            circle.on('mouseover', function (this: any) {
+              this.setStyle({ weight: 2.2, fillOpacity: 1.0, radius: radius + 2.0 });
+              this.bringToFront();
+            });
+            circle.on('mouseout', function (this: any) {
+              this.setStyle({ weight: isTop10 ? 1.8 : 0.8, fillOpacity: 0.92, radius: radius });
+            });
+            circle.on('click', () => {
+              setSelectedNode({ ...node, rank: rankIdx + 1 });
+            });
+
+            circle.bindPopup(popupHtml);
+            markerGroup.addLayer(circle);
+          } else {
+            // Mode Kereta (KA), Udara (UDARA), Laut (LAUT), Jalan (BUS): CUSTOM SVG ICON
+            const baseSize = isTop10 ? 22 : nodeVal > 0 ? 14 + Math.pow(ratio, 0.45) * 5 : 13;
+            const size = Math.round(baseSize);
+
+            const icon = L.icon({
+              iconUrl: customIconUrl,
+              iconSize: [size, size],
+              iconAnchor: [size / 2, size / 2],
+              popupAnchor: [0, -size / 2],
+              className: isTop10 ? 'leaflet-custom-node-icon top10' : 'leaflet-custom-node-icon',
+            });
+
+            const marker = L.marker([lat, lon], {
+              icon: icon,
+              opacity: 0.96,
+              riseOnHover: true,
+            });
+
+            const hoverSize = size + 4;
+            marker.on('mouseover', function (this: any) {
+              this.setIcon(
+                L.icon({
+                  iconUrl: customIconUrl,
+                  iconSize: [hoverSize, hoverSize],
+                  iconAnchor: [hoverSize / 2, hoverSize / 2],
+                  popupAnchor: [0, -hoverSize / 2],
+                  className: isTop10 ? 'leaflet-custom-node-icon top10' : 'leaflet-custom-node-icon',
+                })
+              );
+              this.setZIndexOffset(1000);
+            });
+            marker.on('mouseout', function (this: any) {
+              this.setIcon(icon);
+              this.setZIndexOffset(0);
+            });
+
+            marker.on('click', () => {
+              setSelectedNode({ ...node, rank: rankIdx + 1 });
+            });
+
+            marker.bindPopup(popupHtml);
+            markerGroup.addLayer(marker);
+          }
         });
       }
 
@@ -706,19 +763,27 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
               </div>
             </div>
 
-            {/* Simpul Dots Legend (Neat, tiny GIS dots) */}
+            {/* Simpul per Moda Legend */}
             <div className="border-t border-slate-200 dark:border-slate-800 pt-2">
               <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-1 text-[11px]">
                 <span className="w-2 rounded-full bg-emerald-500" />
                 <span>Titik Simpul per Moda:</span>
               </div>
-              <div className="space-y-0.5 text-[10px]">
+              <div className="space-y-1 text-[10px]">
                 {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => (
                   <div key={m} className="flex items-center gap-1.5">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0 border border-white dark:border-slate-800"
-                      style={{ backgroundColor: COLOR[m] }}
-                    />
+                    {(MODA_CUSTOM_ICONS as any)[m] ? (
+                      <img
+                        src={(MODA_CUSTOM_ICONS as any)[m]}
+                        alt={m}
+                        className="w-3.5 h-3.5 rounded shrink-0 shadow-2xs"
+                      />
+                    ) : (
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0 border border-white dark:border-slate-800"
+                        style={{ backgroundColor: (COLOR as any)[m] }}
+                      />
+                    )}
                     <span className="text-slate-600 dark:text-slate-300">
                       {MODA_DISPLAY_NAME[m]} ({nodes.filter((n) => (n.m || n.moda) === m).length})
                     </span>
@@ -752,13 +817,30 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 font-mono text-xs">
                   <div>
                     <span className="text-[10px] text-slate-400 font-sans">Moda:</span>
-                    <div className="font-bold text-slate-800 dark:text-slate-200">
-                      {MODA_DISPLAY_NAME[selectedNode.m || selectedNode.moda] || selectedNode.m}
+                    <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mt-0.5">
+                      {(MODA_CUSTOM_ICONS as any)[selectedNode.m || selectedNode.moda] ? (
+                        <img
+                          src={(MODA_CUSTOM_ICONS as any)[selectedNode.m || selectedNode.moda]}
+                          alt=""
+                          className="w-4 h-4 rounded shrink-0 shadow-2xs"
+                        />
+                      ) : (
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{
+                            backgroundColor:
+                              (COLOR as any)[selectedNode.m || selectedNode.moda] || '#9333ea',
+                          }}
+                        />
+                      )}
+                      <span>
+                        {MODA_DISPLAY_NAME[selectedNode.m || selectedNode.moda] || selectedNode.m}
+                      </span>
                     </div>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 font-sans">Tipe:</span>
-                    <div className="text-slate-600 dark:text-slate-400 truncate">{selectedNode.tipe || '-'}</div>
+                    <div className="text-slate-600 dark:text-slate-400 truncate mt-0.5">{selectedNode.tipe || '-'}</div>
                   </div>
                 </div>
 
