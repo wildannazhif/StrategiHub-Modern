@@ -112,7 +112,7 @@ export default function Home() {
     sankey: 'Diagram Sankey',
     forecasting_lebaran: 'Proyeksi Lebaran 2027',
     forecasting: 'Proyeksi Nataru 26/27',
-    simulator: 'Simulator Armada',
+    simulator: 'Rekomendasi Armada',
     glossary: 'Data & Rumus',
   };
 

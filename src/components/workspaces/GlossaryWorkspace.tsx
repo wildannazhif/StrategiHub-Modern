@@ -81,9 +81,9 @@ export const GlossaryWorkspace: React.FC = () => {
     { id: 'sec-load-factor', label: '2. Load Factor & Okupansi' },
     { id: 'sec-lebaran', label: '3. Arus Lebaran & Surge' },
     { id: 'sec-forecasting-models', label: '4. 12 Model Peramalan' },
-    { id: 'sec-akurasi', label: '5. Metrik Akurasi & Validasi' },
-    { id: 'sec-simulator', label: '6. Simulator Armada' },
-    { id: 'sec-gis-od', label: '7. Geospasial, OD & Sankey' },
+    { id: 'sec-spatial', label: '5. Peta Spasial' },
+    { id: 'sec-simulator', label: '6. Rekomendasi Armada' },
+    { id: 'sec-od', label: '7. Analisis Rute OD' },
     { id: 'sec-audit', label: '8. Kualitas Data & Glosarium' },
     { id: 'sec-credits', label: '9. Credit Pembuat Dashboard' },
   ];
@@ -432,7 +432,7 @@ export const GlossaryWorkspace: React.FC = () => {
           <div className="flex items-center gap-2 border-l-4 border-indigo-600 pl-3">
             <Calculator className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
-              6. Formula Simulator Kebutuhan Penambahan Armada Simpul (Anti-Overcrowding)
+              6. Formula Rekomendasi Kebutuhan Penambahan Armada Simpul (Anti-Overcrowding)
             </h3>
           </div>
 

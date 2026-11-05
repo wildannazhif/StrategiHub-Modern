@@ -60,11 +60,11 @@ export const SimulatorWorkspace: React.FC<SimulatorWorkspaceProps> = ({ simpulLi
             <div className="flex items-center gap-2">
               <Sliders className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                Simulator Kebutuhan Penambahan Armada Prasarana & Simpul Nasional
+                Rekomendasi Kebutuhan Penambahan Armada Prasarana & Simpul Nasional
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Menghitung simulasi penambahan armada angkutan agar rasio beban hari puncak setara dengan hari normal (Total: <strong>1.010 Simpul</strong>).
+              Menghitung rekomendasi penambahan armada angkutan agar rasio beban hari puncak setara dengan hari normal (Total: <strong>1.010 Simpul</strong>).
             </p>
           </div>
         </div>
