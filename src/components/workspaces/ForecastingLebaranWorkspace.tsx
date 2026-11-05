@@ -471,7 +471,7 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
     const rawList = forecastData?.lebaran_17days_comparison || [];
     if (!rawList || rawList.length === 0) return null;
 
-    const xLabels = rawList.map((r: any) => r.day_month || r.label);
+    const xLabels = rawList.map((r: any) => r.tag || r.day_h || r.label);
 
     const val25 = rawList.map((r: any) => {
       if (!isOperating) return 0;
@@ -529,18 +529,18 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
           if (!params || params.length === 0) return '';
           const idx = params[0].dataIndex;
           const r = rawList[idx];
-          const md = r?.day_month || '';
-          const tag = r?.tag || '';
+          const tag = r?.tag || r?.day_h || '';
+          const d24 = r?.date_2024 || '';
           const d25 = r?.date_2025 || '';
           const d26 = r?.date_2026 || '';
           const d27 = r?.date_2027 || '';
 
           let html = `<div style="font-weight:700;font-size:12px;padding-bottom:5px;margin-bottom:6px;border-bottom:1px solid ${isDarkMode ? '#334155' : '#e2e8f0'}">
-            📅 Tanggal: ${md} (${tag})
+            🌙 Posko: ${tag}
           </div>`;
 
           params.forEach((p: any) => {
-            const dateStr = p.seriesName.includes('2025') ? d25 : p.seriesName.includes('2026') ? d26 : d27;
+            const dateStr = p.seriesName.includes('2024') ? d24 : p.seriesName.includes('2025') ? d25 : p.seriesName.includes('2026') ? d26 : d27;
             html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;font-family:monospace;font-size:11px;padding:2px 0;">
               <span style="display:flex;align-items:center;gap:6px;">
                 <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${p.color};"></span>
@@ -557,12 +557,24 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
         textStyle: { color: isDarkMode ? '#cbd5e1' : '#475569', fontSize: 11 },
         itemGap: 16,
       },
-      grid: { top: 25, right: 15, bottom: 45, left: 65 },
+      grid: {
+        top: 25,
+        left: '2%',
+        right: '2%',
+        bottom: 55,
+        containLabel: true,
+      },
       xAxis: {
         type: 'category',
         data: xLabels,
         axisLine: { lineStyle: { color: isDarkMode ? '#475569' : '#cbd5e1' } },
-        axisLabel: { color: isDarkMode ? '#94a3b8' : '#64748b', fontSize: 10, rotate: 25 },
+        axisLabel: {
+          show: true,
+          interval: 0,
+          color: isDarkMode ? '#e2e8f0' : '#1e293b',
+          fontSize: 11,
+          fontWeight: 600,
+        },
       },
       yAxis: {
         type: 'value',
@@ -883,10 +895,10 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
               <h4 className="font-bold text-slate-900 dark:text-white text-sm">
                 Komparasi 17 Hari Posko: Realisasi Lebaran 2025 vs Realisasi 2026 vs Proyeksi Lebaran 2027
               </h4>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Perbandingan harian antartahun periode H-8 s.d. H+8 (Lebaran 2025: 23 Mar – 8 Apr, Lebaran 2026: 13 – 29 Mar, Lebaran 2027: 2 – 18 Mar).
-            </p>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+              Penyesuaian hari H tiap tahunnya (2024: 10 Apr, 2025: 31 Mar, 2026: 21 Mar, 2027: 10 Mar) tersinkronisasi presisi dari H-8 s.d. H+8.
+              </p>
           </div>
 
           <div className="flex items-center gap-2">
