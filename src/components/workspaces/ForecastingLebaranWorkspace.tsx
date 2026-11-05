@@ -473,6 +473,14 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
 
     const xLabels = rawList.map((r: any) => r.tag || r.day_h || r.label);
 
+    const val24 = rawList.map((r: any) => {
+      if (!isOperating) return 0;
+      if (selectedModa === 'TOTAL') {
+        return selectedMetric === 'pnp' ? (r.pbrg_2024 || r.pnp_2024 || 0) : (r.abrg_2024 || r.arm_2024 || 0);
+      }
+      return selectedMetric === 'pnp' ? (r[`pbrg_${selectedModa}_2024`] || r[`${selectedModa}_2024`] || 0) : (r[`abrg_${selectedModa}_2024`] || r[`arm_${selectedModa}_2024`] || 0);
+    });
+
     const val25 = rawList.map((r: any) => {
       if (!isOperating) return 0;
       if (selectedModa === 'TOTAL') {
@@ -499,10 +507,16 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
 
     const series = [
       {
+        name: 'Realisasi Lebaran 2024',
+        type: 'bar',
+        data: val24,
+        itemStyle: { color: isDarkMode ? '#64748b' : '#94a3b8', borderRadius: [3, 3, 0, 0] },
+      },
+      {
         name: 'Realisasi Lebaran 2025',
         type: 'bar',
         data: val25,
-        itemStyle: { color: isDarkMode ? '#64748b' : '#94a3b8', borderRadius: [3, 3, 0, 0] },
+        itemStyle: { color: isDarkMode ? '#38bdf8' : '#0284c7', borderRadius: [3, 3, 0, 0] },
       },
       {
         name: 'Realisasi Lebaran 2026',
@@ -893,12 +907,12 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                Komparasi 17 Hari Posko: Realisasi Lebaran 2025 vs Realisasi 2026 vs Proyeksi Lebaran 2027
+                Komparasi 17 Hari Posko: Realisasi Lebaran 2024 vs 2025 vs 2026 vs Proyeksi Lebaran 2027
               </h4>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
               Penyesuaian hari H tiap tahunnya (2024: 10 Apr, 2025: 31 Mar, 2026: 21 Mar, 2027: 10 Mar) tersinkronisasi presisi dari H-8 s.d. H+8.
-              </p>
+            </p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -926,14 +940,22 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
 
         {!isLebaranBarMinimized && (
           <>
-            {/* 4 Summary Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+            {/* 5 Summary Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
-                <span className="text-slate-400 font-sans text-[11px] block">Total Lebaran 2025 (17H):</span>
-                <div className="font-bold text-slate-600 dark:text-slate-300 text-sm mt-0.5">
+                <span className="text-slate-400 font-sans text-[11px] block">Total Lebaran 2024 (17H):</span>
+                <div className="font-bold text-slate-500 dark:text-slate-400 text-sm mt-0.5">
+                  17.290.670
+                </div>
+                <span className="text-[10px] text-slate-400 font-sans">Realisasi 2024</span>
+              </div>
+
+              <div className="p-2.5 rounded-lg bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 font-mono text-xs">
+                <span className="text-sky-700 dark:text-sky-400 font-sans text-[11px] block font-semibold">Total Lebaran 2025 (17H):</span>
+                <div className="font-bold text-sky-800 dark:text-sky-300 text-sm mt-0.5">
                   18.101.658
                 </div>
-                <span className="text-[10px] text-slate-400 font-sans">Realisasi 2025</span>
+                <span className="text-[10px] text-sky-700 dark:text-sky-400 font-sans font-semibold">Realisasi 2025 (+4,7%)</span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 font-mono text-xs">
@@ -949,10 +971,10 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
                 <div className="font-bold text-emerald-700 dark:text-emerald-300 text-sm mt-0.5">
                   {formatNumber(kpis.fc17Tot)}
                 </div>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-sans font-semibold">Model Terbaik (+2,5% YoY)</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-sans font-semibold">Model Terbaik (+2,4% YoY)</span>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
+              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs col-span-2 sm:col-span-1">
                 <span className="text-slate-400 font-sans text-[11px] block">Puncak Mudik (H-3):</span>
                 <div className="font-bold text-rose-600 dark:text-rose-400 text-sm mt-0.5">
                   7 Mar • {formatNumber(kpis.mudikVal)}
