@@ -1,0 +1,110 @@
+{
+  "1. LightGBM Regressor (Model Terpilih)": {
+    "MAPE (%)": 3.29,
+    "WAPE (%)": 3.24,
+    "RMSE": 59271,
+    "MAE": 40241,
+    "Max Error": 135400,
+    "Direction Acc (%)": 89.3,
+    "Waktu (dtk)": 0.082
+  },
+  "2. Holt-Winters Mul Standar": {
+    "MAPE (%)": 3.8,
+    "WAPE (%)": 3.89,
+    "RMSE": 63185,
+    "MAE": 47535,
+    "Max Error": 132348,
+    "Direction Acc (%)": 89.3,
+    "Waktu (dtk)": 0.126
+  },
+  "3. Holt-Winters Mul Damped": {
+    "MAPE (%)": 4.1,
+    "WAPE (%)": 4.02,
+    "RMSE": 62051,
+    "MAE": 49146,
+    "Max Error": 142320,
+    "Direction Acc (%)": 89.3,
+    "Waktu (dtk)": 0.152
+  },
+  "4. Holt-Winters Additive Damped": {
+    "MAPE (%)": 4.15,
+    "WAPE (%)": 4.07,
+    "RMSE": 63601,
+    "MAE": 49672,
+    "Max Error": 180080,
+    "Direction Acc (%)": 89.3,
+    "Waktu (dtk)": 0.122
+  },
+  "5. SARIMA (1,1,1)x(1,1,1,7)": {
+    "MAPE (%)": 5.87,
+    "WAPE (%)": 5.94,
+    "RMSE": 83614,
+    "MAE": 72529,
+    "Max Error": 210400,
+    "Direction Acc (%)": 57.1,
+    "Waktu (dtk)": 0.245
+  },
+  "6. Simple Exp Smoothing (SES)": {
+    "MAPE (%)": 6.14,
+    "WAPE (%)": 6.37,
+    "RMSE": 99790,
+    "MAE": 77797,
+    "Max Error": 245100,
+    "Direction Acc (%)": 3.6,
+    "Waktu (dtk)": 0.042
+  },
+  "7. Naive / Random Walk (Lag 1)": {
+    "MAPE (%)": 7.1,
+    "WAPE (%)": 7.48,
+    "RMSE": 118759,
+    "MAE": 91365,
+    "Max Error": 278000,
+    "Direction Acc (%)": 0.0,
+    "Waktu (dtk)": 0.001
+  },
+  "8. Holt's Linear Trend (No Seasonal)": {
+    "MAPE (%)": 8.86,
+    "WAPE (%)": 9.27,
+    "RMSE": 143307,
+    "MAE": 113258,
+    "Max Error": 312000,
+    "Direction Acc (%)": 50.0,
+    "Waktu (dtk)": 0.038
+  },
+  "9. Seasonal Naive (Lag 7)": {
+    "MAPE (%)": 9.17,
+    "WAPE (%)": 8.93,
+    "RMSE": 134838,
+    "MAE": 109005,
+    "Max Error": 295000,
+    "Direction Acc (%)": 75.0,
+    "Waktu (dtk)": 0.002
+  },
+  "10. 7-Day Moving Average": {
+    "MAPE (%)": 10.55,
+    "WAPE (%)": 10.11,
+    "RMSE": 141982,
+    "MAE": 123434,
+    "Max Error": 320000,
+    "Direction Acc (%)": 3.6,
+    "Waktu (dtk)": 0.005
+  },
+  "11. ARIMA (1,1,1) Non-Seasonal": {
+    "MAPE (%)": 11.17,
+    "WAPE (%)": 10.73,
+    "RMSE": 151818,
+    "MAE": 131008,
+    "Max Error": 335000,
+    "Direction Acc (%)": 53.6,
+    "Waktu (dtk)": 0.098
+  },
+  "12. Linear Regression (Trend + DOW)": {
+    "MAPE (%)": 16.76,
+    "WAPE (%)": 16.47,
+    "RMSE": 208674,
+    "MAE": 201091,
+    "Max Error": 410000,
+    "Direction Acc (%)": 89.3,
+    "Waktu (dtk)": 0.015
+  }
+}
