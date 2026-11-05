@@ -73,12 +73,27 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     const markerGroupRef = useRef<any>(null);
     const choroplethGroupRef = useRef<any>(null);
 
-    const [selectedModa, setSelectedModa] = useState<string>('ALL');
+    const [selectedModas, setSelectedModas] = useState<string[]>(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT']);
     const selectedMetric = globalMetric;
     const selectedDirection = globalDirection;
     const [selectedScale, setSelectedScale] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [selectedNode, setSelectedNode] = useState<any | null>(null);
+
+    const toggleModa = (m: string) => {
+      setSelectedModas((prev) => {
+        let next: string[];
+        if (prev.includes(m)) {
+          next = prev.filter((item) => item !== m);
+        } else {
+          next = [...prev, m];
+        }
+        if (selectedNode && !next.includes(selectedNode.m || selectedNode.moda)) {
+          setSelectedNode(null);
+        }
+        return next;
+      });
+    };
 
     const [showHeatmap, setShowHeatmap] = useState<boolean>(true);
     const [heatmapIndicator, setHeatmapIndicator] = useState<'volume' | 'per_capita'>('volume');
@@ -102,10 +117,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
       (n) => n.lat !== null && n.lon !== null && n.lat !== undefined && n.lon !== undefined && !isNaN(Number(n.lat))
     );
 
-    let list = pool;
-    if (selectedModa !== 'ALL') {
-      list = list.filter((n) => (n.m || n.moda) === selectedModa);
-    }
+    let list = pool.filter((n) => selectedModas.includes(n.m || n.moda));
 
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
@@ -150,9 +162,9 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     }
 
     return { filteredNodes: finalNodes, totalPoolVol: poolVol };
-  }, [nodes, selectedModa, selectedMetric, selectedDirection, selectedScale, searchTerm]);
+  }, [nodes, selectedModas, selectedMetric, selectedDirection, selectedScale, searchTerm]);
 
-  // Aggregate Province Statistics for Choropleth Heatmap (Volume & Rasio per Kapita BPS)
+  // Dynamic Provincial Mobility Aggregation (For Choropleth Heatmap, dynamically responds to modes & metric)
   const { provStats, maxProvVol, nationalVol, maxProvRatio } = useMemo(() => {
     const stats: Record<
       string,
@@ -171,7 +183,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
 
     nodes.forEach((n) => {
       const moda = n.m || n.moda;
-      if (selectedModa !== 'ALL' && moda !== selectedModa) return;
+      if (!selectedModas.includes(moda)) return;
       const pNorm = normalizeProvinceName(n.p || n.prov);
       if (!pNorm) return;
 
@@ -197,7 +209,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
     });
 
     return { provStats: stats, maxProvVol: maxVol, nationalVol: natVol, maxProvRatio: maxRatio };
-  }, [nodes, selectedModa, selectedMetric, selectedDirection]);
+  }, [nodes, selectedModas, selectedMetric, selectedDirection]);
 
   // Leaflet Map Initialization and Layer Management
   // 1. LEAFLET MAP INITIALIZATION (Runs once on mount, persistent lifecycle)
@@ -612,83 +624,67 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* MODA SELECTOR, LAYER TOGGLES, METRIC, AND SCALE */}
+        {/* LAYER TOGGLES, METRIC, AND SCALE */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-          {/* Moda Tabs */}
+          {/* Controls: Heatmap Toggle, Heatmap Indicator Mode, Nodes Toggle, Scale, Search */}
           <div className="flex flex-wrap items-center gap-1.5">
-            {(['ALL', 'UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => (
+            <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <button
-                key={m}
-                onClick={() => setSelectedModa(m)}
-                className={`px-2.5 py-1 rounded-md font-medium border ${
-                  selectedModa === m
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold shadow-2xs'
-                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'
+                onClick={() => setShowHeatmap(!showHeatmap)}
+                className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
+                  showHeatmap
+                    ? 'bg-orange-600 text-white shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                {MODA_DISPLAY_NAME[m]}
+                <Flame className="w-3.5 h-3.5" />
+                <span>Heatmap Wilayah</span>
               </button>
-            ))}
-          </div>
+              <button
+                onClick={() => setShowNodes(!showNodes)}
+                className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
+                  showNodes
+                    ? 'bg-sky-700 text-white shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                <span>Titik Simpul</span>
+              </button>
+            </div>
 
-          {/* Controls: Heatmap Toggle, Heatmap Indicator Mode, Nodes Toggle, Scale, Metric, Search */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* LAYER TOGGLES & HEATMAP INDICATOR FILTER */}
-            <div className="flex flex-wrap items-center gap-1.5">
+            {/* HEATMAP INDICATOR (Volume vs Pnp Berangkat / Penduduk BPS) */}
+            {showHeatmap && (
               <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                 <button
-                  onClick={() => setShowHeatmap(!showHeatmap)}
+                  onClick={() => setHeatmapIndicator('volume')}
                   className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
-                    showHeatmap
-                      ? 'bg-orange-600 text-white shadow-2xs'
+                    heatmapIndicator === 'volume'
+                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
                       : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                   }`}
+                  title="Heatmap berdasarkan volume total"
                 >
-                  <Flame className="w-3.5 h-3.5" />
-                  <span>Heatmap Wilayah</span>
+                  <span>Volume Total</span>
                 </button>
                 <button
-                  onClick={() => setShowNodes(!showNodes)}
+                  onClick={() => setHeatmapIndicator('per_capita')}
                   className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
-                    showNodes
-                      ? 'bg-sky-700 text-white shadow-2xs'
+                    heatmapIndicator === 'per_capita'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
                       : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                   }`}
+                  title="Heatmap rasio penumpang berangkat terhadap jumlah penduduk provinsi (BPS)"
                 >
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>Titik Simpul</span>
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Pnp Berangkat / Penduduk</span>
                 </button>
               </div>
+            )}
+          </div>
 
-              {/* HEATMAP INDICATOR (Volume vs Pnp Berangkat / Penduduk BPS) */}
-              {showHeatmap && (
-                <div className="flex items-center rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                  <button
-                    onClick={() => setHeatmapIndicator('volume')}
-                    className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
-                      heatmapIndicator === 'volume'
-                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                    title="Heatmap berdasarkan volume total"
-                  >
-                    <span>Volume Total</span>
-                  </button>
-                  <button
-                    onClick={() => setHeatmapIndicator('per_capita')}
-                    className={`px-2.5 py-1 rounded-md font-semibold flex items-center gap-1 transition-colors ${
-                      heatmapIndicator === 'per_capita'
-                        ? 'bg-indigo-600 text-white shadow-2xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                    title="Heatmap rasio penumpang berangkat terhadap jumlah penduduk provinsi (BPS)"
-                  >
-                    <Users className="w-3.5 h-3.5" />
-                    <span>Pnp Berangkat / Penduduk</span>
-                  </button>
-                </div>
-              )}
-            </div>
+          {/* Scale Filter & Search */}
+          <div className="flex flex-wrap items-center gap-2">
 
             {/* Scale Filter Dropdown (V1 Feature) */}
             <select
@@ -725,8 +721,12 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
         <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs relative isolate z-0">
           <div ref={mapContainerRef} style={{ height: '580px', width: '100%' }} />
 
-          {/* V1 EXACT INTERACTIVE MAP LEGEND (HEATMAP BAR + SIMPUL DOTS) */}
-          <div className="absolute bottom-3 left-3 z-[500] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-lg space-y-2.5 max-w-[240px]">
+          {/* V1 EXACT INTERACTIVE MAP LEGEND (HEATMAP BAR + SIMPUL MODA FILTER CLICKS) */}
+          <div
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            className="absolute bottom-3 left-3 z-[500] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] shadow-lg space-y-2.5 w-64 max-w-[270px]"
+          >
             {/* Heatmap Gradient Bar (Always visible) */}
             <div>
               <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-1 text-[11px]">
@@ -763,32 +763,81 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
               </div>
             </div>
 
-            {/* Simpul per Moda Legend */}
+            {/* Simpul per Moda Legend & Interactive Filter */}
             <div className="border-t border-slate-200 dark:border-slate-800 pt-2">
-              <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 mb-1 text-[11px]">
-                <span className="w-2 rounded-full bg-emerald-500" />
-                <span>Titik Simpul per Moda:</span>
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 text-[11px]">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span>Filter Moda Simpul:</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (selectedModas.length === 5) {
+                      setSelectedModas([]);
+                    } else {
+                      setSelectedModas(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT']);
+                    }
+                  }}
+                  className="text-[10px] font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
+                  title={selectedModas.length === 5 ? 'Nonaktifkan Semua' : 'Aktifkan Semua'}
+                >
+                  {selectedModas.length === 5 ? 'Nonaktifkan' : 'Semua'}
+                </button>
               </div>
+
               <div className="space-y-1 text-[10px]">
-                {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => (
-                  <div key={m} className="flex items-center gap-1.5">
-                    {(MODA_CUSTOM_ICONS as any)[m] ? (
-                      <img
-                        src={(MODA_CUSTOM_ICONS as any)[m]}
-                        alt={m}
-                        className="w-3.5 h-3.5 rounded shrink-0 shadow-2xs"
-                      />
-                    ) : (
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0 border border-white dark:border-slate-800"
-                        style={{ backgroundColor: (COLOR as any)[m] }}
-                      />
-                    )}
-                    <span className="text-slate-600 dark:text-slate-300">
-                      {MODA_DISPLAY_NAME[m]} ({nodes.filter((n) => (n.m || n.moda) === m).length})
-                    </span>
-                  </div>
-                ))}
+                {(['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const).map((m) => {
+                  const isActive = selectedModas.includes(m);
+                  const count = nodes.filter((n) => (n.m || n.moda) === m).length;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleModa(m);
+                      }}
+                      className={`w-full flex items-center justify-between gap-1.5 px-2 py-1 rounded transition-all text-left ${
+                        isActive
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          : 'opacity-40 hover:opacity-75 text-slate-400 dark:text-slate-500 hover:bg-slate-100/50 dark:hover:bg-slate-800/50'
+                      }`}
+                      title={`${isActive ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'} ${MODA_DISPLAY_NAME[m]}`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {(MODA_CUSTOM_ICONS as any)[m] ? (
+                          <img
+                            src={(MODA_CUSTOM_ICONS as any)[m]}
+                            alt={m}
+                            className={`w-3.5 h-3.5 rounded shrink-0 shadow-2xs transition-all ${
+                              !isActive ? 'grayscale' : ''
+                            }`}
+                          />
+                        ) : (
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 border border-white dark:border-slate-800"
+                            style={{ backgroundColor: (COLOR as any)[m] }}
+                          />
+                        )}
+                        <span className={`text-[10px] font-medium truncate ${!isActive ? 'line-through' : ''}`}>
+                          {MODA_DISPLAY_NAME[m]}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 font-mono text-[9px]">
+                        <span className="text-slate-500 dark:text-slate-400">({count})</span>
+                        <span
+                          className={`w-4 text-center font-bold text-[10px] ${
+                            isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'
+                          }`}
+                        >
+                          {isActive ? '✓' : '✕'}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
