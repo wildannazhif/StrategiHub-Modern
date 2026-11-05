@@ -16,7 +16,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'StrategiHub Analytics 2026 V2 • Pusat Data dan Informasi Kemenhub',
+  title: 'StrategiHub Analytics 2026 • Pusat Data dan Informasi Kemenhub',
   description:
     'Dashboard Terpadu Pemantauan Mobilitas Angkutan Penumpang Multimoda Nasional & Model Peramalan Nataru 2026/2027.',
 };

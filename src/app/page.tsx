@@ -95,8 +95,8 @@ export default function Home() {
         <div className="w-12 h-12 rounded-xl bg-sky-900 text-white flex items-center justify-center font-bold text-lg mb-4 animate-pulse">
           SH
         </div>
-        <h2 className="text-base font-bold tracking-tight">Memuat StrategiHub Analytics 2026 V2...</h2>
-        <p className="text-xs text-slate-400 mt-1 font-mono">Verifikasi 221.999 Baris Bersih & Model Peramalan Nataru</p>
+        <h2 className="text-base font-bold tracking-tight">Memuat StrategiHub Analytics 2026...</h2>
+        <p className="text-xs text-slate-400 mt-1 font-mono">Verifikasi 235.219 Baris Bersih & Model Peramalan</p>
       </div>
     );
   }
