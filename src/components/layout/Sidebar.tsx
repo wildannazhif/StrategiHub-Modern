@@ -23,6 +23,7 @@ export type TabId =
   | 'tophubs'
   | 'matrix'
   | 'spatial'
+  | 'forecasting_lebaran'
   | 'forecasting'
   | 'simulator'
   | 'od_map'
@@ -71,6 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen
     {
       groupName: 'PREDIKSI & SIMULASI',
       items: [
+        { id: 'forecasting_lebaran', label: 'Proyeksi Lebaran 2027', icon: <Flame className="w-4 h-4 text-emerald-500" /> },
         { id: 'forecasting', label: 'Proyeksi Nataru 26/27', icon: <TrendingUp className="w-4 h-4 text-amber-500" /> },
         { id: 'simulator', label: 'Simulator Armada', icon: <Sliders className="w-4 h-4 text-purple-500" /> },
       ],

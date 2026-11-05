@@ -11,6 +11,7 @@ import { TopHubsWorkspace } from '@/components/workspaces/TopHubsWorkspace';
 import { MatrixWorkspace } from '@/components/workspaces/MatrixWorkspace';
 import { SpatialMapWorkspace } from '@/components/workspaces/SpatialMapWorkspace';
 import { ForecastingWorkspace } from '@/components/workspaces/ForecastingWorkspace';
+import { ForecastingLebaranWorkspace } from '@/components/workspaces/ForecastingLebaranWorkspace';
 import { SimulatorWorkspace } from '@/components/workspaces/SimulatorWorkspace';
 import { ODMapWorkspace, ODSankeyWorkspace } from '@/components/workspaces/ODWorkspaces';
 import { GlossaryWorkspace } from '@/components/workspaces/GlossaryWorkspace';
@@ -109,6 +110,7 @@ export default function Home() {
     spatial: 'Peta Spasial',
     od_map: 'Peta Rute OD',
     sankey: 'Diagram Sankey',
+    forecasting_lebaran: 'Proyeksi Lebaran 2027',
     forecasting: 'Proyeksi Nataru 26/27',
     simulator: 'Simulator Armada',
     glossary: 'Data & Rumus',
@@ -219,6 +221,16 @@ export default function Home() {
                 isDarkMode={isDarkMode}
                 globalMetric={globalMetric}
                 globalDirection={globalDirection}
+              />
+            )}
+
+            {activeTab === 'forecasting_lebaran' && (
+              <ForecastingLebaranWorkspace
+                forecastData={(data as any).forecast_lebaran}
+                timeline2024={(data as any).timeline_2024 || []}
+                timeline2025={data.timeline_2025}
+                timeline={data.daily_timeline}
+                isDarkMode={isDarkMode}
               />
             )}
 

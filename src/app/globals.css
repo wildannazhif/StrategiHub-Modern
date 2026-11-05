@@ -35,6 +35,13 @@ body {
   filter: drop-shadow(0 0 3px #f59e0b) drop-shadow(0 0 6px #f59e0b);
 }
 
+/* Remove square focus outline on interactive Leaflet polygons */
+.leaflet-interactive:focus,
+path.leaflet-interactive:focus,
+svg.leaflet-zoom-animated path:focus {
+  outline: none !important;
+}
+
 .leaflet-custom-tooltip {
   background-color: #0f172a !important;
   color: #ffffff !important;
