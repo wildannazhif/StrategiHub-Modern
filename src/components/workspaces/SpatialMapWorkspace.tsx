@@ -501,8 +501,8 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
             </div>
           `;
 
-          // Mode penyebrangan (ASDP): TETAP TITIK
-          if (modaKey === 'ASDP' || !customIconUrl) {
+          // Fallback to circleMarker if no customIconUrl
+          if (!customIconUrl) {
             const circle = L.circleMarker([lat, lon], {
               radius: radius,
               fillColor: color,
@@ -526,7 +526,7 @@ export const SpatialMapWorkspace: React.FC<SpatialMapWorkspaceProps> = ({
             circle.bindPopup(popupHtml);
             markerGroup.addLayer(circle);
           } else {
-            // Mode Kereta (KA), Udara (UDARA), Laut (LAUT), Jalan (BUS): CUSTOM SVG ICON
+            // Mode Kereta (KA), Udara (UDARA), Laut (LAUT), Jalan (BUS), Penyebrangan (ASDP): CUSTOM SVG ICON
             const baseSize = isTop10 ? 22 : nodeVal > 0 ? 14 + Math.pow(ratio, 0.45) * 5 : 13;
             const size = Math.round(baseSize);
 
