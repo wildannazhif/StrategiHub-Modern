@@ -242,17 +242,17 @@ export const GlossaryWorkspace: React.FC = () => {
               </h3>
             </div>
             <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-              🏆 Model Terbaik: LightGBM Regressor (MAPE 3,29%)
+              🏆 Model Terbaik: LightGBM Regressor (MAPE 2,86% Nataru • 3,15% Lebaran)
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 1. LIGHTGBM REGRESSOR */}
             <FormulaBlock
-              title="1. LightGBM Regressor (Model Terbaik)"
+              title="1. LightGBM Regressor (Model Terbaik • 13 Fitur Terstandarisasi)"
               math="\hat{y}_t^{(M)} = \hat{y}_t^{(0)} + \sum_{m=1}^{M} \eta f_m(\mathbf{x}_t), \quad \min_{f} \sum_{t} |y_t - \hat{y}_t| + \lambda \Omega(f)"
-              explanation="Model Machine Learning berbasis Gradient Boosted Decision Trees (GBDT) dengan fungsi objektif L1 (MAE loss). Dilatih menggunakan fitur lag sederhana (lag 1, 2, 7, 14), rolling mean 7 hari, dan kalender hari dalam minggu (DOW) & weekend."
-              example="Hasil Uji Posko Nataru: MAPE 3,29%, RMSE 59.271, MAE 40.241, Akurasi Arah 89,3%. Mengungguli 11 model statistik lainnya."
+              explanation="Model Machine Learning berbasis Gradient Boosted Decision Trees (GBDT) dengan fungsi objektif L1 (MAE loss). Dilatih menggunakan 13 fitur terstandarisasi: 4 fitur kalender (DOW, day, month, weekend), 3 fitur tanggal merah kalender Indonesia resmi SKB 3 Menteri (is_holiday, is_tanggal_merah, is_holiday_start penanda awal mudik/libur), 4 lag historis (lag 1, 2, 7, 14), dan 2 rolling window (mean 7H, std 7H)."
+              example="Hasil Evaluasi Empiris: MAPE 2,86% (Nataru) dan 3,15% (Lebaran), RMSE 32.884, Akurasi Arah 89,3%. Fitur tanggal merah di awal terbukti menangkap lonjakan arus mudik orang-orang pulang kampung."
               badge="Rank 1 • Model Terbaik"
             />
 

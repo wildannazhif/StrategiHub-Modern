@@ -704,7 +704,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     const series = nataruBarChartOption.series || [];
     const s24: number[] = series.find((s: any) => s.name.includes('2024'))?.data || [];
     const s25: number[] = series.find((s: any) => s.name.includes('2025'))?.data || [];
-    const s26: number[] = series.find((s: any) => s.name.includes('2026'))?.data || [];
+    const s26: number[] = series.find((s: any) => s.name.includes('26/27') || s.name.includes('2026'))?.data || [];
 
     const tot24 = s24.reduce((acc: number, v: number) => acc + (Number(v) || 0), 0);
     const tot25 = s25.reduce((acc: number, v: number) => acc + (Number(v) || 0), 0);
@@ -1129,10 +1129,10 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
         {/* COMPACT METHODOLOGY INFO (NO CARD, SMALL & CLEAN) */}
         <p className="text-[11px] text-slate-500 font-mono leading-relaxed pt-1">
-          <strong className="text-indigo-600 dark:text-indigo-400 font-sans">Partisi Evaluasi Akurasi:</strong>{' '}
+          <strong className="text-indigo-600 dark:text-indigo-400 font-sans">Partisi & Fitur:</strong>{' '}
           {isAllProv
-            ? 'Data Latih: 1 Jan 2024 – 17 Des 2025 • Data Uji: 18 Des 2025 – 4 Jan 2026 (18H Posko Nataru) • Retrain Penuh: 1.035H s.d. 31 Okt 2026.'
-            : `Data Latih: 1 Jan – 1 Sep 2026 (244H) • Data Uji: 2 – 29 Sep 2026 (28H Holdout ${selectedProv}) • Retrain Penuh: 304H.`}
+            ? 'Data Latih: 1 Jan 2024 – 17 Des 2025 • Data Uji: 18 Des 2025 – 4 Jan 2026 (18H Posko Nataru) • Retrain: 1.035H • Fitur: 13 Fitur Terstandarisasi (incl. Tanggal Merah SKB 3 Menteri).'
+            : `Data Latih: 1 Jan – 1 Sep 2026 (244H) • Data Uji: 2 – 29 Sep 2026 (28H Holdout ${selectedProv}) • Retrain: 304H • Fitur: 13 Fitur Terstandarisasi (incl. Tanggal Merah).`}
         </p>
 
         {/* 3 Metric Cards: MAPE, RMSE, MAE */}

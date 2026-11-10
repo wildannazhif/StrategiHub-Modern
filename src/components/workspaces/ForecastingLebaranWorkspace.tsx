@@ -1241,10 +1241,10 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
 
         {/* COMPACT METHODOLOGY INFO */}
         <p className="text-[11px] text-slate-500 font-mono leading-relaxed pt-1">
-          <strong className="text-emerald-600 dark:text-emerald-400 font-sans">Partisi Evaluasi Akurasi:</strong>{' '}
+          <strong className="text-emerald-600 dark:text-emerald-400 font-sans">Partisi & Fitur:</strong>{' '}
           {isAllProv
-            ? 'Data Latih: 1 Jan 2024 – 12 Mar 2026 • Data Uji: 13 – 29 Mar 2026 (17H Posko Lebaran 2026) • Retrain Penuh: 1.035H s.d. 31 Okt 2026.'
-            : `Data Latih: 1 Jan – 1 Sep 2026 (244H) • Data Uji: 2 – 29 Sep 2026 (28H Holdout ${selectedProv}) • Retrain Penuh: 304H.`}
+            ? 'Data Latih: 1 Jan 2024 – 12 Mar 2026 • Data Uji: 13 – 29 Mar 2026 (17H Posko Lebaran 2026) • Retrain: 1.035H • Fitur: 13 Fitur Terstandarisasi (incl. Tanggal Merah SKB 3 Menteri).'
+            : `Data Latih: 1 Jan – 1 Sep 2026 (244H) • Data Uji: 2 – 29 Sep 2026 (28H Holdout ${selectedProv}) • Retrain: 304H • Fitur: 13 Fitur Terstandarisasi (incl. Tanggal Merah).`}
         </p>
 
         {/* 3 Metric Cards: MAPE, RMSE, MAE */}
