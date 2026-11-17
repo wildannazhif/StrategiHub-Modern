@@ -162,8 +162,8 @@ export default function Home() {
             direction={globalDirection}
           />
 
-          {/* FILTER UTAMA ANALITIK (Disembunyikan di Tab OD karena data OD spesifik koridor penerbangan) */}
-          {activeTab !== 'od_map' && activeTab !== 'sankey' && (
+          {/* FILTER UTAMA ANALITIK (Disembunyikan di Tab OD karena koridor penerbangan, serta Tab Proyeksi Tol karena unit kendaraan & memiliki kontrol gerbang sendiri) */}
+          {activeTab !== 'od_map' && activeTab !== 'sankey' && activeTab !== 'forecasting_toll' && (
             <GlobalFilterBar
               metric={globalMetric}
               direction={globalDirection}
