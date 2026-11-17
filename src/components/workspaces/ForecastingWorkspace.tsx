@@ -25,6 +25,95 @@ const ALL_PROVINCES = [
   'Sumatera Barat', 'Sumatera Selatan', 'Sumatera Utara'
 ];
 
+interface NataruSourceRow {
+  date: string;
+  [key: string]: unknown;
+}
+
+interface NataruChartRow {
+  date_2026: string;
+  date_2025: string;
+  date_2024: string;
+  tag: string;
+  day_month: string;
+  short_label: string;
+  [key: string]: unknown;
+}
+
+const NATARU_COMPARISON_MODES = ['UDARA', 'KA', 'BUS', 'ASDP', 'LAUT'] as const;
+const NATARU_COMPARISON_DATES = Array.from({ length: 21 }, (_, offset) => {
+  const projectedDate = new Date(Date.UTC(2026, 11, 17 + offset));
+  const historical2025Date = new Date(projectedDate);
+  const historical2024Date = new Date(projectedDate);
+  historical2025Date.setUTCFullYear(projectedDate.getUTCFullYear() - 1);
+  historical2024Date.setUTCFullYear(projectedDate.getUTCFullYear() - 2);
+
+  const deltaFromChristmas = offset - 8;
+  const tag = deltaFromChristmas === 0
+    ? 'H'
+    : deltaFromChristmas < 0
+      ? `H${deltaFromChristmas}`
+      : `H+${deltaFromChristmas}`;
+  const dayMonth = projectedDate.getUTCMonth() === 11
+    ? `${projectedDate.getUTCDate()} Des`
+    : `${projectedDate.getUTCDate()} Jan`;
+
+  return {
+    date2026: projectedDate.toISOString().slice(0, 10),
+    date2025: historical2025Date.toISOString().slice(0, 10),
+    date2024: historical2024Date.toISOString().slice(0, 10),
+    tag,
+    dayMonth,
+  };
+});
+
+function readNataruValue(row: NataruSourceRow | undefined, key: string): number {
+  return Number(row?.[key]) || 0;
+}
+
+function buildNataruComparisonRows(
+  timeline2024: NataruSourceRow[],
+  timeline2025: NataruSourceRow[],
+  timeline2026: NataruSourceRow[],
+  forecastPoints: NataruSourceRow[],
+): NataruChartRow[] {
+  const actualByDate = new Map(
+    [...timeline2024, ...timeline2025, ...timeline2026].map((row) => [row.date, row]),
+  );
+  const forecastByDate = new Map(forecastPoints.map((row) => [row.date, row]));
+
+  return NATARU_COMPARISON_DATES.map(({ date2024, date2025, date2026, tag, dayMonth }) => {
+    const actual2024 = actualByDate.get(date2024);
+    const actual2025 = actualByDate.get(date2025);
+    const projected2026 = forecastByDate.get(date2026);
+    const row: NataruChartRow = {
+      date_2024: date2024,
+      date_2025: date2025,
+      date_2026: date2026,
+      tag,
+      day_month: dayMonth,
+      short_label: `${dayMonth} (${tag})`,
+      pnp_2024: readNataruValue(actual2024, 'pbrg_TOTAL'),
+      pnp_2025: readNataruValue(actual2025, 'pbrg_TOTAL'),
+      pnp_2026_forecast: readNataruValue(projected2026, 'pbrg_TOTAL'),
+      arm_2024: readNataruValue(actual2024, 'abrg_TOTAL'),
+      arm_2025: readNataruValue(actual2025, 'abrg_TOTAL'),
+      arm_2026_forecast: readNataruValue(projected2026, 'abrg_TOTAL'),
+    };
+
+    NATARU_COMPARISON_MODES.forEach((mode) => {
+      row[`${mode}_2024`] = readNataruValue(actual2024, `pbrg_${mode}`);
+      row[`arm_${mode}_2024`] = readNataruValue(actual2024, `abrg_${mode}`);
+      row[`${mode}_2025`] = readNataruValue(actual2025, `pbrg_${mode}`);
+      row[`arm_${mode}_2025`] = readNataruValue(actual2025, `abrg_${mode}`);
+      row[mode] = readNataruValue(projected2026, `pbrg_${mode}`);
+      row[`arm_${mode}`] = readNataruValue(projected2026, `abrg_${mode}`);
+    });
+
+    return row;
+  });
+}
+
 export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
   forecastData,
   timeline2024 = [],
@@ -551,10 +640,14 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     return list;
   }, [futurePoints, tableRange]);
 
-  // 8. Dedicated 18-Day Nataru Bar Chart Option (2024 vs 2025 vs Proyeksi 2026)
+  // 8. Dedicated 21-Day Nataru Bar Chart Option (2024 vs 2025 vs Proyeksi 2026)
+  const nataruComparisonRows = useMemo(
+    () => buildNataruComparisonRows(timeline2024, timeline2025, timeline, futurePoints),
+    [timeline2024, timeline2025, timeline, futurePoints],
+  );
+
   const nataruBarChartOption = useMemo(() => {
-    const rawList = forecastData?.nataru_18days_comparison || [];
-    if (rawList.length === 0) return null;
+    const rawList = nataruComparisonRows;
 
     const labels = rawList.map((r: any) => r.short_label || r.label || r.tag);
     const textColor = isDarkMode ? '#cbd5e1' : '#475569';
@@ -694,10 +787,10 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
       },
       series,
     };
-  }, [forecastData, isDarkMode, isAllProv, isOperating, selectedModa, selectedMetric, provData]);
+  }, [nataruComparisonRows, isDarkMode, isAllProv, isOperating, selectedModa, selectedMetric, provData]);
 
-  // 18-Day Comparison Summary Totals (Matching exact bar chart values)
-  const nataru18Totals = useMemo(() => {
+  // 21-Day Comparison Summary Totals (Matching exact bar chart values)
+  const nataru21Totals = useMemo(() => {
     if (!nataruBarChartOption) {
       return { tot24: 0, tot25: 0, tot26: 0, peak26: 0 };
     }
@@ -709,7 +802,8 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
     const tot24 = s24.reduce((acc: number, v: number) => acc + (Number(v) || 0), 0);
     const tot25 = s25.reduce((acc: number, v: number) => acc + (Number(v) || 0), 0);
     const tot26 = s26.reduce((acc: number, v: number) => acc + (Number(v) || 0), 0);
-    const peak26 = s26[6] || 0; // Index 6 is 24 Des H-1
+    const christmasEveIndex = NATARU_COMPARISON_DATES.findIndex(({ date2026 }) => date2026 === '2026-12-24');
+    const peak26 = s26[christmasEveIndex] || 0;
     return { tot24, tot25, tot26, peak26 };
   }, [nataruBarChartOption]);
 
@@ -956,14 +1050,14 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         <EChartWrapper options={chartOptions} style={{ height: '400px', width: '100%' }} />
       </div>
 
-      {/* 4. DEDICATED 18-DAY NATARU BAR CHART (2024 vs 2025 vs PROYEKSI 2026) */}
+      {/* 4. DEDICATED 21-DAY NATARU BAR CHART (2024 vs 2025 vs PROYEKSI 2026) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
           <div>
             <div className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                Grafik Batang Komparasi Volume Harian Posko Nataru (18 Hari: 18 Des – 4 Jan)
+                Grafik Batang Komparasi Volume Harian Posko Nataru (21 Hari: 17 Des – 6 Jan)
               </h4>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -987,25 +1081,25 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
             {/* NATARU SUMMARY CALLOUT CARDS (Strictly Penumpang Berangkat & Armada Berangkat) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
-                <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2024 (18H):</span>
+                <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2024 (21H):</span>
                 <div className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">
-                  {formatNumber(nataru18Totals.tot24)}
+                  {formatNumber(nataru21Totals.tot24)}
                 </div>
                 <span className="text-[10px] text-slate-400 font-sans">Realisasi 2024/2025</span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
-                <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2025 (18H):</span>
+                <span className="text-slate-400 font-sans text-[11px] block">Total Nataru 2025 (21H):</span>
                 <div className="font-bold text-amber-600 dark:text-amber-400 text-sm mt-0.5">
-                  {formatNumber(nataru18Totals.tot25)}
+                  {formatNumber(nataru21Totals.tot25)}
                 </div>
                 <span className="text-[10px] text-amber-600/80 font-sans">Realisasi 2025/2026</span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900 font-mono text-xs">
-                <span className="text-indigo-600 dark:text-indigo-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 26/27 (18H):</span>
+                <span className="text-indigo-600 dark:text-indigo-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 26/27 (21H):</span>
                 <div className="font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-0.5">
-                  {formatNumber(nataru18Totals.tot26)}
+                  {formatNumber(nataru21Totals.tot26)}
                 </div>
                 <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-sans font-semibold">Model Terbaik</span>
               </div>
@@ -1013,7 +1107,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
                 <span className="text-slate-400 font-sans text-[11px] block">Puncak Mudik Natal (H-1):</span>
                 <div className="font-bold text-rose-600 dark:text-rose-400 text-sm mt-0.5">
-                  24 Des • {formatNumber(nataru18Totals.peak26)}
+                  24 Des • {formatNumber(nataru21Totals.peak26)}
                 </div>
                 <span className="text-[10px] text-rose-600/80 font-sans">Puncak Arus Berangkat</span>
               </div>
