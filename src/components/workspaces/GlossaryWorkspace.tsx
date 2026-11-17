@@ -16,6 +16,7 @@ import {
   Calendar,
   CheckCircle2,
   ArrowRight,
+  CarFront,
   Users,
   Mail,
 } from 'lucide-react';
@@ -72,6 +73,43 @@ const FormulaBlock: React.FC<FormulaBlockProps> = ({ title, math, explanation, e
   );
 };
 
+const TOLL_IMPUTATION_STEPS = [
+  {
+    level: 'Tingkat 1 • Lokal',
+    method: 'Median hari sejenis dalam rentang ±3 minggu',
+    result: '841 baris',
+    detail: 'Mengutamakan pola musiman terdekat pada gerbang dan hari dalam minggu yang sama. Dipakai jika tersedia minimal satu pembanding valid.',
+  },
+  {
+    level: 'Tingkat 2 • Bulanan',
+    method: 'Median hari sejenis pada bulan yang sama',
+    result: '671 baris',
+    detail: 'Fallback ketika jendela lokal kosong; menjaga karakter bulan, akhir pekan, serta musim perjalanan yang sedang berlangsung.',
+  },
+  {
+    level: 'Tingkat 3 • Global',
+    method: 'Median hari sejenis seluruh histori gerbang',
+    result: '47 baris',
+    detail: 'Fallback terakhir ketika pembanding lokal dan bulanan tidak tersedia. Tetap dihitung per gerbang dan hari dalam minggu.',
+  },
+];
+
+const TOLL_FORECAST_FEATURES = [
+  { name: 'day_of_week', category: 'Kalender', source: 'Tanggal → 0–6', role: 'Menangkap siklus trafik Senin–Minggu.' },
+  { name: 'day', category: 'Kalender', source: 'Tanggal → 1–31', role: 'Menangkap pola awal, tengah, dan akhir bulan.' },
+  { name: 'month', category: 'Kalender', source: 'Tanggal → 1–12', role: 'Mewakili musim perjalanan tahunan.' },
+  { name: 'is_weekend', category: 'Kalender', source: 'Sabtu/Minggu → 1', role: 'Membedakan hari kerja dan perjalanan akhir pekan.' },
+  { name: 'is_holiday', category: 'Kalender', source: 'SKB 3 Menteri → 0/1', role: 'Menandai libur nasional dan cuti bersama.' },
+  { name: 'lag_1', category: 'Autoregresif', source: 'y(t−1)', role: 'Jangkar level volume kendaraan hari sebelumnya.' },
+  { name: 'lag_2', category: 'Autoregresif', source: 'y(t−2)', role: 'Mengukur momentum trafik dua hari terakhir.' },
+  { name: 'lag_7', category: 'Autoregresif', source: 'y(t−7)', role: 'Membandingkan hari yang sama pada pekan sebelumnya.' },
+  { name: 'lag_14', category: 'Autoregresif', source: 'y(t−14)', role: 'Menjaga pola dua-mingguan pada horizon panjang.' },
+  { name: 'rolling_mean_7', category: 'Rolling', source: 'mean[y(t−7)…y(t−1)]', role: 'Baseline trafik tujuh hari tanpa melihat target hari berjalan.' },
+  { name: 'rolling_std_7', category: 'Rolling', source: 'std[y(t−7)…y(t−1)]', role: 'Mengukur volatilitas sebelum lonjakan operasional.' },
+  { name: 'year_over_year_growth', category: 'Pertumbuhan', source: 'YoY 2024 → 2025 per gerbang', role: 'Membawa arah pertumbuhan tahunan spesifik gerbang.' },
+  { name: 'nataru_phase', category: 'Event', source: 'Fase operasi Posko Nataru', role: 'Membedakan pra-posko, mudik Natal, Tahun Baru, dan arus balik.' },
+];
+
 export const GlossaryWorkspace: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('all');
 
@@ -82,11 +120,12 @@ export const GlossaryWorkspace: React.FC = () => {
     { id: 'sec-lebaran', label: '3. Arus Lebaran & Surge' },
     { id: 'sec-forecasting-models', label: '4. 12 Model Peramalan' },
     { id: 'sec-ml-features', label: '5. Rekayasa 13 Fitur ML' },
-    { id: 'sec-akurasi', label: '6. Evaluasi Akurasi' },
-    { id: 'sec-simulator', label: '7. Rekomendasi Armada' },
-    { id: 'sec-gis-od', label: '8. Geospasial & OD' },
-    { id: 'sec-audit', label: '9. Audit Data & Glosarium' },
-    { id: 'sec-credits', label: '10. Credit Pembuat Dashboard' },
+    { id: 'sec-toll-method', label: '6. Imputasi & Fitur GT' },
+    { id: 'sec-akurasi', label: '7. Evaluasi Akurasi' },
+    { id: 'sec-simulator', label: '8. Rekomendasi Armada' },
+    { id: 'sec-gis-od', label: '9. Geospasial & OD' },
+    { id: 'sec-audit', label: '10. Audit Data & Glosarium' },
+    { id: 'sec-credits', label: '11. Credit Pembuat Dashboard' },
   ];
 
   return (
@@ -102,7 +141,7 @@ export const GlossaryWorkspace: React.FC = () => {
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Dokumentasi komprehensif seluruh indikator, formulasi matematis, arsitektur 12 model peramalan, metodologi train-test holdout, dan audit kualitas data operasional PUSDATIN Kemenhub.
+              Dokumentasi komprehensif seluruh indikator, formulasi matematis, arsitektur model peramalan, metodologi imputasi dan fitur Gerbang Tol, validasi train-test holdout, serta audit kualitas data operasional PUSDATIN Kemenhub.
             </p>
           </div>
         </div>
@@ -606,13 +645,155 @@ export const GlossaryWorkspace: React.FC = () => {
         </div>
       )}
 
-      {/* SECTION 6: METRIK AKURASI & METODOLOGI VALIDASI PARTISI */}
+      {/* SECTION 6: IMPUTASI & FITUR FORECASTING GERBANG TOL */}
+      {(activeSection === 'all' || activeSection === 'sec-toll-method') && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3 border-l-4 border-violet-600 pl-3">
+            <div className="flex items-center gap-2">
+              <CarFront className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
+                6. Proses Imputasi & Rekayasa Fitur Forecasting Gerbang Tol
+              </h3>
+            </div>
+            <span className="text-xs font-mono font-bold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950 px-2.5 py-0.5 rounded border border-violet-200 dark:border-violet-800 whitespace-nowrap">
+              8 GT • 8.400 Observasi
+            </span>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-6 shadow-2xs space-y-5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="p-3 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                <div className="text-[10px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold">Data Asli Sensor</div>
+                <div className="text-xl font-black font-mono text-emerald-700 dark:text-emerald-300 mt-1">6.838</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">81,44% dari histori</div>
+              </div>
+              <div className="p-3 rounded-lg bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                <div className="text-[10px] uppercase tracking-wider text-amber-700 dark:text-amber-400 font-bold">Hasil Imputasi</div>
+                <div className="text-xl font-black font-mono text-amber-700 dark:text-amber-300 mt-1">1.559</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">841 lokal • 671 bulanan • 47 global</div>
+              </div>
+              <div className="p-3 rounded-lg bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800">
+                <div className="text-[10px] uppercase tracking-wider text-sky-700 dark:text-sky-400 font-bold">Nol One-Way Valid</div>
+                <div className="text-xl font-black font-mono text-sky-700 dark:text-sky-300 mt-1">3</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">Dipertahankan, tidak diimputasi</div>
+              </div>
+              <div className="p-3 rounded-lg bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800">
+                <div className="text-[10px] uppercase tracking-wider text-violet-700 dark:text-violet-400 font-bold">Model Terpilih</div>
+                <div className="text-xl font-black font-mono text-violet-700 dark:text-violet-300 mt-1">12,48%</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">MAPE ensemble LightGBM</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <div className="p-4 rounded-lg bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900 space-y-2">
+                <h4 className="font-bold text-rose-900 dark:text-rose-200 text-xs flex items-center gap-2">
+                  <Database className="w-4 h-4" />
+                  Kriteria Nilai Hilang & Anomali Sensor
+                </h4>
+                <ul className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed space-y-1 list-disc pl-4">
+                  <li><strong>Missing date:</strong> tanggal putus ketika API atau sensor tidak mengirim rekaman.</li>
+                  <li><strong>Nol anomali:</strong> volume 0 pada hari operasi normal, mengindikasikan sensor atau jaringan tidak aktif.</li>
+                  <li><strong>Anomali parsial Cikupa:</strong> volume di bawah 25.000 kendaraan pada Mei–Juli 2024 saat perbaikan fisik gardu.</li>
+                  <li>Rekaman Posko Nataru 2024/2025 dan 2025/2026 dipertahankan sebagai ground truth sensor tanpa imputasi.</li>
+                </ul>
+              </div>
+
+              <div className="p-4 rounded-lg bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900 space-y-2">
+                <h4 className="font-bold text-sky-900 dark:text-sky-200 text-xs flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4" />
+                  Pengecualian Operasional One-Way
+                </h4>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Tiga nilai nol saat rekayasa lalu lintas Lebaran 2024 adalah kondisi lapangan yang valid: GT Cikampek Utama 2 pada 7–8 April dan GT Cikampek Utama 1 pada 15 April. Lajur ditutup untuk skema one-way nasional, sehingga nilai nol <strong>tidak boleh dianggap sensor rusak</strong> dan tidak diubah.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                <ArrowRight className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                Hierarki Imputasi Deterministik
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {TOLL_IMPUTATION_STEPS.map((step) => (
+                  <div key={step.level} className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-bold text-violet-700 dark:text-violet-300">{step.level}</span>
+                      <span className="text-[10px] font-mono font-bold text-slate-500">{step.result}</span>
+                    </div>
+                    <div className="text-xs font-semibold text-slate-900 dark:text-white">{step.method}</div>
+                    <p className="text-[10.5px] leading-relaxed text-slate-500 dark:text-slate-400">{step.detail}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                Median hari sejenis dipilih agar nilai pengganti tidak mencampur pola Senin dengan akhir pekan. Urutan fallback dijalankan per gerbang, sehingga karakter arah MASUK/KELUAR dan level trafik masing-masing gerbang tetap terjaga.
+              </p>
+            </div>
+
+            <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                  Matriks 13 Fitur Forecasting Gerbang Tol
+                </h4>
+                <span className="text-[10px] font-mono text-slate-400">Target: log1p(volume kendaraan) • Ensemble Top-3 LightGBM</span>
+              </div>
+              <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-100 dark:bg-slate-800/80 font-mono text-[10.5px] text-slate-700 dark:text-slate-300 uppercase border-b border-slate-200 dark:border-slate-800">
+                    <tr>
+                      <th className="py-2.5 px-2.5 w-8">#</th>
+                      <th className="py-2.5 px-2.5">Nama Fitur</th>
+                      <th className="py-2.5 px-2.5">Kategori</th>
+                      <th className="py-2.5 px-2.5">Sumber / Formula</th>
+                      <th className="py-2.5 px-2.5">Peran dalam Model</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300 text-[11px]">
+                    {TOLL_FORECAST_FEATURES.map((feature, index) => (
+                      <tr key={feature.name} className="odd:bg-white even:bg-violet-50/20 dark:odd:bg-slate-900 dark:even:bg-violet-950/10">
+                        <td className="py-2 px-2.5 font-mono font-bold text-violet-600">{index + 1}</td>
+                        <td className="py-2 px-2.5 font-mono font-bold text-slate-900 dark:text-white whitespace-nowrap">{feature.name}</td>
+                        <td className="py-2 px-2.5">
+                          <span className="px-2 py-0.5 rounded bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 text-[10px] font-semibold whitespace-nowrap">
+                            {feature.category}
+                          </span>
+                        </td>
+                        <td className="py-2 px-2.5 font-mono text-[10.5px] whitespace-nowrap">{feature.source}</td>
+                        <td className="py-2 px-2.5">{feature.role}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                <strong className="text-slate-900 dark:text-white text-xs block mb-1">Partisi Out-of-Time</strong>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Training: 1 Jan 2024–16 Des 2025 (5.728 observasi). Testing murni: 17 Des 2025–6 Jan 2026 (168 observasi / 21 hari × 8 GT). Proyeksi operasional: 16 Nov 2026–10 Feb 2027 (696 observasi).
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900">
+                <strong className="text-emerald-900 dark:text-emerald-200 text-xs block mb-1">Kontrol Zero Leakage</strong>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Fitur lag dan rolling hanya memakai nilai sebelum hari target. Model tidak melihat periode testing saat training; MAPE 12,48% dihitung terhadap 168 observasi sensor asli Posko Nataru.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 7: METRIK AKURASI & METODOLOGI VALIDASI PARTISI */}
       {(activeSection === 'all' || activeSection === 'sec-akurasi' || activeSection === 'sec-forecasting-models') && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-l-4 border-rose-600 pl-3">
             <TrendingUp className="w-5 h-5 text-rose-600 dark:text-rose-400" />
             <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
-              6. Formula Metrik Akurasi & Metodologi Validasi Partisi (Train-Test-Retrain)
+              7. Formula Metrik Akurasi & Metodologi Validasi Partisi (Train-Test-Retrain)
             </h3>
           </div>
 
@@ -674,13 +855,13 @@ export const GlossaryWorkspace: React.FC = () => {
         </div>
       )}
 
-      {/* SECTION 7: SIMULATOR DEFISIT ARMADA */}
+      {/* SECTION 8: SIMULATOR DEFISIT ARMADA */}
       {(activeSection === 'all' || activeSection === 'sec-simulator') && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-l-4 border-indigo-600 pl-3">
             <Calculator className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
-              7. Formula Rekomendasi Kebutuhan Penambahan Armada Simpul (Anti-Overcrowding)
+              8. Formula Rekomendasi Kebutuhan Penambahan Armada Simpul (Anti-Overcrowding)
             </h3>
           </div>
 
@@ -704,13 +885,13 @@ export const GlossaryWorkspace: React.FC = () => {
         </div>
       )}
 
-      {/* SECTION 8: GEOSPASIAL, OD & SANKEY */}
+      {/* SECTION 9: GEOSPASIAL, OD & SANKEY */}
       {(activeSection === 'all' || activeSection === 'sec-gis-od') && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-l-4 border-sky-600 pl-3">
             <Network className="w-5 h-5 text-sky-600 dark:text-sky-400" />
             <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
-              8. Geospasial Leaflet, Peta Busur OD ECharts & Diagram Alir Sankey
+              9. Geospasial Leaflet, Peta Busur OD ECharts & Diagram Alir Sankey
             </h3>
           </div>
 
@@ -734,13 +915,13 @@ export const GlossaryWorkspace: React.FC = () => {
         </div>
       )}
 
-      {/* SECTION 9: DATA QUALITY AUDIT & GLOSARIUM SINGKATAN */}
+      {/* SECTION 10: DATA QUALITY AUDIT & GLOSARIUM SINGKATAN */}
       {(activeSection === 'all' || activeSection === 'sec-audit') && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-l-4 border-emerald-600 pl-3">
             <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
-              9. Audit Integritas Data & Glosarium Singkatan Resmi PUSDATIN Kemenhub
+              10. Audit Integritas Data & Glosarium Singkatan Resmi PUSDATIN Kemenhub
             </h3>
           </div>
 
@@ -826,13 +1007,13 @@ export const GlossaryWorkspace: React.FC = () => {
         </div>
       )}
 
-      {/* SECTION 10: CREDIT PEMBUAT DASHBOARD */}
+      {/* SECTION 11: CREDIT PEMBUAT DASHBOARD */}
       {(activeSection === 'all' || activeSection === 'sec-credits') && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-l-4 border-indigo-600 pl-3">
             <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">
-              10. Credit Pembuat Dashboard
+              11. Credit Pembuat Dashboard
             </h3>
           </div>
 
