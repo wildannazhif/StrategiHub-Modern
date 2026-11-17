@@ -319,14 +319,6 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
           itemStyle: { color: '#0ea5e9', borderRadius: [2, 2, 0, 0] },
         },
         {
-          name: 'Testing Ensemble',
-          type: 'line',
-          data: nataruComparison.map((point) => point.ensemble),
-          showSymbol: false,
-          lineStyle: { color: '#f59e0b', width: 2 },
-          itemStyle: { color: '#f59e0b' },
-        },
-        {
           name: 'Proyeksi Nataru 2026/2027',
           type: 'bar',
           data: futureNataru.map((point) => point.value),
@@ -478,9 +470,9 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
           <div>
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-violet-600 dark:text-violet-400" />
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Komparasi Posko Nataru: Realisasi 2024/2025, Testing 2025/2026, dan Proyeksi 2026/2027</h4>
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Komparasi Posko Nataru: Realisasi 2024/2025, Realisasi 2025/2026, dan Proyeksi 2026/2027</h4>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">Perbandingan 21 hari operasional pada {scopeLabel} dengan evaluasi out-of-time model ensemble.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Perbandingan 21 hari operasional pada {scopeLabel} (Historis 2 Tahun vs Proyeksi Model 12% Ensemble).</p>
           </div>
           <button
             onClick={() => setIsComparisonMinimized((value) => !value)}
