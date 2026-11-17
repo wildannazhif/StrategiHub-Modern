@@ -12,16 +12,19 @@ import { MatrixWorkspace } from '@/components/workspaces/MatrixWorkspace';
 import { SpatialMapWorkspace } from '@/components/workspaces/SpatialMapWorkspace';
 import { ForecastingWorkspace } from '@/components/workspaces/ForecastingWorkspace';
 import { ForecastingLebaranWorkspace } from '@/components/workspaces/ForecastingLebaranWorkspace';
+import { ForecastingTollGateWorkspace } from '@/components/workspaces/ForecastingTollGateWorkspace';
 import { SimulatorWorkspace } from '@/components/workspaces/SimulatorWorkspace';
 import { ODMapWorkspace, ODSankeyWorkspace } from '@/components/workspaces/ODWorkspaces';
 import { GlossaryWorkspace } from '@/components/workspaces/GlossaryWorkspace';
 import { GlobalFilterBar, MobilityMetric, MobilityDirection } from '@/components/dashboard/GlobalFilterBar';
 import { MobilityDataBundle } from '@/types/mobility';
+import { TollGateForecastData } from '@/types/tollGateForecast';
 import { getBasePath } from '@/lib/constants';
 
 export default function Home() {
   const [data, setData] = useState<MobilityDataBundle | null>(null);
   const [benchmarkResults, setBenchmarkResults] = useState<Record<string, any>>({});
+  const [tollGateData, setTollGateData] = useState<TollGateForecastData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<TabId>('timeline');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
@@ -48,9 +51,10 @@ export default function Home() {
     async function loadData() {
       try {
         const base = getBasePath();
-        const [bundleRes, benchRes] = await Promise.all([
+        const [bundleRes, benchRes, tollRes] = await Promise.all([
           fetch(`${base}/data/mobility_data_bundle.json`),
           fetch(`${base}/data/benchmark_forecast_results.json`),
+          fetch(`${base}/data/toll_gate_forecast.json`),
         ]);
 
         if (bundleRes.ok) {
@@ -61,6 +65,11 @@ export default function Home() {
         if (benchRes.ok) {
           const benchJson = await benchRes.json();
           setBenchmarkResults(benchJson);
+        }
+
+        if (tollRes.ok) {
+          const tollJson: TollGateForecastData = await tollRes.json();
+          setTollGateData(tollJson);
         }
       } catch (err) {
         console.error('Failed to load mobility data bundle:', err);
@@ -112,6 +121,7 @@ export default function Home() {
     sankey: 'Diagram Sankey',
     forecasting_lebaran: 'Proyeksi Lebaran 2027',
     forecasting: 'Proyeksi Nataru 26/27',
+    forecasting_toll: 'Proyeksi Gerbang Tol 2027',
     simulator: 'Rekomendasi Armada',
     glossary: 'Data & Rumus',
   };
@@ -243,6 +253,19 @@ export default function Home() {
                 timeline={data.daily_timeline}
                 isDarkMode={isDarkMode}
               />
+            )}
+
+            {activeTab === 'forecasting_toll' && tollGateData && (
+              <ForecastingTollGateWorkspace
+                forecastData={tollGateData}
+                isDarkMode={isDarkMode}
+              />
+            )}
+
+            {activeTab === 'forecasting_toll' && !tollGateData && (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300">
+                Data proyeksi gerbang tol tidak dapat dimuat.
+              </div>
             )}
 
             {activeTab === 'simulator' && (

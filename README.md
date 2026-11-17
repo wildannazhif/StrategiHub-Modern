@@ -20,7 +20,7 @@ Dashboard ditenagai oleh agregasi 15 endpoint API resmi PUSDATIN Kemenhub (Triwu
 
 ---
 
-## 🚀 Fitur & Modul Utama (11 Modul Lengkap)
+## 🚀 Fitur & Modul Utama (13 Modul Lengkap)
 
 ### 1. Kronologi Harian (304 Hari • 10 Bulan Penuh)
 * Deret waktu harian interaktif 5 moda transportasi (Udara, Perkeretaapian, Bus/Jalan, Penyeberangan ASDP, Laut) serta Agregat Multimoda Nasional dari 1 Januari s.d. 31 Oktober 2026.
@@ -52,7 +52,11 @@ Dashboard ditenagai oleh agregasi 15 endpoint API resmi PUSDATIN Kemenhub (Triwu
 ### 8. Diagram Sankey OD Multimoda
 * Komponen SVG murni (tanpa iframe) dengan auto-layout dinamis menampilkan distribusi aliran penumpang dari koridor asal menuju 40 bandara destinasi di seluruh kepulauan Indonesia.
 
-### 9. Proyeksi Mobilitas Nataru 2026/2027 (Horizon 100 Hari: 1 Nov 2026 – 8 Feb 2027)
+### 9. Proyeksi Mobilitas Lebaran 2027 (Horizon 138 Hari: 1 Nov 2026 – 18 Mar 2027)
+* Proyeksi arus mudik dan balik Lebaran 1448H menggunakan LightGBM untuk 38 provinsi dan 5 moda transportasi.
+* Menyediakan kurva historis-proyeksi, komparasi periode posko, benchmark model, dan rincian harian.
+
+### 10. Proyeksi Mobilitas Nataru 2026/2027 (Horizon 100 Hari: 1 Nov 2026 – 8 Feb 2027)
 * **Data Latih Kontinu 1.035 Hari:** Mengintegrasikan data historis kontinu 2024 (366H) + 2025 (365H) + 2026 (304H) langsung tersambung ke 100 hari proyeksi.
 * **Model Champion Juara 1: LightGBM Regressor (Machine Learning)**
   * *Objective:* L1 loss (`regression_l1`) dengan fitur kalender (`dow`, `month`, `day`, `is_weekend`), autoregresif (`lag_1`, `lag_2`, `lag_7`, `lag_14`), dan rolling statistics (`mean_7`, `std_7`).
@@ -61,10 +65,15 @@ Dashboard ditenagai oleh agregasi 15 endpoint API resmi PUSDATIN Kemenhub (Triwu
 * **Grafik Batang Komparasi 3 Tahun Nataru:** Visualisasi komparasi volume 18 hari (Realisasi 2024 vs Realisasi 2025 vs Proyeksi 2026) dilengkapi tombol *Minimize/Expand*.
 * **Tabel Benchmark Turnamen 12 Model Peramalan:** Evaluasi perbandingan LightGBM terhadap Holt-Winters Damped, SARIMA, ARIMA, Linear Regression, SES, Naive, dll.
 
-### 10. Simulator Kapasitas Armada
+### 11. Proyeksi Gerbang Tol 2027
+* Mengintegrasikan **8.400 observasi historis** dari 8 gerbang tol periode 1 Januari 2024 – 15 November 2026 dan **696 proyeksi** periode 16 November 2026 – 10 Februari 2027.
+* Model **Top-3 Tuned Ensemble LightGBM** mencapai **MAPE 12,48%**, akurasi **87,52%**, MAE **5.375 kendaraan/hari**, dan R² **0,4897** pada pengujian out-of-time Posko Nataru.
+* Menyediakan filter gerbang dan arah, kurva historis-proyeksi, komparasi Posko Nataru, audit kualitas serta imputasi sensor, benchmark 12 strategi model, dan rincian proyeksi harian.
+
+### 12. Simulator Kapasitas Armada
 * Simulator penambahan kapasitas angkutan armada harian di 1.010 simpul nasional agar tingkat kepadatan saat lonjakan hari puncak tetap berada dalam ambang batas kenyamanan hari normal.
 
-### 11. Tentang Data, Kamus Rumus & Dokumentasi Model (KaTeX)
+### 13. Tentang Data, Kamus Rumus & Dokumentasi Model (KaTeX)
 * Dokumentasi ensiklopedis 8 bab lengkap dengan persamaan matematis KaTeX ($\LaTeX$): formula metrik dasar, formulasi ke-12 model peramalan, metodologi *middle-holdout*, formula defisit armada, dan kamus glosarium singkatan resmi.
 
 ---

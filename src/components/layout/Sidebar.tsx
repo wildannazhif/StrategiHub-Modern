@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Share2,
   Compass,
+  CarFront,
   PanelLeftClose,
 } from 'lucide-react';
 
@@ -25,6 +26,7 @@ export type TabId =
   | 'spatial'
   | 'forecasting_lebaran'
   | 'forecasting'
+  | 'forecasting_toll'
   | 'simulator'
   | 'od_map'
   | 'sankey'
@@ -74,6 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isOpen
       items: [
         { id: 'forecasting_lebaran', label: 'Proyeksi Lebaran 2027', icon: <Flame className="w-4 h-4 text-emerald-500" /> },
         { id: 'forecasting', label: 'Proyeksi Nataru 26/27', icon: <TrendingUp className="w-4 h-4 text-amber-500" /> },
+        { id: 'forecasting_toll', label: 'Proyeksi Gerbang Tol 2027', icon: <CarFront className="w-4 h-4 text-violet-500" /> },
         { id: 'simulator', label: 'Rekomendasi Armada', icon: <Sliders className="w-4 h-4 text-purple-500" /> },
       ],
     },
