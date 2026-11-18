@@ -514,7 +514,10 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
     const rawList = forecastData?.lebaran_17days_comparison || [];
     if (!rawList || rawList.length === 0) return null;
 
-    const xLabels = rawList.map((r: any) => r.tag || r.day_h || r.label);
+    const xLabels = rawList.map((row: { date_2027?: string }) => {
+      const [, month, day] = (row.date_2027 || '').split('-');
+      return month === '03' && day ? `${Number(day)} Mar` : row.date_2027 || '-';
+    });
 
     const pKey = `pbrg_${selectedModa}`;
     const aKey = `abrg_${selectedModa}`;
