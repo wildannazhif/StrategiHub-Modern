@@ -518,7 +518,7 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
         </div>
         {!isComparisonMinimized && (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 font-mono text-xs">
                 <span className="text-slate-400 font-sans text-[11px] block">Realisasi Nataru 2024/2025:</span>
                 <div className="font-bold text-slate-600 dark:text-slate-300 text-sm mt-0.5">{formatNumber(nataruComparison.reduce((sum, point) => sum + point.actual_2024, 0))}</div>
@@ -530,10 +530,6 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
               <div className="p-2.5 rounded-lg bg-violet-50/70 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-900 font-mono text-xs">
                 <span className="text-violet-700 dark:text-violet-400 font-sans text-[11px] block font-semibold">Proyeksi Nataru 2026/2027:</span>
                 <div className="font-bold text-violet-800 dark:text-violet-300 text-sm mt-0.5">{formatNumber(kpis.nataruTotal)}</div>
-              </div>
-              <div className="p-2.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 font-mono text-xs">
-                <span className="text-amber-700 dark:text-amber-400 font-sans text-[11px] block font-semibold">Buffer Kapasitas Operasional:</span>
-                <div className="font-bold text-amber-800 dark:text-amber-300 text-sm mt-0.5">+{formatDecimal(forecastData.meta.capacity_buffer_recommendation_pct, 0)}%</div>
               </div>
             </div>
             <div className="pt-2"><EChartWrapper options={nataruBarOptions} style={{ height: '360px', width: '100%' }} /></div>
