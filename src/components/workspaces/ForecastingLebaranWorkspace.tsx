@@ -300,6 +300,30 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
 
     const trainColor = TRAIN_COLORS[selectedModa] || (isDark ? '#00f0ff' : '#1d4ed8');
     const forecastColor = isDark ? '#10b981' : '#059669'; // Emerald Green for Lebaran
+    const forecastPeakIndex = futureValues.reduce(
+      (bestIndex, value, index) => bestIndex === -1 || value > futureValues[bestIndex] ? index : bestIndex,
+      -1,
+    );
+    const forecastPeakDate = forecastPeakIndex >= 0 ? futureDates[forecastPeakIndex] : '';
+    const forecastPeakValue = forecastPeakIndex >= 0 ? futureValues[forecastPeakIndex] : 0;
+    const forecastPeakMarkPoint = {
+      symbol: 'circle',
+      symbolSize: 9,
+      itemStyle: { color: '#f43f5e', borderColor: '#ffffff', borderWidth: 1 },
+      label: {
+        show: true,
+        position: 'top',
+        distance: 4,
+        color: '#f43f5e',
+        fontSize: 9,
+        fontWeight: 'bold',
+        formatter: 'Tertinggi',
+      },
+      data: forecastPeakDate && forecastPeakValue > 0
+        ? [{ name: 'Proyeksi Tertinggi', coord: [forecastPeakDate, forecastPeakValue] }]
+        : [],
+    };
+
 
     let xAxisData: string[] = [];
     let series: any[] = [];
@@ -361,6 +385,7 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
               ],
             },
           },
+          markPoint: forecastPeakMarkPoint,
           markLine: {
             symbol: ['none', 'none'],
             label: {
@@ -399,6 +424,7 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
               ],
             },
           },
+          markPoint: forecastPeakMarkPoint,
           markLine: {
             symbol: ['none', 'none'],
             label: {
@@ -593,6 +619,21 @@ export const ForecastingLebaranWorkspace: React.FC<ForecastingLebaranWorkspacePr
         type: 'bar',
         data: val27,
         itemStyle: { color: isDarkMode ? '#10b981' : '#059669', borderRadius: [3, 3, 0, 0] },
+        markPoint: {
+          symbol: 'circle',
+          symbolSize: 9,
+          itemStyle: { color: '#f43f5e', borderColor: '#ffffff', borderWidth: 1 },
+          label: {
+            show: true,
+            position: 'top',
+            distance: 4,
+            color: '#f43f5e',
+            fontSize: 9,
+            fontWeight: 'bold',
+            formatter: 'Tertinggi',
+          },
+          data: [{ type: 'max', name: 'Proyeksi Tertinggi' }],
+        },
       },
     ];
 

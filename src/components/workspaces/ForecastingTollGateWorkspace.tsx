@@ -258,6 +258,23 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
           lineStyle: { color: isDarkMode ? '#a78bfa' : '#7c3aed', width: 2.4 },
           areaStyle: { color: isDarkMode ? 'rgba(167,139,250,0.10)' : 'rgba(124,58,237,0.08)' },
           itemStyle: { color: isDarkMode ? '#a78bfa' : '#7c3aed' },
+          markPoint: {
+            symbol: 'circle',
+            symbolSize: 9,
+            itemStyle: { color: '#f43f5e', borderColor: '#ffffff', borderWidth: 1 },
+            label: {
+              show: true,
+              position: 'top',
+              distance: 4,
+              color: '#f43f5e',
+              fontSize: 9,
+              fontWeight: 'bold',
+              formatter: 'Tertinggi',
+            },
+            data: kpis.peak
+              ? [{ name: 'Proyeksi Tertinggi', coord: [kpis.peak.date, kpis.peak.value] }]
+              : [],
+          },
           markLine: {
             symbol: 'none',
             label: { formatter: 'Mulai Proyeksi', color: labelColor, fontSize: 9 },
@@ -273,7 +290,7 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
         },
       ],
     };
-  }, [chartHistory, forecast, forecastData.meta.forecast_start, forecastData.meta.nataru_end, forecastData.meta.nataru_start, horizonView, isDarkMode]);
+  }, [chartHistory, forecast, forecastData.meta.forecast_start, forecastData.meta.nataru_end, forecastData.meta.nataru_start, horizonView, isDarkMode, kpis.peak]);
 
   const nataruBarOptions = useMemo(() => {
     const futureNataru = forecast.filter(
@@ -296,7 +313,10 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
       grid: { top: 48, left: 60, right: 20, bottom: 40 },
       xAxis: {
         type: 'category',
-        data: nataruComparison.map((point) => point.label),
+        data: futureNataru.map((point) => {
+          const [, month, day] = point.date.split('-');
+          return `${Number(day)} ${month === '12' ? 'Des' : 'Jan'}`;
+        }),
         axisLabel: { color: labelColor, fontSize: 9, interval: 0, rotate: 35 },
         axisLine: { lineStyle: { color: gridColor } },
       },
@@ -323,6 +343,21 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
           type: 'bar',
           data: futureNataru.map((point) => point.value),
           itemStyle: { color: '#7c3aed', borderRadius: [2, 2, 0, 0] },
+          markPoint: {
+            symbol: 'circle',
+            symbolSize: 9,
+            itemStyle: { color: '#f43f5e', borderColor: '#ffffff', borderWidth: 1 },
+            label: {
+              show: true,
+              position: 'top',
+              distance: 4,
+              color: '#f43f5e',
+              fontSize: 9,
+              fontWeight: 'bold',
+              formatter: 'Tertinggi',
+            },
+            data: [{ type: 'max', name: 'Proyeksi Tertinggi' }],
+          },
         },
       ],
     };

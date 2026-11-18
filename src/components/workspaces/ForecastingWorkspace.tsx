@@ -395,6 +395,30 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
 
     const trainColor = TRAIN_COLORS[selectedModa] || (isDark ? '#00f0ff' : '#1d4ed8');
     const forecastColor = isDark ? '#facc15' : '#d97706'; // Vibrant Gold/Amber with high contrast on both
+    const forecastPeakIndex = futureValues.reduce(
+      (bestIndex, value, index) => bestIndex === -1 || value > futureValues[bestIndex] ? index : bestIndex,
+      -1,
+    );
+    const forecastPeakDate = forecastPeakIndex >= 0 ? futureDates[forecastPeakIndex] : '';
+    const forecastPeakValue = forecastPeakIndex >= 0 ? futureValues[forecastPeakIndex] : 0;
+    const forecastPeakMarkPoint = {
+      symbol: 'circle',
+      symbolSize: 9,
+      itemStyle: { color: '#f43f5e', borderColor: '#ffffff', borderWidth: 1 },
+      label: {
+        show: true,
+        position: 'top',
+        distance: 4,
+        color: '#f43f5e',
+        fontSize: 9,
+        fontWeight: 'bold',
+        formatter: 'Tertinggi',
+      },
+      data: forecastPeakDate && forecastPeakValue > 0
+        ? [{ name: 'Proyeksi Tertinggi', coord: [forecastPeakDate, forecastPeakValue] }]
+        : [],
+    };
+
 
     let xAxisData: string[] = [];
     let series: any[] = [];
@@ -413,17 +437,6 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         ...futureValues,
       ];
 
-      const markPointsList: any[] = [];
-      if (isAllProv && horizonView === 'all_train_plus_forecast') {
-        if (val24_peak > 0) {
-          markPointsList.push({ name: 'Puncak Natal 2024', coord: ['2024-12-24', val24_peak], value: 'Natal 24' });
-        }
-        if (val25_peak > 0) {
-          markPointsList.push({ name: 'Puncak Nataru 2025', coord: ['2025-12-28', val25_peak], value: 'Nataru 25' });
-        }
-      }
-      markPointsList.push({ name: 'Puncak Mudik Natal', coord: ['2026-12-24', kpis.xmasVal], value: 'Natal 26' });
-      markPointsList.push({ name: 'Puncak Balik', coord: ['2027-01-03', kpis.nyVal], value: 'Balik 27' });
 
       series = [
         {
@@ -451,13 +464,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           areaStyle: {
             color: isDark ? 'rgba(245, 158, 11, 0.20)' : 'rgba(245, 158, 11, 0.12)',
           },
-          markPoint: {
-            symbol: 'pin',
-            symbolSize: 42,
-            itemStyle: { color: '#ef4444' },
-            label: { fontSize: 8.5, color: '#ffffff', fontWeight: 'bold' },
-            data: markPointsList,
-          },
+          markPoint: forecastPeakMarkPoint,
         },
       ];
     } else {
@@ -477,16 +484,7 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
           areaStyle: {
             color: isDark ? 'rgba(250, 204, 21, 0.15)' : 'rgba(217, 119, 6, 0.08)',
           },
-          markPoint: {
-            symbol: 'pin',
-            symbolSize: 44,
-            itemStyle: { color: '#ef4444' },
-            label: { fontSize: 9, color: '#ffffff', fontWeight: 'bold' },
-            data: [
-              { name: 'Puncak Mudik Natal', coord: ['2026-12-24', kpis.xmasVal], value: 'Natal' },
-              { name: 'Puncak Balik Tahun Baru', coord: ['2027-01-03', kpis.nyVal], value: 'Balik' },
-            ],
-          },
+          markPoint: forecastPeakMarkPoint,
         },
       ];
     }
@@ -721,6 +719,21 @@ export const ForecastingWorkspace: React.FC<ForecastingWorkspaceProps> = ({
         type: 'bar',
         data: val26,
         itemStyle: { color: isDarkMode ? '#818cf8' : '#4f46e5', borderRadius: [3, 3, 0, 0] },
+        markPoint: {
+          symbol: 'circle',
+          symbolSize: 9,
+          itemStyle: { color: '#f43f5e', borderColor: '#ffffff', borderWidth: 1 },
+          label: {
+            show: true,
+            position: 'top',
+            distance: 4,
+            color: '#f43f5e',
+            fontSize: 9,
+            fontWeight: 'bold',
+            formatter: 'Tertinggi',
+          },
+          data: [{ type: 'max', name: 'Proyeksi Tertinggi' }],
+        },
       },
     ];
 
