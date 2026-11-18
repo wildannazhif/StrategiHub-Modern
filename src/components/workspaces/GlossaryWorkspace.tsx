@@ -95,19 +95,19 @@ const TOLL_IMPUTATION_STEPS = [
 ];
 
 const TOLL_FORECAST_FEATURES = [
-  { name: 'lag_1', category: 'Autoregresif', source: 'y(t−1)', role: 'Jangkar level volume kendaraan hari sebelumnya (faktor paling berpengaruh).' },
-  { name: 'day_of_week', category: 'Kalender', source: 'Tanggal → 0–6', role: 'Menangkap siklus trafik Senin–Minggu (komuter vs akhir pekan).' },
-  { name: 'lag_14', category: 'Autoregresif', source: 'y(t−14)', role: 'Menjaga konsistensi pola dua-mingguan pada horizon panjang.' },
-  { name: 'rolling_std_7', category: 'Rolling', source: 'std[y(t−7)…y(t−1)]', role: 'Mengukur volatilitas sebelum lonjakan operasional.' },
-  { name: 'lag_7', category: 'Autoregresif', source: 'y(t−7)', role: 'Membandingkan hari yang sama pada pekan sebelumnya (siklus 7H).' },
-  { name: 'rolling_mean_7', category: 'Rolling', source: 'mean[y(t−7)…y(t−1)]', role: 'Baseline trafik tujuh hari tanpa melihat target hari berjalan.' },
-  { name: 'year_over_year_growth', category: 'Pertumbuhan', source: 'YoY 2024 → 2025 per gerbang', role: 'Membawa arah pertumbuhan tahunan spesifik gerbang.' },
-  { name: 'day', category: 'Kalender', source: 'Tanggal → 1–31', role: 'Menangkap pola awal, tengah, dan akhir bulan.' },
-  { name: 'lag_2', category: 'Autoregresif', source: 'y(t−2)', role: 'Mengukur momentum trafik dua hari terakhir.' },
-  { name: 'nataru_phase', category: 'Event', source: 'Fase operasi Posko Nataru', role: 'Membedakan pra-posko, mudik Natal, Tahun Baru, dan arus balik.' },
-  { name: 'month', category: 'Kalender', source: 'Tanggal → 1–12', role: 'Mewakili musim perjalanan tahunan.' },
-  { name: 'is_holiday', category: 'Kalender', source: 'SKB 3 Menteri → 0/1', role: 'Menandai libur nasional dan cuti bersama.' },
-  { name: 'is_weekend', category: 'Kalender', source: 'Sabtu/Minggu → 1', role: 'Membedakan hari kerja dan perjalanan akhir pekan.' },
+  { name: 'lag_1', type: 'Float (y_t-1)', category: 'Inersia H-1', formula: 'y.shift(1)', role: 'Jangkar level volume kendaraan hari sebelumnya (faktor paling berpengaruh).' },
+  { name: 'day_of_week', type: 'Int [0–6]', category: 'Kalender Siklus', formula: 'dt.dayofweek', role: 'Menangkap siklus trafik Senin–Minggu (komuter vs akhir pekan).' },
+  { name: 'lag_14', type: 'Float (y_t-14)', category: 'Inersia 2W', formula: 'y.shift(14)', role: 'Menjaga konsistensi pola dua-mingguan pada horizon panjang.' },
+  { name: 'rolling_std_7', type: 'Float64', category: 'Volatilitas 7H', formula: 'shift(1).roll(7).std()', role: 'Mengukur volatilitas sebelum lonjakan operasional.' },
+  { name: 'lag_7', type: 'Float (y_t-7)', category: 'Siklus 7H', formula: 'y.shift(7)', role: 'Membandingkan hari yang sama pada pekan sebelumnya (siklus 7H).' },
+  { name: 'rolling_mean_7', type: 'Float64', category: 'Rerata 7H', formula: 'shift(1).roll(7).mean()', role: 'Baseline trafik tujuh hari tanpa melihat target hari berjalan.' },
+  { name: 'year_over_year_growth', type: 'Float YoY', category: 'Pertumbuhan', formula: 'yoy_pct / 100', role: 'Membawa arah pertumbuhan tahunan spesifik gerbang (2024 → 2025).' },
+  { name: 'day', type: 'Int [1–31]', category: 'Kalender Tanggal', formula: 'dt.day', role: 'Menangkap pola awal, tengah, dan akhir bulan.' },
+  { name: 'lag_2', type: 'Float (y_t-2)', category: 'Momentum', formula: 'y.shift(2)', role: 'Mengukur momentum trafik dua hari terakhir.' },
+  { name: 'nataru_phase', type: 'Cat [0–3]', category: 'Fase Event', formula: 'Fase Posko (0–3)', role: 'Membedakan pra-posko, mudik Natal, Tahun Baru, dan arus balik.' },
+  { name: 'month', type: 'Int [1–12]', category: 'Kalender Makro', formula: 'dt.month', role: 'Mewakili musim perjalanan tahunan.' },
+  { name: 'is_holiday', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: 't in Libur Nasional', role: 'Menandai libur nasional dan cuti bersama.' },
+  { name: 'is_weekend', type: 'Bin [0/1]', category: 'Kalender Biner', formula: '1 if dow in [5,6]', role: 'Membedakan hari kerja dan perjalanan akhir pekan.' },
 ];
 
 export const GlossaryWorkspace: React.FC = () => {
@@ -723,23 +723,26 @@ export const GlossaryWorkspace: React.FC = () => {
                   <thead className="bg-slate-100 dark:bg-slate-800/80 font-mono text-[10.5px] text-slate-700 dark:text-slate-300 uppercase border-b border-slate-200 dark:border-slate-800">
                     <tr>
                       <th className="py-2.5 px-2.5 w-8">#</th>
-                      <th className="py-2.5 px-2.5">Nama Fitur</th>
+                      <th className="py-2.5 px-2.5">Variabel &amp; Tipe</th>
                       <th className="py-2.5 px-2.5">Kategori</th>
-                      <th className="py-2.5 px-2.5">Sumber / Formula</th>
-                      <th className="py-2.5 px-2.5">Peran dalam Model</th>
+                      <th className="py-2.5 px-2.5">Formulasi</th>
+                      <th className="py-2.5 px-2.5">Peran &amp; Dampak Prediksi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300 text-[11px]">
                     {TOLL_FORECAST_FEATURES.map((feature, index) => (
                       <tr key={feature.name} className="odd:bg-white even:bg-violet-50/20 dark:odd:bg-slate-900 dark:even:bg-violet-950/10">
                         <td className="py-2 px-2.5 font-mono font-bold text-violet-600">{index + 1}</td>
-                        <td className="py-2 px-2.5 font-mono font-bold text-slate-900 dark:text-white whitespace-nowrap">{feature.name}</td>
+                        <td className="py-2 px-2.5 whitespace-nowrap">
+                          <div className="font-mono font-bold text-slate-900 dark:text-white">{feature.name}</div>
+                          <div className="text-[10px] font-mono text-slate-400">{feature.type}</div>
+                        </td>
                         <td className="py-2 px-2.5">
-                          <span className="px-2 py-0.5 rounded bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 text-[10px] font-semibold whitespace-nowrap">
+                          <span className="px-2 py-0.5 rounded bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 text-[10px] font-semibold whitespace-nowrap inline-block">
                             {feature.category}
                           </span>
                         </td>
-                        <td className="py-2 px-2.5 font-mono text-[10.5px] whitespace-nowrap">{feature.source}</td>
+                        <td className="py-2 px-2.5 font-mono text-[10.5px] whitespace-nowrap">{feature.formula}</td>
                         <td className="py-2 px-2.5">{feature.role}</td>
                       </tr>
                     ))}
