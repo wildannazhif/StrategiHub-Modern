@@ -310,12 +310,16 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
         valueFormatter: (value: number) => `${formatNumber(value)} kendaraan`,
       },
       legend: { top: 0, textStyle: { color: labelColor, fontSize: 10 } },
-      grid: { top: 48, left: 60, right: 20, bottom: 40 },
+      grid: { top: 48, left: 60, right: 20, bottom: 48 },
       xAxis: {
         type: 'category',
         data: futureNataru.map((point) => {
           const [, month, day] = point.date.split('-');
-          return `${Number(day)} ${month === '12' ? 'Des' : 'Jan'}`;
+          const dayNum = Number(day);
+          const dayMonth = `${dayNum} ${month === '12' ? 'Des' : 'Jan'}`;
+          const delta = month === '12' ? dayNum - 25 : dayNum + 6;
+          const tag = delta === 0 ? 'H' : delta < 0 ? `H${delta}` : `H+${delta}`;
+          return `${dayMonth} (${tag})`;
         }),
         axisLabel: { color: labelColor, fontSize: 9, interval: 0, rotate: 35 },
         axisLine: { lineStyle: { color: gridColor } },
