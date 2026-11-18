@@ -95,19 +95,19 @@ const TOLL_IMPUTATION_STEPS = [
 ];
 
 const TOLL_FORECAST_FEATURES = [
-  { name: 'day_of_week', category: 'Kalender', source: 'Tanggal → 0–6', role: 'Menangkap siklus trafik Senin–Minggu.' },
-  { name: 'day', category: 'Kalender', source: 'Tanggal → 1–31', role: 'Menangkap pola awal, tengah, dan akhir bulan.' },
-  { name: 'month', category: 'Kalender', source: 'Tanggal → 1–12', role: 'Mewakili musim perjalanan tahunan.' },
-  { name: 'is_weekend', category: 'Kalender', source: 'Sabtu/Minggu → 1', role: 'Membedakan hari kerja dan perjalanan akhir pekan.' },
-  { name: 'is_holiday', category: 'Kalender', source: 'SKB 3 Menteri → 0/1', role: 'Menandai libur nasional dan cuti bersama.' },
-  { name: 'lag_1', category: 'Autoregresif', source: 'y(t−1)', role: 'Jangkar level volume kendaraan hari sebelumnya.' },
-  { name: 'lag_2', category: 'Autoregresif', source: 'y(t−2)', role: 'Mengukur momentum trafik dua hari terakhir.' },
-  { name: 'lag_7', category: 'Autoregresif', source: 'y(t−7)', role: 'Membandingkan hari yang sama pada pekan sebelumnya.' },
-  { name: 'lag_14', category: 'Autoregresif', source: 'y(t−14)', role: 'Menjaga pola dua-mingguan pada horizon panjang.' },
-  { name: 'rolling_mean_7', category: 'Rolling', source: 'mean[y(t−7)…y(t−1)]', role: 'Baseline trafik tujuh hari tanpa melihat target hari berjalan.' },
+  { name: 'lag_1', category: 'Autoregresif', source: 'y(t−1)', role: 'Jangkar level volume kendaraan hari sebelumnya (faktor paling berpengaruh).' },
+  { name: 'day_of_week', category: 'Kalender', source: 'Tanggal → 0–6', role: 'Menangkap siklus trafik Senin–Minggu (komuter vs akhir pekan).' },
+  { name: 'lag_14', category: 'Autoregresif', source: 'y(t−14)', role: 'Menjaga konsistensi pola dua-mingguan pada horizon panjang.' },
   { name: 'rolling_std_7', category: 'Rolling', source: 'std[y(t−7)…y(t−1)]', role: 'Mengukur volatilitas sebelum lonjakan operasional.' },
+  { name: 'lag_7', category: 'Autoregresif', source: 'y(t−7)', role: 'Membandingkan hari yang sama pada pekan sebelumnya (siklus 7H).' },
+  { name: 'rolling_mean_7', category: 'Rolling', source: 'mean[y(t−7)…y(t−1)]', role: 'Baseline trafik tujuh hari tanpa melihat target hari berjalan.' },
   { name: 'year_over_year_growth', category: 'Pertumbuhan', source: 'YoY 2024 → 2025 per gerbang', role: 'Membawa arah pertumbuhan tahunan spesifik gerbang.' },
+  { name: 'day', category: 'Kalender', source: 'Tanggal → 1–31', role: 'Menangkap pola awal, tengah, dan akhir bulan.' },
+  { name: 'lag_2', category: 'Autoregresif', source: 'y(t−2)', role: 'Mengukur momentum trafik dua hari terakhir.' },
   { name: 'nataru_phase', category: 'Event', source: 'Fase operasi Posko Nataru', role: 'Membedakan pra-posko, mudik Natal, Tahun Baru, dan arus balik.' },
+  { name: 'month', category: 'Kalender', source: 'Tanggal → 1–12', role: 'Mewakili musim perjalanan tahunan.' },
+  { name: 'is_holiday', category: 'Kalender', source: 'SKB 3 Menteri → 0/1', role: 'Menandai libur nasional dan cuti bersama.' },
+  { name: 'is_weekend', category: 'Kalender', source: 'Sabtu/Minggu → 1', role: 'Membedakan hari kerja dan perjalanan akhir pekan.' },
 ];
 
 export const GlossaryWorkspace: React.FC = () => {
@@ -468,94 +468,11 @@ export const GlossaryWorkspace: React.FC = () => {
                       <th className="py-2.5 px-2.5">Kategori</th>
                       <th className="py-2.5 px-2.5">Formulasi</th>
                       <th className="py-2.5 px-2.5">Peran &amp; Dampak Prediksi</th>
-                      <th className="py-2.5 px-2.5 text-center whitespace-nowrap">Split Rank</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300 text-[11px]">
-                    {/* GROUP 1: KALENDER DASAR */}
-                    <tr className="bg-indigo-50/20 dark:bg-indigo-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-indigo-600">1</td>
-                      <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white">dow</div>
-                        <div className="text-[10px] font-mono text-slate-400">Int [0–6]</div>
-                      </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold whitespace-nowrap inline-block">Kalender Siklus</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">dt.dayofweek</td>
-                      <td className="py-2 px-2.5">Menangkap variasi hari kerja vs akhir pekan dalam siklus 7 hari.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-emerald-600 whitespace-nowrap">#2 (214)</td>
-                    </tr>
-                    <tr className="bg-indigo-50/20 dark:bg-indigo-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-indigo-600">2</td>
-                      <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white">day</div>
-                        <div className="text-[10px] font-mono text-slate-400">Int [1–31]</div>
-                      </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold whitespace-nowrap inline-block">Kalender Tanggal</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">dt.day</td>
-                      <td className="py-2 px-2.5">Menangkap dinamika awal bulan (gajian) vs akhir bulan.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-slate-500 whitespace-nowrap">#7 (178)</td>
-                    </tr>
-                    <tr className="bg-indigo-50/20 dark:bg-indigo-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-indigo-600">3</td>
-                      <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white">month</div>
-                        <div className="text-[10px] font-mono text-slate-400">Int [1–12]</div>
-                      </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold whitespace-nowrap inline-block">Kalender Makro</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">dt.month</td>
-                      <td className="py-2 px-2.5">Menangkap tren musiman semesteran dan liburan sekolah Juni–Juli.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-slate-500 whitespace-nowrap">#9 (85)</td>
-                    </tr>
-                    <tr className="bg-indigo-50/20 dark:bg-indigo-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-indigo-600">4</td>
-                      <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white">is_weekend</div>
-                        <div className="text-[10px] font-mono text-slate-400">Bin [0/1]</div>
-                      </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold whitespace-nowrap inline-block">Kalender Biner</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">1 if dow in [5,6]</td>
-                      <td className="py-2 px-2.5">Penanda percepatan perjalanan rekreasi dan lonjakan akhir pekan.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-slate-400 whitespace-nowrap">Baseline</td>
-                    </tr>
-
-                    {/* GROUP 2: TANGGAL MERAH SKB 3 MENTERI */}
-                    <tr className="bg-rose-50/30 dark:bg-rose-950/20">
-                      <td className="py-2 px-2.5 font-mono font-bold text-rose-600">5</td>
-                      <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-rose-700 dark:text-rose-400">is_holiday</div>
-                        <div className="text-[10px] font-mono text-slate-400">Bin [0/1]</div>
-                      </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-[10px] font-semibold whitespace-nowrap inline-block">SKB 3 Menteri</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">t in Libur Nasional</td>
-                      <td className="py-2 px-2.5">Menandai hari libur resmi keagamaan &amp; cuti bersama (98 tanggal).</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-rose-600 whitespace-nowrap">16 split</td>
-                    </tr>
-                    <tr className="bg-rose-50/30 dark:bg-rose-950/20">
-                      <td className="py-2 px-2.5 font-mono font-bold text-rose-600">6</td>
-                      <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-rose-700 dark:text-rose-400">is_tanggal_merah</div>
-                        <div className="text-[10px] font-mono text-slate-400">Bin [0/1]</div>
-                      </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-[10px] font-semibold whitespace-nowrap inline-block">Tanggal Merah</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">is_hol | is_wknd</td>
-                      <td className="py-2 px-2.5">Menandai seluruh hari non-kerja resmi di kalender nasional Indonesia.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-rose-600 whitespace-nowrap">12 split</td>
-                    </tr>
-                    <tr className="bg-rose-50/40 dark:bg-rose-950/30">
-                      <td className="py-2 px-2.5 font-mono font-bold text-rose-600">7</td>
-                      <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-rose-600 dark:text-rose-300">is_holiday_start ★</div>
-                        <div className="text-[10px] font-mono text-slate-400">Bin [0/1]</div>
-                      </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-[10px] font-bold whitespace-nowrap inline-block">Pemicu Mudik</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">(red_t &amp; !red_t-1) | (!red_t &amp; red_t+1)</td>
-                      <td className="py-2 px-2.5"><strong>Triger Arus Mudik</strong>: Menangkap keberangkatan awal pulang kampung sebelum hari H (H-3/H-2 Lebaran &amp; H-1 Natal).</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-amber-600 whitespace-nowrap">#10 (51)</td>
-                    </tr>
-
-                    {/* GROUP 3: AUTOKORELASI LAG */}
                     <tr className="bg-emerald-50/20 dark:bg-emerald-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-emerald-600">8</td>
+                      <td className="py-2 px-2.5 font-mono font-bold text-emerald-600">1</td>
                       <td className="py-2 px-2.5 whitespace-nowrap">
                         <div className="font-mono font-bold text-slate-900 dark:text-white">lag_1</div>
                         <div className="text-[10px] font-mono text-slate-400">Float (y_t-1)</div>
@@ -563,32 +480,19 @@ export const GlossaryWorkspace: React.FC = () => {
                       <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold whitespace-nowrap inline-block">Inersia H-1</span></td>
                       <td className="py-2 px-2.5 font-mono text-[10.5px]">y.shift(1)</td>
                       <td className="py-2 px-2.5"><strong>Fitur Terpenting</strong>: Menjadi jangkar level volume harian terkini.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-emerald-600 whitespace-nowrap">#1 (330)</td>
                     </tr>
-                    <tr className="bg-emerald-50/20 dark:bg-emerald-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-emerald-600">9</td>
+                    <tr className="bg-indigo-50/20 dark:bg-indigo-950/10">
+                      <td className="py-2 px-2.5 font-mono font-bold text-indigo-600">2</td>
                       <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white">lag_2</div>
-                        <div className="text-[10px] font-mono text-slate-400">Float (y_t-2)</div>
+                        <div className="font-mono font-bold text-slate-900 dark:text-white">dow</div>
+                        <div className="text-[10px] font-mono text-slate-400">Int [0–6]</div>
                       </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold whitespace-nowrap inline-block">Momentum</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">y.shift(2)</td>
-                      <td className="py-2 px-2.5">Mengonfirmasi percepatan atau perlambatan tren 2 hari terakhir.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-slate-500 whitespace-nowrap">#8 (155)</td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold whitespace-nowrap inline-block">Kalender Siklus</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">dt.dayofweek</td>
+                      <td className="py-2 px-2.5">Menangkap variasi hari kerja vs akhir pekan dalam siklus 7 hari.</td>
                     </tr>
                     <tr className="bg-emerald-50/20 dark:bg-emerald-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-emerald-600">10</td>
-                      <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white">lag_7</div>
-                        <div className="text-[10px] font-mono text-slate-400">Float (y_t-7)</div>
-                      </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold whitespace-nowrap inline-block">Siklus 7H</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">y.shift(7)</td>
-                      <td className="py-2 px-2.5">Menjaga kepatuhan ritme hari yang sama pekan lalu (Senin ke Senin).</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-emerald-600 whitespace-nowrap">#5 (181)</td>
-                    </tr>
-                    <tr className="bg-emerald-50/20 dark:bg-emerald-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-emerald-600">11</td>
+                      <td className="py-2 px-2.5 font-mono font-bold text-emerald-600">3</td>
                       <td className="py-2 px-2.5 whitespace-nowrap">
                         <div className="font-mono font-bold text-slate-900 dark:text-white">lag_14</div>
                         <div className="text-[10px] font-mono text-slate-400">Float (y_t-14)</div>
@@ -596,23 +500,9 @@ export const GlossaryWorkspace: React.FC = () => {
                       <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold whitespace-nowrap inline-block">Inersia 2W</span></td>
                       <td className="py-2 px-2.5 font-mono text-[10.5px]">y.shift(14)</td>
                       <td className="py-2 px-2.5">Memvalidasi konsistensi tren multi-minggu pada horizon panjang.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-emerald-600 whitespace-nowrap">#3 (212)</td>
-                    </tr>
-
-                    {/* GROUP 4: ROLLING STATS */}
-                    <tr className="bg-purple-50/20 dark:bg-purple-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-purple-600">12</td>
-                      <td className="py-2 px-2.5 whitespace-nowrap">
-                        <div className="font-mono font-bold text-slate-900 dark:text-white">rolling_mean_7</div>
-                        <div className="text-[10px] font-mono text-slate-400">Float64</div>
-                      </td>
-                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-semibold whitespace-nowrap inline-block">Rerata 7H</span></td>
-                      <td className="py-2 px-2.5 font-mono text-[10.5px]">shift(1).roll(7).mean()</td>
-                      <td className="py-2 px-2.5">Baseline tren halus terkini tanpa data leakage untuk deteksi deviasi.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-slate-500 whitespace-nowrap">#6 (179)</td>
                     </tr>
                     <tr className="bg-purple-50/20 dark:bg-purple-950/10">
-                      <td className="py-2 px-2.5 font-mono font-bold text-purple-600">13</td>
+                      <td className="py-2 px-2.5 font-mono font-bold text-purple-600">4</td>
                       <td className="py-2 px-2.5 whitespace-nowrap">
                         <div className="font-mono font-bold text-slate-900 dark:text-white">rolling_std_7</div>
                         <div className="text-[10px] font-mono text-slate-400">Float64</div>
@@ -620,7 +510,96 @@ export const GlossaryWorkspace: React.FC = () => {
                       <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-semibold whitespace-nowrap inline-block">Volatilitas 7H</span></td>
                       <td className="py-2 px-2.5 font-mono text-[10.5px]">shift(1).roll(7).std()</td>
                       <td className="py-2 px-2.5">Mengukur dispersi harian; mendeteksi transisi menuju fase posko padat.</td>
-                      <td className="py-2 px-2.5 text-center font-mono font-bold text-emerald-600 whitespace-nowrap">#4 (187)</td>
+                    </tr>
+                    <tr className="bg-emerald-50/20 dark:bg-emerald-950/10">
+                      <td className="py-2 px-2.5 font-mono font-bold text-emerald-600">5</td>
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white">lag_7</div>
+                        <div className="text-[10px] font-mono text-slate-400">Float (y_t-7)</div>
+                      </td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold whitespace-nowrap inline-block">Siklus 7H</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">y.shift(7)</td>
+                      <td className="py-2 px-2.5">Menjaga kepatuhan ritme hari yang sama pekan lalu (Senin ke Senin).</td>
+                    </tr>
+                    <tr className="bg-purple-50/20 dark:bg-purple-950/10">
+                      <td className="py-2 px-2.5 font-mono font-bold text-purple-600">6</td>
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white">rolling_mean_7</div>
+                        <div className="text-[10px] font-mono text-slate-400">Float64</div>
+                      </td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-semibold whitespace-nowrap inline-block">Rerata 7H</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">shift(1).roll(7).mean()</td>
+                      <td className="py-2 px-2.5">Baseline tren halus terkini tanpa data leakage untuk deteksi deviasi.</td>
+                    </tr>
+                    <tr className="bg-indigo-50/20 dark:bg-indigo-950/10">
+                      <td className="py-2 px-2.5 font-mono font-bold text-indigo-600">7</td>
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white">day</div>
+                        <div className="text-[10px] font-mono text-slate-400">Int [1–31]</div>
+                      </td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold whitespace-nowrap inline-block">Kalender Tanggal</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">dt.day</td>
+                      <td className="py-2 px-2.5">Menangkap dinamika awal bulan (gajian) vs akhir bulan.</td>
+                    </tr>
+                    <tr className="bg-emerald-50/20 dark:bg-emerald-950/10">
+                      <td className="py-2 px-2.5 font-mono font-bold text-emerald-600">8</td>
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white">lag_2</div>
+                        <div className="text-[10px] font-mono text-slate-400">Float (y_t-2)</div>
+                      </td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold whitespace-nowrap inline-block">Momentum</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">y.shift(2)</td>
+                      <td className="py-2 px-2.5">Mengonfirmasi percepatan atau perlambatan tren 2 hari terakhir.</td>
+                    </tr>
+                    <tr className="bg-indigo-50/20 dark:bg-indigo-950/10">
+                      <td className="py-2 px-2.5 font-mono font-bold text-indigo-600">9</td>
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white">month</div>
+                        <div className="text-[10px] font-mono text-slate-400">Int [1–12]</div>
+                      </td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold whitespace-nowrap inline-block">Kalender Makro</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">dt.month</td>
+                      <td className="py-2 px-2.5">Menangkap tren musiman semesteran dan liburan sekolah Juni–Juli.</td>
+                    </tr>
+                    <tr className="bg-rose-50/40 dark:bg-rose-950/30">
+                      <td className="py-2 px-2.5 font-mono font-bold text-rose-600">10</td>
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <div className="font-mono font-bold text-rose-600 dark:text-rose-300">is_holiday_start ★</div>
+                        <div className="text-[10px] font-mono text-slate-400">Bin [0/1]</div>
+                      </td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-[10px] font-bold whitespace-nowrap inline-block">Pemicu Mudik</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">(red_t &amp; !red_t-1) | (!red_t &amp; red_t+1)</td>
+                      <td className="py-2 px-2.5"><strong>Triger Arus Mudik</strong>: Menangkap keberangkatan awal pulang kampung sebelum hari H (H-3/H-2 Lebaran &amp; H-1 Natal).</td>
+                    </tr>
+                    <tr className="bg-rose-50/30 dark:bg-rose-950/20">
+                      <td className="py-2 px-2.5 font-mono font-bold text-rose-600">11</td>
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <div className="font-mono font-bold text-rose-700 dark:text-rose-400">is_holiday</div>
+                        <div className="text-[10px] font-mono text-slate-400">Bin [0/1]</div>
+                      </td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-[10px] font-semibold whitespace-nowrap inline-block">SKB 3 Menteri</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">t in Libur Nasional</td>
+                      <td className="py-2 px-2.5">Menandai hari libur resmi keagamaan &amp; cuti bersama (98 tanggal).</td>
+                    </tr>
+                    <tr className="bg-rose-50/30 dark:bg-rose-950/20">
+                      <td className="py-2 px-2.5 font-mono font-bold text-rose-600">12</td>
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <div className="font-mono font-bold text-rose-700 dark:text-rose-400">is_tanggal_merah</div>
+                        <div className="text-[10px] font-mono text-slate-400">Bin [0/1]</div>
+                      </td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-[10px] font-semibold whitespace-nowrap inline-block">Tanggal Merah</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">is_hol | is_wknd</td>
+                      <td className="py-2 px-2.5">Menandai seluruh hari non-kerja resmi di kalender nasional Indonesia.</td>
+                    </tr>
+                    <tr className="bg-indigo-50/20 dark:bg-indigo-950/10">
+                      <td className="py-2 px-2.5 font-mono font-bold text-indigo-600">13</td>
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <div className="font-mono font-bold text-slate-900 dark:text-white">is_weekend</div>
+                        <div className="text-[10px] font-mono text-slate-400">Bin [0/1]</div>
+                      </td>
+                      <td className="py-2 px-2.5"><span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-semibold whitespace-nowrap inline-block">Kalender Biner</span></td>
+                      <td className="py-2 px-2.5 font-mono text-[10.5px]">1 if dow in [5,6]</td>
+                      <td className="py-2 px-2.5">Penanda percepatan perjalanan rekreasi dan lonjakan akhir pekan.</td>
                     </tr>
                   </tbody>
                 </table>
