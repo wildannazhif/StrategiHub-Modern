@@ -108,6 +108,19 @@ const TOLL_FORECAST_FEATURES = [
   { name: 'month', type: 'Int [1–12]', category: 'Kalender Makro', formula: 'dt.month', role: 'Mewakili musim perjalanan tahunan.' },
   { name: 'is_holiday', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: 't in Libur Nasional', role: 'Menandai libur nasional dan cuti bersama.' },
   { name: 'is_weekend', type: 'Bin [0/1]', category: 'Kalender Biner', formula: '1 if dow in [5,6]', role: 'Membedakan hari kerja dan perjalanan akhir pekan.' },
+  { name: 'is_diskon_tol', type: 'Bin [0/1]', category: 'Insentif Tarif', formula: '1 if ada diskon tol', role: 'Menangkap peralihan waktu perjalanan pengguna akibat stimulus tarif.' },
+  { name: 'diskon_tol_persen', type: 'Float [0–30%]', category: 'Insentif Tarif', formula: 'Besaran diskon (%)', role: 'Mengukur sensitivitas elastisitas harga permintaan trafik tol.' },
+  { name: 'is_contraflow', type: 'Bin [0/1]', category: 'Rekayasa Lalin', formula: '1 if contraflow aktif', role: 'Menandai peningkatan kapasitas lajur pada ruas padat (KM 36–KM 72).' },
+  { name: 'is_oneway', type: 'Bin [0/1]', category: 'Rekayasa Lalin', formula: '1 if one way aktif', role: 'Menandai pembukaan lajur penuh searah dari KM 72 s.d. KM 414.' },
+  { name: 'is_rekayasa_lalin', type: 'Bin [0/1]', category: 'Rekayasa Lalin', formula: '1 if contraflow/oneway', role: 'Indikator komposit manajemen rekayasa lalu lintas diskresioner Kepolisian.' },
+  { name: 'is_wfh', type: 'Bin [0/1]', category: 'Kebijakan Kerja', formula: '1 if ada SE WFH', role: 'Menangkap fleksibilitas keberangkatan mudik lebih awal (early exodus).' },
+  { name: 'persentase_wfh', type: 'Float [0–50%]', category: 'Kebijakan Kerja', formula: 'Alokasi WFH (%)', role: 'Mengukur intensitas penurunan beban komuter kerja harian.' },
+  { name: 'curah_hujan_mm', type: 'Float64 (mm)', category: 'Cuaca BMKG', formula: 'Curah hujan harian (mm)', role: 'Menangkap penurunan kecepatan dan penundaan perjalanan saat cuaca ekstrem.' },
+  { name: 'suhu_maks_c', type: 'Float64 (°C)', category: 'Cuaca BMKG', formula: 'Suhu maksimum (°C)', role: 'Mencerminkan kenyamanan perjalanan dan aktivitas mobilitas siang hari.' },
+  { name: 'suhu_min_c', type: 'Float64 (°C)', category: 'Cuaca BMKG', formula: 'Suhu minimum (°C)', role: 'Variabel iklim pendukung stabilitas sirkulasi malam/dini hari.' },
+  { name: 'kecepatan_angin_kmh', type: 'Float64 (km/h)', category: 'Cuaca BMKG', formula: 'Kecepatan angin (km/h)', role: 'Faktor keselamatan berkendara pada ruas layang (MBZ) dan jembatan.' },
+  { name: 'is_libur_nasional', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: '1 if Libur Nasional', role: 'Memisahkan hari libur resmi nasional dari cuti bersama.' },
+  { name: 'is_cuti_bersama', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: '1 if Cuti Bersama', role: 'Menandai hari jembatan libur yang memicu gelombang mudik massal.' },
 ];
 
 export const GlossaryWorkspace: React.FC = () => {
@@ -658,8 +671,8 @@ export const GlossaryWorkspace: React.FC = () => {
               </div>
               <div className="p-3 rounded-lg bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800">
                 <div className="text-[10px] uppercase tracking-wider text-violet-700 dark:text-violet-400 font-bold">Model Terpilih</div>
-                <div className="text-xl font-black font-mono text-violet-700 dark:text-violet-300 mt-1">12,48%</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">MAPE ensemble LightGBM</div>
+                <div className="text-xl font-black font-mono text-violet-700 dark:text-violet-300 mt-1">9,31%</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">MAPE Top-3 Tuned Ensemble (26 Fitur)</div>
               </div>
             </div>
 
@@ -714,9 +727,9 @@ export const GlossaryWorkspace: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
                   <Layers className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-                  Matriks 13 Fitur Forecasting Gerbang Tol
+                  Matriks 26 Fitur Forecasting Gerbang Tol
                 </h4>
-                <span className="text-[10px] font-mono text-slate-400">Target: log1p(volume kendaraan) • Ensemble Top-3 LightGBM</span>
+                <span className="text-[10px] font-mono text-slate-400">Target: log1p(volume kendaraan) • Top-3 Tuned Ensemble LightGBM (L1 &amp; MAPE Loss)</span>
               </div>
               <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
                 <table className="w-full text-left text-xs">
@@ -761,7 +774,7 @@ export const GlossaryWorkspace: React.FC = () => {
               <div className="p-3 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900">
                 <strong className="text-emerald-900 dark:text-emerald-200 text-xs block mb-1">Kontrol Zero Leakage</strong>
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Fitur lag dan rolling hanya memakai nilai sebelum hari target. Model tidak melihat periode testing saat training; MAPE 12,48% dihitung terhadap 168 observasi sensor asli Posko Nataru.
+                  Fitur lag dan rolling hanya memakai nilai sebelum hari target. Model tidak melihat periode testing saat training; MAPE 9,31% (Akurasi 90,69% • MAE 3.804 kend/hari) dihitung terhadap 168 observasi sensor asli Posko Nataru dengan penguatan 26 fitur komprehensif.
                 </p>
               </div>
             </div>

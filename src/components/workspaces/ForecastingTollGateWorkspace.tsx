@@ -99,7 +99,7 @@ function aggregateNataruComparison(gates: TollGateData[]): TollGateNataruCompari
       model_15_ape: 0,
       ensemble,
       ensemble_ape: actual2025 > 0 ? (Math.abs(ensemble - actual2025) / actual2025) * 100 : 0,
-      best_model: 'Model 12% (Ensemble)',
+      best_model: 'Model 9% (Tuned Ensemble)',
     };
   });
 }
