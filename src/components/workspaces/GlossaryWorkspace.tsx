@@ -95,32 +95,32 @@ const TOLL_IMPUTATION_STEPS = [
 ];
 
 const TOLL_FORECAST_FEATURES = [
-  { name: 'lag_1', type: 'Float (y_t-1)', category: 'Inersia H-1', formula: 'y.shift(1)', role: 'Jangkar level volume kendaraan hari sebelumnya (faktor paling berpengaruh).' },
-  { name: 'day_of_week', type: 'Int [0–6]', category: 'Kalender Siklus', formula: 'dt.dayofweek', role: 'Menangkap siklus trafik Senin–Minggu (komuter vs akhir pekan).' },
-  { name: 'lag_14', type: 'Float (y_t-14)', category: 'Inersia 2W', formula: 'y.shift(14)', role: 'Menjaga konsistensi pola dua-mingguan pada horizon panjang.' },
-  { name: 'rolling_std_7', type: 'Float64', category: 'Volatilitas 7H', formula: 'shift(1).roll(7).std()', role: 'Mengukur volatilitas sebelum lonjakan operasional.' },
-  { name: 'lag_7', type: 'Float (y_t-7)', category: 'Siklus 7H', formula: 'y.shift(7)', role: 'Membandingkan hari yang sama pada pekan sebelumnya (siklus 7H).' },
-  { name: 'rolling_mean_7', type: 'Float64', category: 'Rerata 7H', formula: 'shift(1).roll(7).mean()', role: 'Baseline trafik tujuh hari tanpa melihat target hari berjalan.' },
-  { name: 'year_over_year_growth', type: 'Float YoY', category: 'Pertumbuhan', formula: 'yoy_pct / 100', role: 'Membawa arah pertumbuhan tahunan spesifik gerbang (2024 → 2025).' },
-  { name: 'day', type: 'Int [1–31]', category: 'Kalender Tanggal', formula: 'dt.day', role: 'Menangkap pola awal, tengah, dan akhir bulan.' },
-  { name: 'lag_2', type: 'Float (y_t-2)', category: 'Momentum', formula: 'y.shift(2)', role: 'Mengukur momentum trafik dua hari terakhir.' },
-  { name: 'nataru_phase', type: 'Cat [0–3]', category: 'Fase Event', formula: 'Fase Posko (0–3)', role: 'Membedakan pra-posko, mudik Natal, Tahun Baru, dan arus balik.' },
-  { name: 'month', type: 'Int [1–12]', category: 'Kalender Makro', formula: 'dt.month', role: 'Mewakili musim perjalanan tahunan.' },
-  { name: 'is_holiday', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: 't in Libur Nasional', role: 'Menandai libur nasional dan cuti bersama.' },
-  { name: 'is_weekend', type: 'Bin [0/1]', category: 'Kalender Biner', formula: '1 if dow in [5,6]', role: 'Membedakan hari kerja dan perjalanan akhir pekan.' },
-  { name: 'is_diskon_tol', type: 'Bin [0/1]', category: 'Insentif Tarif', formula: '1 if ada diskon tol', role: 'Menangkap peralihan waktu perjalanan pengguna akibat stimulus tarif.' },
-  { name: 'diskon_tol_persen', type: 'Float [0–30%]', category: 'Insentif Tarif', formula: 'Besaran diskon (%)', role: 'Mengukur sensitivitas elastisitas harga permintaan trafik tol.' },
-  { name: 'is_contraflow', type: 'Bin [0/1]', category: 'Rekayasa Lalin', formula: '1 if contraflow aktif', role: 'Menandai peningkatan kapasitas lajur pada ruas padat (KM 36–KM 72).' },
-  { name: 'is_oneway', type: 'Bin [0/1]', category: 'Rekayasa Lalin', formula: '1 if one way aktif', role: 'Menandai pembukaan lajur penuh searah dari KM 72 s.d. KM 414.' },
-  { name: 'is_rekayasa_lalin', type: 'Bin [0/1]', category: 'Rekayasa Lalin', formula: '1 if contraflow/oneway', role: 'Indikator komposit manajemen rekayasa lalu lintas diskresioner Kepolisian.' },
-  { name: 'is_wfh', type: 'Bin [0/1]', category: 'Kebijakan Kerja', formula: '1 if ada SE WFH', role: 'Menangkap fleksibilitas keberangkatan mudik lebih awal (early exodus).' },
-  { name: 'persentase_wfh', type: 'Float [0–50%]', category: 'Kebijakan Kerja', formula: 'Alokasi WFH (%)', role: 'Mengukur intensitas penurunan beban komuter kerja harian.' },
-  { name: 'curah_hujan_mm', type: 'Float64 (mm)', category: 'Cuaca BMKG', formula: 'Curah hujan harian (mm)', role: 'Menangkap penurunan kecepatan dan penundaan perjalanan saat cuaca ekstrem.' },
-  { name: 'suhu_maks_c', type: 'Float64 (°C)', category: 'Cuaca BMKG', formula: 'Suhu maksimum (°C)', role: 'Mencerminkan kenyamanan perjalanan dan aktivitas mobilitas siang hari.' },
-  { name: 'suhu_min_c', type: 'Float64 (°C)', category: 'Cuaca BMKG', formula: 'Suhu minimum (°C)', role: 'Variabel iklim pendukung stabilitas sirkulasi malam/dini hari.' },
-  { name: 'kecepatan_angin_kmh', type: 'Float64 (km/h)', category: 'Cuaca BMKG', formula: 'Kecepatan angin (km/h)', role: 'Faktor keselamatan berkendara pada ruas layang (MBZ) dan jembatan.' },
-  { name: 'is_libur_nasional', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: '1 if Libur Nasional', role: 'Memisahkan hari libur resmi nasional dari cuti bersama.' },
-  { name: 'is_cuti_bersama', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: '1 if Cuti Bersama', role: 'Menandai hari jembatan libur yang memicu gelombang mudik massal.' },
+  { name: 'lag_1', type: 'Float (y_t-1)', category: 'Inersia H-1', formula: 'y.shift(1)', role: 'Jangkar level volume kendaraan hari sebelumnya (faktor paling berpengaruh; Gain: 38.813).' },
+  { name: 'lag_7', type: 'Float (y_t-7)', category: 'Siklus 7H', formula: 'y.shift(7)', role: 'Membandingkan ritme hari yang sama pada pekan sebelumnya / siklus 7 hari (Gain: 33.670).' },
+  { name: 'rolling_mean_7', type: 'Float64', category: 'Rerata 7H', formula: 'shift(1).roll(7).mean()', role: 'Baseline tren trafik 7 hari terakhir tanpa data leakage (Gain: 17.663).' },
+  { name: 'lag_14', type: 'Float (y_t-14)', category: 'Inersia 2W', formula: 'y.shift(14)', role: 'Menjaga konsistensi tren multi-mingguan pada horizon panjang (Gain: 9.381).' },
+  { name: 'day_of_week', type: 'Int [0–6]', category: 'Kalender Siklus', formula: 'dt.dayofweek', role: 'Menangkap siklus trafik Senin–Minggu / komuter vs akhir pekan (Gain: 9.230).' },
+  { name: 'lag_2', type: 'Float (y_t-2)', category: 'Momentum', formula: 'y.shift(2)', role: 'Mengukur akselerasi atau perlambatan trafik dua hari terakhir (Gain: 7.258).' },
+  { name: 'rolling_std_7', type: 'Float64', category: 'Volatilitas 7H', formula: 'shift(1).roll(7).std()', role: 'Mengukur dispersi & volatilitas trafik sebelum lonjakan operasional (Gain: 6.633).' },
+  { name: 'suhu_maks_c', type: 'Float64 (°C)', category: 'Cuaca BMKG', formula: 'Suhu maksimum (°C)', role: 'Mencerminkan kenyamanan perjalanan dan aktivitas mobilitas siang hari (Gain: 4.393).' },
+  { name: 'day', type: 'Int [1–31]', category: 'Kalender Tanggal', formula: 'dt.day', role: 'Menangkap pola dinamika tanggal awal, tengah, dan akhir bulan (Gain: 4.302).' },
+  { name: 'month', type: 'Int [1–12]', category: 'Kalender Makro', formula: 'dt.month', role: 'Mewakili musim perjalanan tahunan & liburan sekolah semesteran (Gain: 4.047).' },
+  { name: 'year_over_year_growth', type: 'Float YoY', category: 'Pertumbuhan', formula: 'yoy_pct / 100', role: 'Membawa arah tren pertumbuhan tahunan spesifik gerbang tol (Gain: 3.849).' },
+  { name: 'suhu_min_c', type: 'Float64 (°C)', category: 'Cuaca BMKG', formula: 'Suhu minimum (°C)', role: 'Variabel iklim pendukung stabilitas perjalanan malam dan dini hari (Gain: 3.844).' },
+  { name: 'curah_hujan_mm', type: 'Float64 (mm)', category: 'Cuaca BMKG', formula: 'Curah hujan harian (mm)', role: 'Menangkap penurunan laju kecepatan dan penundaan akibat cuaca ekstrem (Gain: 3.717).' },
+  { name: 'kecepatan_angin_kmh', type: 'Float64 (km/h)', category: 'Cuaca BMKG', formula: 'Kecepatan angin (km/h)', role: 'Faktor keselamatan berkendara pada ruas layang MBZ & jembatan (Gain: 3.386).' },
+  { name: 'is_holiday', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: 'is_libur_nasional | is_cuti', role: 'Indikator komposit seluruh hari libur nasional dan cuti bersama (Gain: 1.193).' },
+  { name: 'is_libur_nasional', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: '1 if Libur Nasional resmi', role: 'Memisahkan tanggal merah libur resmi keagamaan/nasional dari cuti bersama (Gain: 432).' },
+  { name: 'is_weekend', type: 'Bin [0/1]', category: 'Kalender Biner', formula: '1 if dow in [5,6]', role: 'Membedakan hari kerja reguler dan lonjakan perjalanan akhir pekan (Gain: 391).' },
+  { name: 'nataru_phase', type: 'Cat [0–4]', category: 'Fase Event', formula: 'Fase Posko (0–4)', role: 'Membedakan pra-posko, mudik Natal, Tahun Baru, dan arus balik (Gain: 350).' },
+  { name: 'is_wfh', type: 'Bin [0/1]', category: 'Kebijakan Kerja', formula: '1 if ada SE WFH', role: 'Menangkap fleksibilitas keberangkatan mudik lebih awal / early exodus (Gain: 273).' },
+  { name: 'is_contraflow', type: 'Bin [0/1]', category: 'Rekayasa Lalin', formula: '1 if contraflow aktif', role: 'Menandai penambahan kapasitas lajur pada ruas padat KM 36–KM 72 (Gain: 149).' },
+  { name: 'is_oneway', type: 'Bin [0/1]', category: 'Rekayasa Lalin', formula: '1 if one way aktif', role: 'Menandai pembukaan lajur penuh searah dari KM 72 s.d. KM 414 (Gain: 131).' },
+  { name: 'is_cuti_bersama', type: 'Bin [0/1]', category: 'SKB 3 Menteri', formula: '1 if Cuti Bersama', role: 'Menandai hari jembatan libur yang memicu gelombang mudik massal (Gain: 78).' },
+  { name: 'persentase_wfh', type: 'Float [0–50%]', category: 'Kebijakan Kerja', formula: 'Alokasi WFH instansi (%)', role: 'Mengukur intensitas penurunan beban komuter kerja harian di tol (Gain: 32).' },
+  { name: 'is_rekayasa_lalin', type: 'Bin [0/1]', category: 'Rekayasa Lalin', formula: '1 if contraflow/oneway', role: 'Indikator komposit manajemen rekayasa lalu lintas diskresioner Kepolisian (Gain: 28).' },
+  { name: 'is_diskon_tol', type: 'Bin [0/1]', category: 'Insentif Tarif', formula: '1 if ada diskon tarif', role: 'Menangkap pergeseran waktu perjalanan pengguna akibat insentif tarif (Gain: 28).' },
+  { name: 'diskon_tol_persen', type: 'Float [0–30%]', category: 'Insentif Tarif', formula: 'Besaran diskon tarif (%)', role: 'Mengukur elastisitas permintaan trafik terhadap besaran diskon tarif (Gain: 13).' },
 ];
 
 export const GlossaryWorkspace: React.FC = () => {
@@ -727,9 +727,9 @@ export const GlossaryWorkspace: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
                   <Layers className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-                  Matriks 26 Fitur Forecasting Gerbang Tol
+                  Matriks 26 Fitur Forecasting Gerbang Tol (Urutan Berdasarkan Tingkat Pengaruh)
                 </h4>
-                <span className="text-[10px] font-mono text-slate-400">Target: log1p(volume kendaraan) • Top-3 Tuned Ensemble LightGBM (L1 &amp; MAPE Loss)</span>
+                <span className="text-[10px] font-mono text-slate-400">Target: log1p(volume kendaraan) • Diurutkan berdasarkan Feature Importance Gain (Top-3 Tuned Ensemble LightGBM)</span>
               </div>
               <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
                 <table className="w-full text-left text-xs">
