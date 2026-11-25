@@ -51,10 +51,11 @@ export default function Home() {
     async function loadData() {
       try {
         const base = getBasePath();
+        const cacheBust = `?t=${Date.now()}`;
         const [bundleRes, benchRes, tollRes] = await Promise.all([
-          fetch(`${base}/data/mobility_data_bundle.json`),
-          fetch(`${base}/data/benchmark_forecast_results.json`),
-          fetch(`${base}/data/toll_gate_forecast.json`),
+          fetch(`${base}/data/mobility_data_bundle.json${cacheBust}`, { cache: 'no-cache' }),
+          fetch(`${base}/data/benchmark_forecast_results.json${cacheBust}`, { cache: 'no-cache' }),
+          fetch(`${base}/data/toll_gate_forecast.json${cacheBust}`, { cache: 'no-cache' }),
         ]);
 
         if (bundleRes.ok) {

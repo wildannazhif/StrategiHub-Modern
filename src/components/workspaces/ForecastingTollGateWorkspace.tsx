@@ -601,7 +601,7 @@ export const ForecastingTollGateWorkspace: React.FC<ForecastingTollGateWorkspace
 
         <p className="text-[11px] text-slate-500 font-mono leading-relaxed">
           <strong className="text-violet-600 dark:text-violet-400 font-sans">Partisi & Fitur:</strong>{' '}
-          Data latih 1 Jan 2024 – 16 Des 2025 ({formatNumber(forecastData.meta.training_rows)} observasi) • Data uji 17 Des 2025 – 6 Jan 2026 ({formatNumber(forecastData.meta.testing_rows)} observasi) • 13 fitur kalender, lag, rolling statistics, pertumbuhan YoY, dan fase Nataru. Imputasi memakai median hari sejenis lokal, bulanan, lalu global tanpa mengubah tiga nol valid skema one-way.
+          Data latih 1 Jan 2024 – 16 Des 2025 ({formatNumber(forecastData.meta.training_rows)} observasi) • Data uji 17 Des 2025 – 6 Jan 2026 ({formatNumber(forecastData.meta.testing_rows)} observasi) • 26 fitur komprehensif (fitur kalender, inersia lag, rolling statistics, pertumbuhan YoY, diskon tarif tol, rekayasa lalin contraflow/one-way, kebijakan WFH, dan cuaca BMKG). Imputasi bertingkat tier-1 s.d tier-4 dengan integritas 86% data riil sensor.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
